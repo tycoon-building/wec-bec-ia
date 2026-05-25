@@ -510,32 +510,41 @@ const statusText = document.getElementById('status');
 function setStatus(text) { if(statusText) statusText.innerText = text; }
 
 function getHumanVoice() {
-    const voices = speechSynthesis.getVoices();
-    return voices.find(v => v.name.includes('Samantha'))
+
+    const voices =
+        speechSynthesis.getVoices();
+
+    return (
+        voices.find(v => v.name.includes('Microsoft Aria'))
+        || voices.find(v => v.name.includes('Microsoft Jenny'))
         || voices.find(v => v.name.includes('Google US English'))
-        || voices.find(v => v.name.includes('Jenny'))
+        || voices.find(v => v.name.includes('Samantha'))
         || voices.find(v => v.name.includes('Zira'))
-        || voices.find(v => v.name.includes('Aria'))
-        || voices.find(v => v.lang.includes('en'));
+        || voices.find(v => v.lang.startsWith('en'))
+    );
 }
 
 function speak(text) {
+
     window.speechSynthesis.cancel();
-    speaking = true;
-    setStatus('Speaking... 🔊');
-    let speech = new SpeechSynthesisUtterance(text);
-    speech.lang = 'en-US';
-    speech.rate = 0.92;
-    speech.pitch = 1.05;
+
+    const speech =
+        new SpeechSynthesisUtterance(text);
+
+    speech.lang = "en-US";
+
+    speech.voice = getHumanVoice();
+
+    speech.rate = 0.95;
+
+    speech.pitch = 1.0;
+
     speech.volume = 1;
-    const selected = getHumanVoice();
-    if (selected) speech.voice = selected;
-    speech.onstart = () => { if (recognition && isListening) { recognition.stop(); isListening = false; } };
-    speech.onend = () => {
-        speaking = false;
-        setStatus('Ready 🎤');
-        if (voiceMode) setTimeout(() => startListening(), 800);
+
+    speech.onboundary = () => {
+        // rythme plus humain
     };
+
     speechSynthesis.speak(speech);
 }
 
@@ -603,33 +612,56 @@ function stopVoice() {
 window.speechSynthesis.onvoiceschanged = () => { getHumanVoice(); };
 
 // ========== LESSONS (auto‑generated audio) ==========
-const lessonsData = [
-    { title: '🌍 Greetings & Introductions', level: 'Beginner · A1', text: 'Hello! My name is Anna. I am from France. Nice to meet you! How are you today? I am fine, thank you. This is my friend, John. He is from England.' },
-    { title: '☕ Daily Routines', level: 'Beginner · A2', text: 'Every morning I wake up at seven o\'clock. I brush my teeth, take a shower, and eat breakfast. Then I go to work by bus. In the evening I read a book or watch TV.' },
-    { title: '🛒 Shopping & Food', level: 'Intermediate · B1', text: 'I need to buy some groceries. Can I have a kilo of apples, please? How much does this cost? That is too expensive. Do you have any discounts? I will pay with my credit card.' },
-    { title: '✈️ Travel & Directions', level: 'Intermediate · B1', text: 'Excuse me, where is the train station? Go straight ahead, then turn left at the traffic light. It is next to the big supermarket. Thank you very much! Have a nice day.' },
-];
+let lessonsData = [];
+
+async function loadLessons() {
+    try {
+        const response = await fetch('/courses');
+        const data = await response.json();
+
+        lessonsData = data.courses || data;
+
+        renderLessons();
+    } catch (error) {
+        console.error("Erreur chargement cours:", error);
+    }
+}
 
 function renderLessons() {
-    const container = document.getElementById('lessons-container');
+
+    const container =
+        document.getElementById('lessons-container');
+
     container.innerHTML = '';
+
     lessonsData.forEach((lesson, idx) => {
+
         const card = document.createElement('div');
+
         card.className = 'lesson-card';
+
         card.innerHTML = `
             <h3>${lesson.title}</h3>
-            <div class="meta">${lesson.level} · Lesson ${idx+1}</div>
-            <p>${lesson.text}</p>
-            <div class="audio-bar">
-                <button onclick="playLessonAudio(${idx})">🔊 Listen to Lesson</button>
-                <button class="secondary" onclick="repeatPhrase(${idx})">🔄 Repeat phrase</button>
+
+            <div class="meta">
+                ${lesson.level}
             </div>
-            <div class="lesson-progress">
-                <span>Progress</span>
-                <div class="bar"><span style="width:${(idx+1)*25}%"></span></div>
-                <span>${(idx+1)*25}%</span>
+
+            <p>
+                ${lesson.content || lesson.text}
+            </p>
+
+            <div class="audio-bar">
+                <button onclick="playLessonAudio(${idx})">
+                    🔊 Listen
+                </button>
+
+                <button onclick="repeatPhrase(${idx})">
+                    🔄 Repeat
+                </button>
             </div>
         `;
+
         container.appendChild(card);
     });
 }
@@ -651,6 +683,19 @@ function repeatPhrase(idx) {
     } else {
         speak(lesson.text);
     }
+}
+// ========== PRONUNCIATION ==========
+function pronounceWord(word){
+
+    speak(word);
+
+    setTimeout(() => {
+
+        speak(
+          `Repeat after me. ${word}`
+        );
+
+    },1500);
 }
 
 // ========== PRONUNCIATION ==========
@@ -727,8 +772,8 @@ renderPronunciation();
 
 // welcome message in chat
 document.addEventListener('DOMContentLoaded', () => {
-    const chat = document.getElementById('chat-box');
-    chat.innerHTML = `<div class="msg bot"><b>Teacher:</b> Hello ${document.querySelector('.header-text p')?.innerText?.replace('Connected as: ', '') || 'student'}! I'm your AI tutor. Ask me anything or choose a lesson from the menu. 🚀</div>`;
+    loadLessons();
+    renderPronunciation();
 });
 </script>
 

@@ -24,7 +24,12 @@ ALLOWED_USERS = {
     "student1@gmail.com": "1234",
     "admin@wec-bec.com": "admin"
 }
-
+# loading json file
+@app.route("/courses")
+def courses():
+    with open("data/courses.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return jsonify(data)
 # =========================
 # 🤖 OPENROUTER CONFIG
 # =========================

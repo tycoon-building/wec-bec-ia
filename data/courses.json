@@ -1,0 +1,37 @@
+{
+  "A1": {
+    "module_1": {
+      "title": "English Alphabet",
+      "dialogue": {
+        "question": "How many letters are there in the English alphabet?",
+        "answer": "There are twenty-six letters in the English alphabet."
+      }
+    },
+    "module_2": {
+      "title": "Greetings and Farewells",
+      "dialogue": {
+        "greeting": "Good morning",
+        "response": "I am fine, thank you"
+      }
+    },
+    "module_3": {
+      "title": "Introductions",
+      "dialogue": {
+        "question": "What is your name?",
+        "answer": "My name is..."
+      }
+    },
+    "module_4": {
+      "title": "Cardinal Numbers"
+    },
+    "module_5": {
+      "title": "Ordinal Numbers"
+    },
+    "module_6": {
+      "title": "Days Of The Week"
+    },
+    "module_7": {
+      "title": "Months Of The Year"
+    }
+  }
+}
