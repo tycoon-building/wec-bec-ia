@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>WEC-BEC English AI – Your Personal English Tutor</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,11 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -52,7 +48,6 @@
             border-radius: 42px;
             overflow: hidden;
             box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
         }
 
         .header {
@@ -74,13 +69,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+            overflow: hidden;
+        }
+        .header-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .header-text {
-            flex: 1;
-        }
+        .header-text { flex: 1; }
         .header-text h1 {
             font-size: 22px;
             font-weight: 800;
@@ -88,17 +85,9 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            letter-spacing: -0.5px;
         }
-        .header-text p {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-top: 2px;
-        }
-        .header-text p i {
-            color: #10b981;
-            margin-right: 4px;
-        }
+        .header-text p { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+        .header-text p i { color: #10b981; margin-right: 4px; }
 
         .streak-badge {
             background: linear-gradient(135deg, #f59e0b, #ef4444);
@@ -109,7 +98,6 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
         .logout-btn {
@@ -123,11 +111,7 @@
             transition: 0.3s;
             border: 1px solid rgba(239, 68, 68, 0.3);
         }
-        .logout-btn:hover {
-            background: #ef4444;
-            color: white;
-            transform: translateY(-2px);
-        }
+        .logout-btn:hover { background: #ef4444; color: white; transform: translateY(-2px); }
 
         .nav {
             display: flex;
@@ -154,17 +138,10 @@
             gap: 8px;
             white-space: nowrap;
         }
-        .nav button i {
-            font-size: 16px;
-        }
         .nav button.active {
             color: #3b82f6;
             background: rgba(59, 130, 246, 0.15);
             border-bottom: 2px solid #3b82f6;
-        }
-        .nav button:hover:not(.active) {
-            color: #cbd5e1;
-            background: rgba(255, 255, 255, 0.05);
         }
 
         .main {
@@ -173,30 +150,13 @@
             padding: 24px;
             scroll-behavior: smooth;
         }
-        .main::-webkit-scrollbar {
-            width: 6px;
-        }
-        .main::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-        }
-        .main::-webkit-scrollbar-thumb {
-            background: #3b82f6;
-            border-radius: 10px;
-        }
+        .main::-webkit-scrollbar { width: 6px; }
+        .main::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .main::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
 
-        .section {
-            display: none;
-            animation: fadeInUp 0.4s ease-out;
-        }
-        .section.active {
-            display: block;
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .section { display: none; animation: fadeInUp 0.4s ease-out; }
+        .section.active { display: block; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         #chat-box {
             display: flex;
@@ -216,23 +176,18 @@
             font-size: 15px;
             animation: messagePop 0.3s ease;
         }
-        @keyframes messagePop {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
+        @keyframes messagePop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .msg.user {
             margin-left: auto;
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             color: white;
             border-bottom-right-radius: 6px;
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
         }
         .msg.bot {
             background: rgba(30, 41, 59, 0.9);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #f1f5f9;
             border-bottom-left-radius: 6px;
-            backdrop-filter: blur(5px);
         }
 
         .chat-input-area {
@@ -251,15 +206,8 @@
             color: white;
             font-size: 15px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: 0.3s;
         }
-        .chat-input-area input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
-        .chat-input-area input::placeholder {
-            color: #64748b;
-        }
+        .chat-input-area input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
         .chat-input-area button {
             border: none;
             border-radius: 60px;
@@ -270,23 +218,11 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            font-size: 14px;
         }
-        .chat-input-area button:hover {
-            transform: translateY(-2px);
-        }
-        .btn-send {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            color: white;
-        }
-        .btn-mic {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-        }
-        .btn-stop {
-            background: rgba(100, 116, 139, 0.5);
-            color: white;
-        }
+        .btn-send { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+        .btn-mic { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+        .btn-stop { background: rgba(100, 116, 139, 0.5); color: white; }
+        .mic-active { background: #10b981 !important; animation: pulse 1s infinite; }
 
         .status {
             font-size: 12px;
@@ -306,13 +242,9 @@
             color: transparent;
             margin-bottom: 8px;
         }
-        .section-subtitle {
-            color: #94a3b8;
-            margin-bottom: 24px;
-            font-size: 14px;
-        }
+        .section-subtitle { color: #94a3b8; margin-bottom: 24px; font-size: 14px; }
 
-        .module-card {
+        .module-card, .pron-card, .quiz-card {
             background: rgba(30, 41, 59, 0.8);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -321,53 +253,13 @@
             margin-bottom: 16px;
             transition: all 0.3s ease;
         }
-        .module-card:hover {
-            transform: translateY(-3px);
-            border-color: rgba(59, 130, 246, 0.3);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-        }
-        .module-card h3 {
+        .module-card:hover, .pron-card:hover, .quiz-card:hover { transform: translateY(-3px); border-color: rgba(59,130,246,0.3); }
+
+        .module-card h3, .pron-card h3, .quiz-card h3 {
             font-size: 20px;
             font-weight: 700;
             color: white;
             margin-bottom: 12px;
-        }
-        .module-card .module-content {
-            font-size: 14px;
-            line-height: 1.6;
-            color: #cbd5e1;
-        }
-        .module-card .module-content p {
-            margin-bottom: 8px;
-        }
-        .module-card .sub-section {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        .module-card .sub-section h4 {
-            color: #8b5cf6;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-        .module-card .grid-2col {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .module-card .grid-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px dashed rgba(255,255,255,0.05);
-        }
-        .module-card .english {
-            color: white;
-            font-weight: 500;
-        }
-        .module-card .french {
-            color: #94a3b8;
         }
 
         .audio-bar {
@@ -376,37 +268,19 @@
             flex-wrap: wrap;
             margin: 16px 0 12px;
         }
-        .audio-bar button {
+        .audio-bar button, .quiz-card button {
             border: none;
             background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
-            padding: 8px 20px;
+            padding: 10px 22px;
             border-radius: 40px;
             font-weight: 600;
             font-size: 13px;
             cursor: pointer;
             transition: 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
         }
-        .audio-bar button.secondary {
-            background: rgba(100, 116, 139, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .audio-bar button:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
+        .audio-bar button:hover, .quiz-card button:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
-        .pron-card {
-            background: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            padding: 20px 24px;
-            margin-bottom: 16px;
-        }
         .pron-card .phrase {
             font-size: 20px;
             font-weight: 700;
@@ -414,32 +288,9 @@
             margin: 12px 0;
             font-style: italic;
         }
-        .pron-card .actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-        .pron-card .actions button {
-            border: none;
-            padding: 10px 24px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .pron-card .actions .btn-listen {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-        }
-        .pron-card .actions .btn-record {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-        }
+        .pron-card .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+        .pron-card .actions .btn-listen { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 10px 24px; border-radius: 40px; border: none; cursor: pointer; }
+        .pron-card .actions .btn-record { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 10px 24px; border-radius: 40px; border: none; cursor: pointer; }
         .pron-feedback {
             margin-top: 12px;
             padding: 12px 16px;
@@ -447,25 +298,45 @@
             border-radius: 16px;
             border-left: 3px solid #3b82f6;
             font-size: 13px;
-            line-height: 1.5;
             color: #cbd5e1;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
         }
-        .recording-active {
-            animation: pulse 1s infinite;
+        .quiz-option {
+            background: rgba(255,255,255,0.05);
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #cbd5e1;
         }
+        .quiz-option:hover { background: rgba(59,130,246,0.2); }
+        .quiz-option.correct { background: rgba(16,185,129,0.3); border-left: 3px solid #10b981; }
+        .quiz-option.wrong { background: rgba(239,68,68,0.3); border-left: 3px solid #ef4444; }
+
+        .score-display {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .recording-active { animation: pulse 1s infinite; }
 
         @media (max-width: 768px) {
             .app { height: 100vh; margin: 0; border-radius: 0; }
             .main { padding: 16px; }
             .msg { max-width: 95%; }
-            .chat-input-area button { padding: 10px 14px; font-size: 12px; }
             .nav button { font-size: 11px; }
-            .module-card h3 { font-size: 18px; }
         }
     </style>
 </head>
@@ -474,15 +345,13 @@
 <div class="app">
     <div class="header">
         <div class="header-logo">
-            <i class="fas fa-language"></i>
+            <img src="static/images/logo.jpg" alt="logo" onerror="this.src='https://placehold.co/50x50/3b82f6/white?text=WEC'">
         </div>
         <div class="header-text">
             <h1>🎓 WEC‑BEC English AI</h1>
             <p><i class="fas fa-circle"></i> Connected as: {{ user }} · Your personal AI tutor</p>
         </div>
-        <div class="streak-badge">
-            <i class="fas fa-fire"></i> 7 day streak
-        </div>
+        <div class="streak-badge"><i class="fas fa-fire"></i> 7 day streak</div>
         <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Exit</a>
     </div>
 
@@ -496,34 +365,30 @@
     <div class="main">
         <div id="section-chat" class="section active">
             <div id="chat-box"></div>
-            <div class="status">
-                <i class="fas fa-headphones"></i>
-                <span id="status">Ready to help you learn English! 🎧</span>
-            </div>
+            <div class="status"><i class="fas fa-headphones"></i> <span id="status">🎤 Microphone always ready! Just speak or type.</span></div>
             <div class="chat-input-area">
-                <input id="msg" placeholder="Type or speak in English..." autocomplete="off">
+                <input id="msg" placeholder="Type in English..." autocomplete="off">
                 <button class="btn-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i> Send</button>
-                <button class="btn-mic" onclick="startVoice()"><i class="fas fa-microphone"></i> Speak</button>
-                <button class="btn-stop" onclick="stopVoice()"><i class="fas fa-stop"></i> Stop</button>
+                <button class="btn-mic" id="micToggleBtn" onclick="toggleContinuousMic()"><i class="fas fa-microphone"></i> Mic ON</button>
             </div>
         </div>
 
         <div id="section-lessons" class="section">
-            <h2 class="section-title"><i class="fas fa-book-reader"></i> Audio Lessons</h2>
-            <p class="section-subtitle">Listen, repeat, and master English with natural AI voice</p>
+            <h2 class="section-title"><i class="fas fa-book-reader"></i> Interactive Lessons</h2>
+            <p class="section-subtitle">Choose a lesson, listen, repeat after the teacher, and get encouragement!</p>
             <div id="lessons-container"></div>
         </div>
 
         <div id="section-pronunciation" class="section">
             <h2 class="section-title"><i class="fas fa-microphone-alt"></i> Pronunciation Coach</h2>
-            <p class="section-subtitle">Listen to the phrase, record yourself, and get instant feedback</p>
+            <p class="section-subtitle">Listen, record, get a score and correction</p>
             <div id="pron-container"></div>
         </div>
 
         <div id="section-vocabulary" class="section">
-            <h2 class="section-title"><i class="fas fa-graduation-cap"></i> Vocabulary & Grammar</h2>
-            <p class="section-subtitle">Complete A1 English course with dialogues, numbers, days, months, and more</p>
-            <div id="vocab-container"></div>
+            <h2 class="section-title"><i class="fas fa-graduation-cap"></i> Vocabulary Practice</h2>
+            <p class="section-subtitle">The AI asks questions. Answer correctly! If wrong, you'll get the French translation with pronunciation.</p>
+            <div id="vocab-practice-container"></div>
         </div>
     </div>
 </div>
@@ -531,18 +396,22 @@
 <script>
 let coursesData = null;
 let currentUtterance = null;
-let voiceMode = false;
+let continuousMic = false;
 let recognition = null;
 let isListening = false;
+let currentLessonIndex = 0;
+let currentQuizWord = null;
+let quizScore = 0;
+let quizTotal = 0;
 
-// ========== VOICE FUNCTIONS ==========
+// ========== VOICE FUNCTIONS (optimized for all devices) ==========
 function getHumanVoice() {
     const voices = speechSynthesis.getVoices();
+    // Prioritize natural voices
     return voices.find(v => v.name.includes('Samantha')) ||
            voices.find(v => v.name.includes('Google UK English Female')) ||
            voices.find(v => v.name.includes('Microsoft Jenny')) ||
-           voices.find(v => v.name.includes('Aria')) ||
-           voices.find(v => v.name.includes('Zira')) ||
+           voices.find(v => v.name.includes('Google US English')) ||
            voices.find(v => v.lang === 'en-US') ||
            voices[0];
 }
@@ -553,13 +422,13 @@ function speak(text, onEnd = null) {
     let utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
     utterance.rate = 0.92;
-    utterance.pitch = 1.08;
+    utterance.pitch = 1.05;
     utterance.volume = 1;
     const selectedVoice = getHumanVoice();
     if (selectedVoice) utterance.voice = selectedVoice;
     utterance.onend = () => {
         currentUtterance = null;
-        setStatus('Ready to learn! 🎧');
+        setStatus(continuousMic ? '🎤 Microphone active - Speak now!' : 'Ready');
         if (onEnd) onEnd();
     };
     currentUtterance = utterance;
@@ -571,16 +440,103 @@ function setStatus(msg) {
     if (statusSpan) statusSpan.innerHTML = msg;
 }
 
+// ========== CONTINUOUS MICROPHONE ==========
+function startContinuousListening() {
+    if (!continuousMic) return;
+    if (isListening) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        setStatus('⚠️ Speech recognition not supported on this device');
+        return;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    let finalTranscript = '';
+
+    recognition.onstart = () => {
+        isListening = true;
+        setStatus('🎤 Listening continuously... Speak English!');
+    };
+
+    recognition.onresult = (e) => {
+        let interimTranscript = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+            if (e.results[i].isFinal) {
+                finalTranscript += e.results[i][0].transcript;
+            } else {
+                interimTranscript += e.results[i][0].transcript;
+            }
+        }
+        if (finalTranscript.trim()) {
+            sendMessage(finalTranscript.trim());
+            finalTranscript = '';
+        }
+    };
+
+    recognition.onerror = (e) => {
+        console.log('Recognition error:', e.error);
+        if (continuousMic) {
+            setTimeout(() => startContinuousListening(), 1000);
+        }
+    };
+
+    recognition.onend = () => {
+        isListening = false;
+        if (continuousMic) {
+            setTimeout(() => startContinuousListening(), 500);
+        }
+    };
+
+    recognition.start();
+}
+
+function stopContinuousListening() {
+    continuousMic = false;
+    if (recognition) {
+        recognition.stop();
+        recognition = null;
+    }
+    isListening = false;
+    setStatus('Microphone OFF. Click Mic ON to speak.');
+    const micBtn = document.getElementById('micToggleBtn');
+    if (micBtn) {
+        micBtn.innerHTML = '<i class="fas fa-microphone"></i> Mic OFF';
+        micBtn.classList.remove('mic-active');
+    }
+}
+
+function toggleContinuousMic() {
+    const micBtn = document.getElementById('micToggleBtn');
+    if (continuousMic) {
+        continuousMic = false;
+        stopContinuousListening();
+        micBtn.innerHTML = '<i class="fas fa-microphone"></i> Mic ON';
+        micBtn.classList.remove('mic-active');
+    } else {
+        continuousMic = true;
+        startContinuousListening();
+        micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Mic ON';
+        micBtn.classList.add('mic-active');
+    }
+}
+
 // ========== CHAT FUNCTIONS ==========
 async function sendMessage(textFromVoice = null) {
     const input = document.getElementById('msg');
     const message = textFromVoice ?? input.value;
     if (!message.trim()) return;
+
     const chat = document.getElementById('chat-box');
     chat.innerHTML += `<div class="msg user"><i class="fas fa-user"></i> ${escapeHtml(message)}</div>`;
     input.value = '';
     chat.scrollTop = chat.scrollHeight;
     setStatus('🤔 Thinking...');
+
     try {
         const res = await fetch('/chat', {
             method: 'POST',
@@ -592,51 +548,28 @@ async function sendMessage(textFromVoice = null) {
         chat.scrollTop = chat.scrollHeight;
         speak(data.reply);
     } catch (err) {
-        chat.innerHTML += `<div class="msg bot"><i class="fas fa-exclamation-triangle"></i> Oops! Network issue. Please try again.</div>`;
+        chat.innerHTML += `<div class="msg bot"><i class="fas fa-exclamation-triangle"></i> Oops! Network issue.</div>`;
         setStatus('Connection error ❌');
     }
 }
 
-function startListening() {
-    if (isListening) return;
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) { alert('Speech recognition not supported.'); return; }
-    recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.onstart = () => { isListening = true; setStatus('🎤 Listening... Speak now!'); };
-    recognition.onresult = async (e) => {
-        const text = e.results[0][0].transcript;
-        recognition.stop();
-        isListening = false;
-        await sendMessage(text);
-    };
-    recognition.onerror = () => { setStatus('Microphone error. Try again.'); isListening = false; };
-    recognition.start();
-}
-
-function startVoice() { voiceMode = true; startListening(); }
-function stopVoice() { voiceMode = false; isListening = false; if (recognition) recognition.stop(); window.speechSynthesis.cancel(); setStatus('Voice mode OFF.'); }
-
 function escapeHtml(str) { return str.replace(/[&<>]/g, function(m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; }); }
 
-// ========== LOAD DATA FROM BACKEND ==========
+// ========== LOAD DATA ==========
 async function loadCourses() {
     try {
         const response = await fetch('/courses');
-        if (!response.ok) throw new Error('Failed to load courses');
+        if (!response.ok) throw new Error('Failed');
         coursesData = await response.json();
         renderLessons();
         renderPronunciation();
-        renderVocabulary();
+        renderVocabularyPractice();
     } catch (error) {
         console.error('Error:', error);
-        document.getElementById('lessons-container').innerHTML = '<p style="color:red;">Error loading courses. Make sure data/courses.json exists.</p>';
     }
 }
 
-// ========== RENDER LESSONS (from A1.modules) ==========
+// ========== LESSONS (Interactive with repetition) ==========
 function renderLessons() {
     const container = document.getElementById('lessons-container');
     if (!container || !coursesData?.A1) return;
@@ -647,84 +580,99 @@ function renderLessons() {
     moduleList.forEach((moduleKey, idx) => {
         const module = modules[moduleKey];
         const title = module.title || moduleKey;
-        let content = '';
-
-        if (module.dialogue) {
-            if (module.dialogue.question) content += `<p><strong>Q:</strong> ${module.dialogue.question}</p><p><strong>A:</strong> ${module.dialogue.answer}</p>`;
-            if (module.dialogue.greeting) content += `<p><strong>Greeting:</strong> ${module.dialogue.greeting}</p><p><strong>Response:</strong> ${module.dialogue.response}</p>`;
-        }
-        if (module.numbers && Object.keys(module.numbers).length > 0) {
-            const nums = Object.entries(module.numbers).slice(0, 12);
-            content += `<div class="grid-2col">${nums.map(([k,v]) => `<div class="grid-item"><span class="english">${k}</span><span class="french">→ ${v}</span></div>`).join('')}</div>`;
-        }
-        if (module.days) {
-            content += `<div class="grid-2col">${Object.entries(module.days).map(([k,v]) => `<div class="grid-item"><span class="english">${k}</span><span class="french">→ ${v}</span></div>`).join('')}</div>`;
-        }
-        if (module.months) {
-            content += `<div class="grid-2col">${Object.entries(module.months).slice(0,6).map(([k,v]) => `<div class="grid-item"><span class="english">${k}</span><span class="french">→ ${v}</span></div>`).join('')}</div>`;
-        }
-        if (module.colours) {
-            content += `<div class="grid-2col">${Object.entries(module.colours).slice(0,8).map(([k,v]) => `<div class="grid-item"><span class="english">${k}</span><span class="french">→ ${v}</span></div>`).join('')}</div>`;
-        }
-
-        if (!content) content = '<p>Click on Vocabulary tab to see all content</p>';
 
         const card = document.createElement('div');
         card.className = 'module-card';
         card.innerHTML = `
             <h3>${escapeHtml(title)}</h3>
-            <div class="module-content">${content}</div>
+            <div class="module-content">
+                <p><i class="fas fa-info-circle"></i> Click "Start Lesson" to begin. The teacher will guide you!</p>
+            </div>
             <div class="audio-bar">
-                <button onclick="speakLessonText('${escapeHtml(title)}', ${idx})"><i class="fas fa-headphones"></i> Listen</button>
+                <button onclick="startLesson(${idx}, '${escapeHtml(title)}')"><i class="fas fa-play"></i> Start Lesson</button>
+                <button class="secondary" onclick="repeatLastPhrase()"><i class="fas fa-redo-alt"></i> Repeat</button>
             </div>
         `;
         container.appendChild(card);
     });
 }
 
-function speakLessonText(title, idx) {
+let lastLessonText = '';
+
+function startLesson(lessonIdx, title) {
     const modules = coursesData?.A1;
     if (!modules) return;
     const moduleKeys = Object.keys(modules);
-    const module = modules[moduleKeys[idx]];
-    let textToSpeak = `${module.title}. `;
+    const module = modules[moduleKeys[lessonIdx]];
+
+    let lessonContent = '';
     if (module.dialogue) {
-        if (module.dialogue.question) textToSpeak += module.dialogue.question + '. ' + module.dialogue.answer + '. ';
-        if (module.dialogue.greeting) textToSpeak += module.dialogue.greeting + '. ' + module.dialogue.response + '. ';
+        if (module.dialogue.question) lessonContent += `${module.dialogue.question} ${module.dialogue.answer}. `;
+        if (module.dialogue.greeting) lessonContent += `${module.dialogue.greeting}. ${module.dialogue.response}. `;
     }
-    if (textToSpeak.length < 20) textToSpeak = `Lesson about ${module.title}. Practice with your teacher in the chat!`;
-    speak(textToSpeak);
+    if (module.numbers) {
+        const nums = Object.entries(module.numbers).slice(0, 10);
+        lessonContent += nums.map(([k,v]) => `${k}`).join(', ') + '. ';
+    }
+    if (module.days) lessonContent += Object.keys(module.days).join(', ') + '. ';
+    if (module.months) lessonContent += Object.keys(module.months).slice(0, 6).join(', ') + '. ';
+
+    if (!lessonContent) lessonContent = `Let's learn about ${title}. `;
+
+    lastLessonText = lessonContent;
+
+    const teacherMessage = `Great! Let's study ${title}. Listen carefully: ${lessonContent} Now, please repeat after me. I'll say it again. ${lessonContent} Your turn! Say it out loud.`;
+    speak(teacherMessage);
+
+    const chat = document.getElementById('chat-box');
+    chat.innerHTML += `<div class="msg bot"><i class="fas-robot"></i> 🎓 Teacher: ${escapeHtml(teacherMessage)}</div>`;
+    chat.scrollTop = chat.scrollHeight;
 }
 
-// ========== PRONUNCIATION (extract from modules) ==========
+function repeatLastPhrase() {
+    if (lastLessonText) {
+        speak(`Repeat: ${lastLessonText} Very good! Keep practicing!`);
+    } else {
+        speak("Please start a lesson first by clicking 'Start Lesson'.");
+    }
+}
+
+// ========== PRONUNCIATION with full phrases from JSON ==========
 function renderPronunciation() {
     const container = document.getElementById('pron-container');
     if (!container || !coursesData?.A1) return;
     container.innerHTML = '';
     const modules = coursesData.A1;
-    const pronPhrases = [];
+    const allPhrases = [];
 
-    if (modules.module_1?.spelling_dialogue) {
-        pronPhrases.push({ phrase: "How do you spell your name?", tip: "Say each letter clearly." });
-        pronPhrases.push({ phrase: "I spell my name L.O.C.K.", tip: "Pause between letters." });
-    }
-    if (modules.module_2?.dialogue) {
-        pronPhrases.push({ phrase: modules.module_2.dialogue.greeting || "Good morning", tip: "Stress the first syllable." });
-        pronPhrases.push({ phrase: modules.module_2.dialogue.response || "I am fine, thank you", tip: "Connect 'I am' to sound like 'I'm'." });
-    }
-    if (modules.module_3?.dialogue) {
-        pronPhrases.push({ phrase: modules.module_3.dialogue.question || "What is your name?", tip: "Rising intonation for questions." });
-        pronPhrases.push({ phrase: modules.module_3.dialogue.answer || "My name is...", tip: "Pause before saying your name." });
-    }
-    if (modules.module_4?.numbers) {
-        pronPhrases.push({ phrase: "One, two, three, four, five", tip: "Practice the 'th' sound in three." });
-    }
-    if (modules.module_6?.days) {
-        const days = Object.keys(modules.module_6.days).slice(0,3);
-        pronPhrases.push({ phrase: days.join(", "), tip: "Monday ends with 'day' sound like 'dey'." });
+    // Extract all dialogues and phrases
+    Object.keys(modules).forEach(key => {
+        const module = modules[key];
+        if (module.dialogue) {
+            if (module.dialogue.question) allPhrases.push({ phrase: module.dialogue.question, tip: "Question intonation should rise at the end." });
+            if (module.dialogue.answer) allPhrases.push({ phrase: module.dialogue.answer, tip: "Answer with clear pronunciation." });
+            if (module.dialogue.greeting) allPhrases.push({ phrase: module.dialogue.greeting, tip: "Stress the first syllable." });
+            if (module.dialogue.response) allPhrases.push({ phrase: module.dialogue.response, tip: "Connect words naturally." });
+        }
+        if (module.spelling_dialogue) {
+            allPhrases.push({ phrase: module.spelling_dialogue.question || "How do you spell it?", tip: "Say each letter clearly." });
+            allPhrases.push({ phrase: module.spelling_dialogue.answer || "I spell it L O C K", tip: "Pause between letters." });
+        }
+        if (module.numbers) {
+            allPhrases.push({ phrase: "One two three four five", tip: "Practice the 'th' sound in three." });
+            allPhrases.push({ phrase: "Six seven eight nine ten", tip: "The 'v' in seven is soft." });
+        }
+    });
+
+    // Add common phrases if not enough
+    if (allPhrases.length < 6) {
+        allPhrases.push({ phrase: "How are you today?", tip: "Connect 'how are' to sound like 'how're'." });
+        allPhrases.push({ phrase: "I am fine, thank you", tip: "Say 'I'm' instead of 'I am' for natural flow." });
+        allPhrases.push({ phrase: "What is your name?", tip: "Rising intonation for questions." });
+        allPhrases.push({ phrase: "Nice to meet you", tip: "The 't' in 'meet' is soft." });
     }
 
-    pronPhrases.forEach((item, idx) => {
+    allPhrases.forEach((item, idx) => {
         const card = document.createElement('div');
         card.className = 'pron-card';
         card.innerHTML = `
@@ -732,7 +680,7 @@ function renderPronunciation() {
             <div class="phrase">"${escapeHtml(item.phrase)}"</div>
             <div class="actions">
                 <button class="btn-listen" onclick="listenPhrase('${escapeHtml(item.phrase)}')"><i class="fas fa-play"></i> Listen</button>
-                <button class="btn-record" onclick="recordPhrase('${escapeHtml(item.phrase)}', '${escapeHtml(item.tip)}', this)"><i class="fas fa-microphone"></i> Record</button>
+                <button class="btn-record" id="recordBtn-${idx}" onclick="recordPhrase('${escapeHtml(item.phrase)}', '${escapeHtml(item.tip)}', this)"><i class="fas fa-microphone"></i> Record & Score</button>
             </div>
             <div class="pron-feedback" id="pron-feedback-${idx}">
                 <i class="fas fa-lightbulb"></i> <strong>Tip:</strong> ${escapeHtml(item.tip)}
@@ -746,103 +694,217 @@ function listenPhrase(phrase) { speak(phrase); }
 
 async function recordPhrase(targetPhrase, tip, btn) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) { alert('Recording not supported.'); return; }
+    if (!SpeechRecognition) { alert('Recording not supported on this device.'); return; }
+
     const rec = new SpeechRecognition();
     rec.lang = 'en-US';
     const feedbackDiv = btn.closest('.pron-card').querySelector('.pron-feedback');
-    feedbackDiv.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> Listening... Speak the phrase!`;
+    feedbackDiv.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> Listening... Speak the phrase clearly!`;
     btn.classList.add('recording-active');
+
     rec.onresult = (e) => {
         btn.classList.remove('recording-active');
         const userText = e.results[0][0].transcript;
+
+        // Calculate accuracy
         const target = targetPhrase.toLowerCase().replace(/[^\w\s]/g, '');
         const user = userText.toLowerCase().replace(/[^\w\s]/g, '');
         const targetWords = target.split(/\s+/);
         const userWords = user.split(/\s+/);
+
         let correct = 0;
-        targetWords.forEach((w, i) => { if (userWords[i] === w) correct++; });
+        let wrongWords = [];
+        targetWords.forEach((w, i) => {
+            if (userWords[i] === w) {
+                correct++;
+            } else if (userWords[i]) {
+                wrongWords.push(`"${w}" → you said "${userWords[i]}"`);
+            } else {
+                wrongWords.push(`"${w}" → missing`);
+            }
+        });
+
         const accuracy = Math.round((correct / targetWords.length) * 100);
-        let stars = accuracy >= 90 ? '⭐⭐⭐ Excellent!' : accuracy >= 70 ? '⭐⭐ Good!' : '⭐ Keep practicing!';
+        let stars = accuracy >= 90 ? '⭐⭐⭐' : accuracy >= 70 ? '⭐⭐' : '⭐';
+        let comment = accuracy >= 90 ? 'Excellent pronunciation! 🎉' : accuracy >= 70 ? 'Good job! Keep practicing.' : 'Try again! Focus on the sounds.';
+
+        let correctionHtml = '';
+        if (wrongWords.length > 0 && accuracy < 85) {
+            correctionHtml = `<br><i class="fas fa-chalkboard"></i> <strong>Correction:</strong> ${wrongWords.slice(0, 3).join(', ')}`;
+        }
+
         feedbackDiv.innerHTML = `
             <i class="fas fa-comment-dots"></i> <strong>You said:</strong> "${escapeHtml(userText)}"<br>
-            <i class="fas fa-chart-simple"></i> <strong>Accuracy:</strong> ${stars} (${accuracy}%)<br>
+            <i class="fas fa-chart-simple"></i> <strong>Score:</strong> ${stars} ${accuracy}%<br>
+            <i class="fas fa-smile-wink"></i> ${comment}${correctionHtml}<br>
             <i class="fas fa-lightbulb"></i> <strong>Tip:</strong> ${escapeHtml(tip)}
         `;
+
+        // Encourage based on score
+        if (accuracy >= 80) {
+            speak(`Good job! That was ${accuracy} percent accurate. Keep it up!`);
+        } else {
+            speak(`Let's practice more. The correct pronunciation is: ${targetPhrase}`);
+        }
     };
+
     rec.onerror = () => {
         btn.classList.remove('recording-active');
-        feedbackDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Microphone error.<br><i class="fas fa-lightbulb"></i> Tip: ${escapeHtml(tip)}`;
+        feedbackDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Microphone error. Please allow mic access.<br><i class="fas fa-lightbulb"></i> Tip: ${escapeHtml(tip)}`;
     };
     rec.start();
 }
 
-// ========== VOCABULARY (full content from all modules) ==========
-function renderVocabulary() {
-    const container = document.getElementById('vocab-container');
+// ========== VOCABULARY PRACTICE (Quiz style) ==========
+let vocabularyQuestions = [];
+let currentQuestionIndex = 0;
+let vocabScore = 0;
+
+function renderVocabularyPractice() {
+    const container = document.getElementById('vocab-practice-container');
     if (!container || !coursesData?.A1) return;
     container.innerHTML = '';
+
+    // Build questions from JSON
     const modules = coursesData.A1;
-    const moduleKeys = Object.keys(modules);
+    const questions = [];
 
-    moduleKeys.forEach(moduleKey => {
-        const module = modules[moduleKey];
-        let html = `<div class="module-card"><h3>${escapeHtml(module.title)}</h3><div class="module-content">`;
+    // Numbers
+    if (modules.module_4?.numbers) {
+        const nums = Object.entries(modules.module_4.numbers).slice(0, 12);
+        nums.forEach(([eng, fr]) => {
+            questions.push({ english: eng, french: fr, category: 'Numbers' });
+        });
+    }
 
-        if (module.letters) {
-            html += `<div class="sub-section"><h4><i class="fas fa-alphabet"></i> Alphabet</h4><div class="grid-2col">`;
-            html += Object.entries(module.letters).slice(0,13).map(([k,v]) => `<div class="grid-item"><span class="english">${k}</span><span class="french">→ ${v}</span></div>`).join('');
-            html += `</div></div>`;
-        }
-        if (module.how_to_greet) {
-            html += `<div class="sub-section"><h4><i class="fas fa-hand-peace"></i> Greetings</h4>`;
-            if (module.how_to_greet.formal) html += `<p><strong>Formal:</strong> ${Object.keys(module.how_to_greet.formal).join(', ')}</p>`;
-            if (module.how_to_greet.informal) html += `<p><strong>Informal:</strong> ${Object.keys(module.how_to_greet.informal).join(', ')}</p>`;
-            html += `</div>`;
-        }
-        if (module.how_to_ask_about_health) {
-            html += `<div class="sub-section"><h4><i class="fas fa-heartbeat"></i> Health Questions</h4><div class="grid-2col">`;
-            html += Object.entries(module.how_to_ask_about_health).slice(0,5).map(([k,v]) => `<div class="grid-item"><span class="english">${k}</span><span class="french">→ ${v}</span></div>`).join('');
-            html += `</div></div>`;
-        }
-        if (module.numbers) {
-            html += `<div class="sub-section"><h4><i class="fas fa-calculator"></i> Numbers</h4><div class="grid-2col">`;
-            html += Object.entries(module.numbers).slice(0,15).map(([k,v]) => `<div class="grid-item"><span class="english">${k}</span><span class="french">→ ${v}</span></div>`).join('');
-            html += `</div></div>`;
-        }
-        if (module.days) {
-            html += `<div class="sub-section"><h4><i class="fas fa-calendar-week"></i> Days</h4><div class="grid-2col">`;
-            html += Object.entries(module.days).map(([k,v]) => `<div class="grid-item"><span class="english">${k}</span><span class="french">→ ${v}</span></div>`).join('');
-            html += `</div></div>`;
-        }
-        if (module.months) {
-            html += `<div class="sub-section"><h4><i class="fas fa-calendar-alt"></i> Months</h4><div class="grid-2col">`;
-            html += Object.entries(module.months).map(([k,v]) => `<div class="grid-item"><span class="english">${k}</span><span class="french">→ ${v}</span></div>`).join('');
-            html += `</div></div>`;
-        }
-        if (module.colours) {
-            html += `<div class="sub-section"><h4><i class="fas fa-palette"></i> Colours</h4><div class="grid-2col">`;
-            html += Object.entries(module.colours).map(([k,v]) => `<div class="grid-item"><span class="english">${k}</span><span class="french">→ ${v}</span></div>`).join('');
-            html += `</div></div>`;
-        }
-        if (module.phrases) {
-            html += `<div class="sub-section"><h4><i class="fas fa-chalkboard-teacher"></i> Classroom Phrases</h4><div class="grid-2col">`;
-            html += Object.entries(module.phrases).slice(0,8).map(([k,v]) => `<div class="grid-item"><span class="english">${k}</span><span class="french">→ ${v}</span></div>`).join('');
-            html += `</div></div>`;
-        }
-        if (module.how_to_introduce_oneself) {
-            html += `<div class="sub-section"><h4><i class="fas fa-user-plus"></i> Self Introduction</h4><div class="grid-2col">`;
-            html += Object.entries(module.how_to_introduce_oneself).slice(0,6).map(([k,v]) => `<div class="grid-item"><span class="english">${k}</span><span class="french">→ ${v}</span></div>`).join('');
-            html += `</div></div>`;
-        }
+    // Days
+    if (modules.module_6?.days) {
+        Object.entries(modules.module_6.days).forEach(([eng, fr]) => {
+            questions.push({ english: eng, french: fr, category: 'Days' });
+        });
+    }
 
-        html += `<div class="audio-bar"><button onclick="speakVocabulary('${escapeHtml(module.title)}')"><i class="fas fa-headphones"></i> Listen to this module</button></div>`;
-        html += `</div></div>`;
-        container.innerHTML += html;
-    });
+    // Months
+    if (modules.module_7?.months) {
+        Object.entries(modules.module_7.months).forEach(([eng, fr]) => {
+            questions.push({ english: eng, french: fr, category: 'Months' });
+        });
+    }
+
+    // Colours
+    if (modules.module_9?.colours) {
+        Object.entries(modules.module_9.colours).forEach(([eng, fr]) => {
+            questions.push({ english: eng, french: fr, category: 'Colours' });
+        });
+    }
+
+    // Greetings
+    if (modules.module_2?.how_to_greet?.formal) {
+        Object.keys(modules.module_2.how_to_greet.formal).forEach(g => {
+            questions.push({ english: g, french: modules.module_2.how_to_greet.formal[g], category: 'Greetings' });
+        });
+    }
+
+    vocabularyQuestions = questions;
+
+    if (vocabularyQuestions.length === 0) {
+        container.innerHTML = '<p>Loading vocabulary questions...</p>';
+        return;
+    }
+
+    // Shuffle questions
+    vocabularyQuestions = vocabularyQuestions.sort(() => Math.random() - 0.5);
+    currentQuestionIndex = 0;
+    vocabScore = 0;
+
+    displayQuestion();
 }
 
-function speakVocabulary(title) {
-    speak(`Let's study ${title}. Open the chat to practice with your teacher!`);
+function displayQuestion() {
+    const container = document.getElementById('vocab-practice-container');
+    if (!container) return;
+
+    if (currentQuestionIndex >= vocabularyQuestions.length) {
+        const finalScore = Math.round((vocabScore / vocabularyQuestions.length) * 100);
+        container.innerHTML = `
+            <div class="quiz-card">
+                <h3><i class="fas fa-trophy"></i> Quiz Complete!</h3>
+                <div class="score-display">Your score: ${vocabScore}/${vocabularyQuestions.length} (${finalScore}%)</div>
+                <p>${finalScore >= 70 ? '🎉 Excellent work! You\'re making great progress!' : '📚 Keep practicing! You\'ll get better every day.'}</p>
+                <button onclick="renderVocabularyPractice()"><i class="fas fa-redo-alt"></i> Start New Quiz</button>
+                <button onclick="speak('Congratulations! You completed the vocabulary quiz! Keep learning English every day.')"><i class="fas fa-volume-up"></i> Hear Result</button>
+            </div>
+        `;
+        return;
+    }
+
+    const q = vocabularyQuestions[currentQuestionIndex];
+    currentQuizWord = q;
+
+    // Generate wrong options
+    const otherOptions = vocabularyQuestions.filter(o => o.english !== q.english).sort(() => Math.random() - 0.5).slice(0, 3);
+    const options = [q.english, ...otherOptions.map(o => o.english)];
+    const shuffledOptions = options.sort(() => Math.random() - 0.5);
+
+    container.innerHTML = `
+        <div class="quiz-card">
+            <h3><i class="fas fa-question-circle"></i> Vocabulary Quiz (${q.category})</h3>
+            <div class="score-display">Score: ${vocabScore}/${vocabularyQuestions.length}</div>
+            <p><strong>Question ${currentQuestionIndex + 1}/${vocabularyQuestions.length}</strong></p>
+            <p style="font-size: 18px; margin: 15px 0;">What is the English word for:<br> <span style="color: #8b5cf6; font-weight: bold;">"${escapeHtml(q.french)}"</span> ?</p>
+            <div class="quiz-options" id="quizOptions">
+                ${shuffledOptions.map(opt => `<div class="quiz-option" onclick="checkAnswer('${escapeHtml(opt)}')">${escapeHtml(opt)}</div>`).join('')}
+            </div>
+            <div class="audio-bar">
+                <button onclick="speak('${escapeHtml(q.english)} means ${escapeHtml(q.french)} in French.')"><i class="fas fa-volume-up"></i> Listen to pronunciation</button>
+            </div>
+            <div id="quizFeedback" class="pron-feedback" style="margin-top: 15px;"></div>
+        </div>
+    `;
+}
+
+function checkAnswer(selected) {
+    const isCorrect = selected === currentQuizWord.english;
+    const feedbackDiv = document.getElementById('quizFeedback');
+    const optionsDiv = document.getElementById('quizOptions');
+
+    if (isCorrect) {
+        vocabScore++;
+        feedbackDiv.innerHTML = `<i class="fas fa-check-circle" style="color:#10b981;"></i> ✅ Correct! "${currentQuizWord.english}" means "${currentQuizWord.french}". Well done! 🎉`;
+        speak(`Correct! ${currentQuizWord.english} means ${currentQuizWord.french} in French. Great job!`);
+
+        // Highlight correct answer
+        if (optionsDiv) {
+            const options = optionsDiv.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                if (opt.innerText === currentQuizWord.english) opt.classList.add('correct');
+            });
+        }
+    } else {
+        feedbackDiv.innerHTML = `<i class="fas fa-times-circle" style="color:#ef4444;"></i> ❌ Oops! "${selected}" is not correct. The correct answer is "${currentQuizWord.english}" which means "${currentQuizWord.french}".<br><br><i class="fas fa-volume-up"></i> Listen: `;
+        speak(`The correct answer is ${currentQuizWord.english}. ${currentQuizWord.english} means ${currentQuizWord.french} in French. Let's try the next one!`);
+
+        // Show wrong and correct
+        if (optionsDiv) {
+            const options = optionsDiv.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                if (opt.innerText === selected && selected !== currentQuizWord.english) opt.classList.add('wrong');
+                if (opt.innerText === currentQuizWord.english) opt.classList.add('correct');
+            });
+        }
+    }
+
+    // Disable further clicks on options
+    if (optionsDiv) {
+        const options = optionsDiv.querySelectorAll('.quiz-option');
+        options.forEach(opt => opt.style.pointerEvents = 'none');
+    }
+
+    // Next question after delay
+    setTimeout(() => {
+        currentQuestionIndex++;
+        displayQuestion();
+    }, 3000);
 }
 
 // ========== NAVIGATION ==========
@@ -853,16 +915,21 @@ document.querySelectorAll('.nav button').forEach(btn => {
         const section = this.dataset.section;
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById('section-' + section).classList.add('active');
+
+        // Refresh content when switching tabs
+        if (section === 'vocabulary') renderVocabularyPractice();
     });
 });
 
+// ========== INIT ==========
 window.speechSynthesis.onvoiceschanged = () => { getHumanVoice(); };
 
 document.addEventListener('DOMContentLoaded', () => {
     loadCourses();
     const chat = document.getElementById('chat-box');
     const userName = document.querySelector('.header-text p')?.innerText?.replace('Connected as: ', '') || 'student';
-    chat.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Hello ${escapeHtml(userName)}! 🎓 I'm your personal AI English tutor. Ask me anything about English, practice pronunciation, or explore our complete A1 course with 10+ modules! 🇬🇧✨</div>`;
+    chat.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Hello ${escapeHtml(userName)}! 🎓 I'm your AI English teacher. My microphone is always listening! Just speak naturally, and I'll help you learn. Try asking me anything in English! 🇬🇧✨</div>`;
+    speak(`Hello ${userName}! I'm your English teacher. Just speak to me naturally, and I'll help you practice. Let's start learning together!`);
 });
 </script>
 
