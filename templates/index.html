@@ -65,10 +65,6 @@
             width: 50px;
             height: 50px;
             border-radius: 18px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
             overflow: hidden;
         }
         .header-logo img {
@@ -175,6 +171,7 @@
             max-width: 85%;
             font-size: 15px;
             animation: messagePop 0.3s ease;
+            position: relative;
         }
         @keyframes messagePop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .msg.user {
@@ -188,6 +185,33 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #f1f5f9;
             border-bottom-left-radius: 6px;
+        }
+
+        /* Language badge */
+        .lang-badge {
+            display: inline-block;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 20px;
+            margin-left: 8px;
+            font-weight: 600;
+            vertical-align: middle;
+        }
+        .lang-badge.fr { background: #0055a4; color: white; }
+        .lang-badge.en { background: #b22234; color: white; }
+
+        .msg.bot .typing {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: white;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 0.3; }
+            30% { opacity: 1; }
         }
 
         .chat-input-area {
@@ -221,8 +245,11 @@
         }
         .btn-send { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
         .btn-mic { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
-        .btn-stop { background: rgba(100, 116, 139, 0.5); color: white; }
-        .mic-active { background: #10b981 !important; animation: pulse 1s infinite; }
+        .btn-mic.listening { background: linear-gradient(135deg, #10b981, #059669); animation: pulse 1s infinite; }
+        .btn-clear {
+            background: rgba(100, 116, 139, 0.5);
+            color: white;
+        }
 
         .status {
             font-size: 12px;
@@ -289,8 +316,15 @@
             font-style: italic;
         }
         .pron-card .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-        .pron-card .actions .btn-listen { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 10px 24px; border-radius: 40px; border: none; cursor: pointer; }
-        .pron-card .actions .btn-record { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 10px 24px; border-radius: 40px; border: none; cursor: pointer; }
+        .pron-card .actions button {
+            padding: 10px 24px;
+            border-radius: 40px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .pron-card .actions .btn-listen { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; }
+        .pron-card .actions .btn-record { background: linear-gradient(135deg, #10b981, #059669); color: white; }
         .pron-feedback {
             margin-top: 12px;
             padding: 12px 16px;
@@ -329,7 +363,7 @@
             text-align: center;
         }
 
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         .recording-active { animation: pulse 1s infinite; }
 
         @media (max-width: 768px) {
@@ -349,7 +383,7 @@
         </div>
         <div class="header-text">
             <h1>🎓 WEC‑BEC English AI</h1>
-            <p><i class="fas fa-circle"></i> Connected as: {{ user }} · Your personal AI tutor</p>
+            <p><i class="fas fa-circle"></i> Connected as: {{ user }} · 🇫🇷 Bilingual AI Teacher 🇬🇧</p>
         </div>
         <div class="streak-badge"><i class="fas fa-fire"></i> 7 day streak</div>
         <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Exit</a>
@@ -365,11 +399,15 @@
     <div class="main">
         <div id="section-chat" class="section active">
             <div id="chat-box"></div>
-            <div class="status"><i class="fas fa-headphones"></i> <span id="status">🎤 Microphone always ready! Just speak or type.</span></div>
+            <div class="status">
+                <i class="fas fa-headphones"></i>
+                <span id="status">Ready to chat! 💬 🇫🇷🇬🇧</span>
+            </div>
             <div class="chat-input-area">
-                <input id="msg" placeholder="Type in English..." autocomplete="off">
+                <input id="msg" placeholder="Type in English or French..." autocomplete="off" onkeypress="if(event.key==='Enter') sendMessage()">
                 <button class="btn-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i> Send</button>
-                <button class="btn-mic" id="micToggleBtn" onclick="toggleContinuousMic()"><i class="fas fa-microphone"></i> Mic ON</button>
+                <button class="btn-mic" id="micBtn" onclick="toggleMicrophone()"><i class="fas fa-microphone"></i> Speak</button>
+                <button class="btn-clear" onclick="clearChat()"><i class="fas fa-trash-alt"></i> Clear</button>
             </div>
         </div>
 
@@ -387,7 +425,7 @@
 
         <div id="section-vocabulary" class="section">
             <h2 class="section-title"><i class="fas fa-graduation-cap"></i> Vocabulary Practice</h2>
-            <p class="section-subtitle">The AI asks questions. Answer correctly! If wrong, you'll get the French translation with pronunciation.</p>
+            <p class="section-subtitle">Test your vocabulary! Choose the correct English word.</p>
             <div id="vocab-practice-container"></div>
         </div>
     </div>
@@ -396,41 +434,85 @@
 <script>
 let coursesData = null;
 let currentUtterance = null;
-let continuousMic = false;
-let recognition = null;
-let isListening = false;
-let currentLessonIndex = 0;
-let currentQuizWord = null;
-let quizScore = 0;
-let quizTotal = 0;
+let isSpeaking = false;
+let isSending = false;
 
-// ========== VOICE FUNCTIONS (optimized for all devices) ==========
-function getHumanVoice() {
+// ========== BILINGUAL LANGUAGE DETECTION ==========
+function detectLanguage(text) {
+    // French characters detection
+    const frenchPattern = /[àâçéèêëîïôûùüÿñæœ]/i;
+    // Common French words
+    const frenchWords = ['bonjour', 'salut', 'comment', 'ça', 'merci', 'voilà', 'bien', 'très', 'oui', 'non', 'je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles', 'avec', 'pour', 'dans', 'sur', 'sous', 'chez', 'par', 'mais', 'donc', 'et', 'ou', 'ni', 'car', 'fait', 'jour', 'soir', 'nuit', 'au revoir', 'bonne', 'journée', 'soirée'];
+
+    const lowerText = text.toLowerCase();
+
+    // Check for French characters
+    if (frenchPattern.test(text)) return 'fr';
+
+    // Check for common French words
+    for (let word of frenchWords) {
+        if (lowerText.includes(word)) return 'fr';
+    }
+
+    return 'en';
+}
+
+function getHumanVoice(lang) {
     const voices = speechSynthesis.getVoices();
-    // Prioritize natural voices
-    return voices.find(v => v.name.includes('Samantha')) ||
-           voices.find(v => v.name.includes('Google UK English Female')) ||
-           voices.find(v => v.name.includes('Microsoft Jenny')) ||
-           voices.find(v => v.name.includes('Google US English')) ||
-           voices.find(v => v.lang === 'en-US') ||
-           voices[0];
+
+    if (lang === 'fr') {
+        // French voices
+        return voices.find(v => v.name.includes('Thomas') && v.lang === 'fr-FR') ||
+               voices.find(v => v.name.includes('Google français') && v.lang === 'fr-FR') ||
+               voices.find(v => v.name.includes('Amélie') && v.lang === 'fr-FR') ||
+               voices.find(v => v.name.includes('Paul') && v.lang === 'fr-FR') ||
+               voices.find(v => v.lang === 'fr-FR') ||
+               voices.find(v => v.lang.startsWith('fr')) ||
+               voices[0];
+    } else {
+        // English voices
+        return voices.find(v => v.name.includes('Samantha')) ||
+               voices.find(v => v.name.includes('Google UK English Female')) ||
+               voices.find(v => v.name.includes('Microsoft Jenny')) ||
+               voices.find(v => v.name.includes('Google US English')) ||
+               voices.find(v => v.lang === 'en-US') ||
+               voices[0];
+    }
 }
 
 function speak(text, onEnd = null) {
     if (currentUtterance) window.speechSynthesis.cancel();
-    setStatus('Speaking... 🔊');
+    isSpeaking = true;
+
+    // Detect language automatically
+    const lang = detectLanguage(text);
+    const langDisplay = lang === 'fr' ? '🇫🇷 Français' : '🇬🇧 English';
+    setStatus(`Speaking... ${langDisplay} 🔊`);
+
     let utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
+
+    // Set language based on detection
+    utterance.lang = lang === 'fr' ? 'fr-FR' : 'en-US';
     utterance.rate = 0.92;
-    utterance.pitch = 1.05;
+    utterance.pitch = 1.08;
     utterance.volume = 1;
-    const selectedVoice = getHumanVoice();
+
+    const selectedVoice = getHumanVoice(lang);
     if (selectedVoice) utterance.voice = selectedVoice;
+
     utterance.onend = () => {
         currentUtterance = null;
-        setStatus(continuousMic ? '🎤 Microphone active - Speak now!' : 'Ready');
+        isSpeaking = false;
+        setStatus('Ready 💬');
         if (onEnd) onEnd();
     };
+    utterance.onerror = () => {
+        currentUtterance = null;
+        isSpeaking = false;
+        setStatus('Ready 💬');
+        if (onEnd) onEnd();
+    };
+
     currentUtterance = utterance;
     window.speechSynthesis.speak(utterance);
 }
@@ -440,102 +522,30 @@ function setStatus(msg) {
     if (statusSpan) statusSpan.innerHTML = msg;
 }
 
-// ========== CONTINUOUS MICROPHONE ==========
-function startContinuousListening() {
-    if (!continuousMic) return;
-    if (isListening) return;
+// ========== CHAT FUNCTIONS ==========
+let isWaitingForResponse = false;
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        setStatus('⚠️ Speech recognition not supported on this device');
+async function sendMessage(textFromVoice = null) {
+    if (isSending || isWaitingForResponse) {
+        setStatus('⏳ Please wait for the teacher to respond...');
         return;
     }
 
-    recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    let finalTranscript = '';
-
-    recognition.onstart = () => {
-        isListening = true;
-        setStatus('🎤 Listening continuously... Speak English!');
-    };
-
-    recognition.onresult = (e) => {
-        let interimTranscript = '';
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-            if (e.results[i].isFinal) {
-                finalTranscript += e.results[i][0].transcript;
-            } else {
-                interimTranscript += e.results[i][0].transcript;
-            }
-        }
-        if (finalTranscript.trim()) {
-            sendMessage(finalTranscript.trim());
-            finalTranscript = '';
-        }
-    };
-
-    recognition.onerror = (e) => {
-        console.log('Recognition error:', e.error);
-        if (continuousMic) {
-            setTimeout(() => startContinuousListening(), 1000);
-        }
-    };
-
-    recognition.onend = () => {
-        isListening = false;
-        if (continuousMic) {
-            setTimeout(() => startContinuousListening(), 500);
-        }
-    };
-
-    recognition.start();
-}
-
-function stopContinuousListening() {
-    continuousMic = false;
-    if (recognition) {
-        recognition.stop();
-        recognition = null;
-    }
-    isListening = false;
-    setStatus('Microphone OFF. Click Mic ON to speak.');
-    const micBtn = document.getElementById('micToggleBtn');
-    if (micBtn) {
-        micBtn.innerHTML = '<i class="fas fa-microphone"></i> Mic OFF';
-        micBtn.classList.remove('mic-active');
-    }
-}
-
-function toggleContinuousMic() {
-    const micBtn = document.getElementById('micToggleBtn');
-    if (continuousMic) {
-        continuousMic = false;
-        stopContinuousListening();
-        micBtn.innerHTML = '<i class="fas fa-microphone"></i> Mic ON';
-        micBtn.classList.remove('mic-active');
-    } else {
-        continuousMic = true;
-        startContinuousListening();
-        micBtn.innerHTML = '<i class="fas fa-microphone-slash"></i> Mic ON';
-        micBtn.classList.add('mic-active');
-    }
-}
-
-// ========== CHAT FUNCTIONS ==========
-async function sendMessage(textFromVoice = null) {
     const input = document.getElementById('msg');
     const message = textFromVoice ?? input.value;
     if (!message.trim()) return;
+
+    isSending = true;
+    isWaitingForResponse = true;
 
     const chat = document.getElementById('chat-box');
     chat.innerHTML += `<div class="msg user"><i class="fas fa-user"></i> ${escapeHtml(message)}</div>`;
     input.value = '';
     chat.scrollTop = chat.scrollHeight;
-    setStatus('🤔 Thinking...');
+    setStatus('🤔 Teacher is thinking...');
+
+    // Show typing indicator
+    const typingId = showTypingIndicator();
 
     try {
         const res = await fetch('/chat', {
@@ -544,16 +554,126 @@ async function sendMessage(textFromVoice = null) {
             body: JSON.stringify({ message })
         });
         const data = await res.json();
-        chat.innerHTML += `<div class="msg bot"><i class="fas fa-robot"></i> ${escapeHtml(data.reply)}</div>`;
+
+        // Remove typing indicator
+        removeTypingIndicator(typingId);
+
+        const reply = data.reply;
+        const replyLang = detectLanguage(reply);
+        const langBadge = replyLang === 'fr' ? '<span class="lang-badge fr">🇫🇷 FR</span>' : '<span class="lang-badge en">🇬🇧 EN</span>';
+
+        chat.innerHTML += `<div class="msg bot"><i class="fas fa-robot"></i> ${escapeHtml(reply)} ${langBadge}</div>`;
         chat.scrollTop = chat.scrollHeight;
-        speak(data.reply);
+
+        // Speak the reply with auto language detection
+        speak(reply, () => {
+            isWaitingForResponse = false;
+        });
+
     } catch (err) {
-        chat.innerHTML += `<div class="msg bot"><i class="fas fa-exclamation-triangle"></i> Oops! Network issue.</div>`;
+        removeTypingIndicator(typingId);
+        chat.innerHTML += `<div class="msg bot"><i class="fas fa-exclamation-triangle"></i> Oops! Network issue. Please try again.</div>`;
         setStatus('Connection error ❌');
+        isWaitingForResponse = false;
+    }
+
+    isSending = false;
+}
+
+function showTypingIndicator() {
+    const chat = document.getElementById('chat-box');
+    const id = 'typing-' + Date.now();
+    chat.innerHTML += `<div class="msg bot" id="${id}"><i class="fas fa-robot"></i> <span class="typing"></span><span class="typing"></span><span class="typing"></span></div>`;
+    chat.scrollTop = chat.scrollHeight;
+    return id;
+}
+
+function removeTypingIndicator(id) {
+    const element = document.getElementById(id);
+    if (element) element.remove();
+}
+
+function clearChat() {
+    const chat = document.getElementById('chat-box');
+    const userName = document.querySelector('.header-text p')?.innerText?.replace('Connected as: ', '')?.replace('· 🇫🇷 Bilingual AI Teacher 🇬🇧', '') || 'student';
+    chat.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Chat cleared! Ask me anything in English or French. 🇫🇷🇬🇧✨</div>`;
+}
+
+function escapeHtml(str) {
+    return str.replace(/[&<>]/g, function(m) {
+        return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;';
+    });
+}
+
+// ========== MICROPHONE (manual, with language detection) ==========
+let recognition = null;
+let isListening = false;
+
+function toggleMicrophone() {
+    const micBtn = document.getElementById('micBtn');
+
+    if (isListening) {
+        stopListening();
+        micBtn.innerHTML = '<i class="fas fa-microphone"></i> Speak';
+        micBtn.classList.remove('listening');
+    } else {
+        startListening();
+        micBtn.innerHTML = '<i class="fas fa-stop"></i> Stop';
+        micBtn.classList.add('listening');
     }
 }
 
-function escapeHtml(str) { return str.replace(/[&<>]/g, function(m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; }); }
+function startListening() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        setStatus('⚠️ Speech recognition not supported on this device');
+        return;
+    }
+
+    recognition = new SpeechRecognition();
+    // Auto-detect language or default to English
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+        isListening = true;
+        setStatus('🎤 Listening... Speak now! (English or French)');
+    };
+
+    recognition.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        stopListening();
+        document.getElementById('micBtn').innerHTML = '<i class="fas fa-microphone"></i> Speak';
+        document.getElementById('micBtn').classList.remove('listening');
+        document.getElementById('msg').value = text;
+        sendMessage(text);
+    };
+
+    recognition.onerror = (e) => {
+        setStatus(`Microphone error: ${e.error}`);
+        stopListening();
+        document.getElementById('micBtn').innerHTML = '<i class="fas fa-microphone"></i> Speak';
+        document.getElementById('micBtn').classList.remove('listening');
+    };
+
+    recognition.onend = () => {
+        isListening = false;
+        if (!isWaitingForResponse) {
+            setStatus('Ready 💬');
+        }
+    };
+
+    recognition.start();
+}
+
+function stopListening() {
+    if (recognition) {
+        recognition.stop();
+        recognition = null;
+    }
+    isListening = false;
+}
 
 // ========== LOAD DATA ==========
 async function loadCourses() {
@@ -566,10 +686,11 @@ async function loadCourses() {
         renderVocabularyPractice();
     } catch (error) {
         console.error('Error:', error);
+        document.getElementById('lessons-container').innerHTML = '<p style="color:red;">Error loading courses</p>';
     }
 }
 
-// ========== LESSONS (Interactive with repetition) ==========
+// ========== LESSONS ==========
 function renderLessons() {
     const container = document.getElementById('lessons-container');
     if (!container || !coursesData?.A1) return;
@@ -589,55 +710,35 @@ function renderLessons() {
                 <p><i class="fas fa-info-circle"></i> Click "Start Lesson" to begin. The teacher will guide you!</p>
             </div>
             <div class="audio-bar">
-                <button onclick="startLesson(${idx}, '${escapeHtml(title)}')"><i class="fas fa-play"></i> Start Lesson</button>
-                <button class="secondary" onclick="repeatLastPhrase()"><i class="fas fa-redo-alt"></i> Repeat</button>
+                <button onclick="startLesson(${idx})"><i class="fas fa-play"></i> Start Lesson</button>
             </div>
         `;
         container.appendChild(card);
     });
 }
 
-let lastLessonText = '';
-
-function startLesson(lessonIdx, title) {
+function startLesson(lessonIdx) {
     const modules = coursesData?.A1;
     if (!modules) return;
     const moduleKeys = Object.keys(modules);
     const module = modules[moduleKeys[lessonIdx]];
+    const title = module.title || moduleKeys[lessonIdx];
 
-    let lessonContent = '';
+    let lessonContent = `Let's learn about ${title}. `;
+
     if (module.dialogue) {
         if (module.dialogue.question) lessonContent += `${module.dialogue.question} ${module.dialogue.answer}. `;
         if (module.dialogue.greeting) lessonContent += `${module.dialogue.greeting}. ${module.dialogue.response}. `;
     }
-    if (module.numbers) {
-        const nums = Object.entries(module.numbers).slice(0, 10);
-        lessonContent += nums.map(([k,v]) => `${k}`).join(', ') + '. ';
-    }
-    if (module.days) lessonContent += Object.keys(module.days).join(', ') + '. ';
-    if (module.months) lessonContent += Object.keys(module.months).slice(0, 6).join(', ') + '. ';
 
-    if (!lessonContent) lessonContent = `Let's learn about ${title}. `;
-
-    lastLessonText = lessonContent;
-
-    const teacherMessage = `Great! Let's study ${title}. Listen carefully: ${lessonContent} Now, please repeat after me. I'll say it again. ${lessonContent} Your turn! Say it out loud.`;
-    speak(teacherMessage);
+    speak(lessonContent);
 
     const chat = document.getElementById('chat-box');
-    chat.innerHTML += `<div class="msg bot"><i class="fas-robot"></i> 🎓 Teacher: ${escapeHtml(teacherMessage)}</div>`;
+    chat.innerHTML += `<div class="msg bot"><i class="fas fa-robot"></i> 🎓 Teacher: ${escapeHtml(lessonContent)} Now practice in the chat! Ask me questions about this lesson.</div>`;
     chat.scrollTop = chat.scrollHeight;
 }
 
-function repeatLastPhrase() {
-    if (lastLessonText) {
-        speak(`Repeat: ${lastLessonText} Very good! Keep practicing!`);
-    } else {
-        speak("Please start a lesson first by clicking 'Start Lesson'.");
-    }
-}
-
-// ========== PRONUNCIATION with full phrases from JSON ==========
+// ========== PRONUNCIATION ==========
 function renderPronunciation() {
     const container = document.getElementById('pron-container');
     if (!container || !coursesData?.A1) return;
@@ -645,7 +746,6 @@ function renderPronunciation() {
     const modules = coursesData.A1;
     const allPhrases = [];
 
-    // Extract all dialogues and phrases
     Object.keys(modules).forEach(key => {
         const module = modules[key];
         if (module.dialogue) {
@@ -654,22 +754,12 @@ function renderPronunciation() {
             if (module.dialogue.greeting) allPhrases.push({ phrase: module.dialogue.greeting, tip: "Stress the first syllable." });
             if (module.dialogue.response) allPhrases.push({ phrase: module.dialogue.response, tip: "Connect words naturally." });
         }
-        if (module.spelling_dialogue) {
-            allPhrases.push({ phrase: module.spelling_dialogue.question || "How do you spell it?", tip: "Say each letter clearly." });
-            allPhrases.push({ phrase: module.spelling_dialogue.answer || "I spell it L O C K", tip: "Pause between letters." });
-        }
-        if (module.numbers) {
-            allPhrases.push({ phrase: "One two three four five", tip: "Practice the 'th' sound in three." });
-            allPhrases.push({ phrase: "Six seven eight nine ten", tip: "The 'v' in seven is soft." });
-        }
     });
 
-    // Add common phrases if not enough
-    if (allPhrases.length < 6) {
+    if (allPhrases.length === 0) {
         allPhrases.push({ phrase: "How are you today?", tip: "Connect 'how are' to sound like 'how're'." });
         allPhrases.push({ phrase: "I am fine, thank you", tip: "Say 'I'm' instead of 'I am' for natural flow." });
         allPhrases.push({ phrase: "What is your name?", tip: "Rising intonation for questions." });
-        allPhrases.push({ phrase: "Nice to meet you", tip: "The 't' in 'meet' is soft." });
     }
 
     allPhrases.forEach((item, idx) => {
@@ -680,7 +770,7 @@ function renderPronunciation() {
             <div class="phrase">"${escapeHtml(item.phrase)}"</div>
             <div class="actions">
                 <button class="btn-listen" onclick="listenPhrase('${escapeHtml(item.phrase)}')"><i class="fas fa-play"></i> Listen</button>
-                <button class="btn-record" id="recordBtn-${idx}" onclick="recordPhrase('${escapeHtml(item.phrase)}', '${escapeHtml(item.tip)}', this)"><i class="fas fa-microphone"></i> Record & Score</button>
+                <button class="btn-record" onclick="recordPhrase('${escapeHtml(item.phrase)}', '${escapeHtml(item.tip)}', this)"><i class="fas fa-microphone"></i> Record & Score</button>
             </div>
             <div class="pron-feedback" id="pron-feedback-${idx}">
                 <i class="fas fa-lightbulb"></i> <strong>Tip:</strong> ${escapeHtml(item.tip)}
@@ -692,131 +782,83 @@ function renderPronunciation() {
 
 function listenPhrase(phrase) { speak(phrase); }
 
-async function recordPhrase(targetPhrase, tip, btn) {
+function recordPhrase(targetPhrase, tip, btn) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) { alert('Recording not supported on this device.'); return; }
+    if (!SpeechRecognition) { alert('Recording not supported.'); return; }
 
     const rec = new SpeechRecognition();
     rec.lang = 'en-US';
     const feedbackDiv = btn.closest('.pron-card').querySelector('.pron-feedback');
-    feedbackDiv.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> Listening... Speak the phrase clearly!`;
+    feedbackDiv.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> Listening... Speak the phrase!`;
     btn.classList.add('recording-active');
 
     rec.onresult = (e) => {
         btn.classList.remove('recording-active');
         const userText = e.results[0][0].transcript;
 
-        // Calculate accuracy
         const target = targetPhrase.toLowerCase().replace(/[^\w\s]/g, '');
         const user = userText.toLowerCase().replace(/[^\w\s]/g, '');
         const targetWords = target.split(/\s+/);
         const userWords = user.split(/\s+/);
 
         let correct = 0;
-        let wrongWords = [];
-        targetWords.forEach((w, i) => {
-            if (userWords[i] === w) {
-                correct++;
-            } else if (userWords[i]) {
-                wrongWords.push(`"${w}" → you said "${userWords[i]}"`);
-            } else {
-                wrongWords.push(`"${w}" → missing`);
-            }
-        });
-
+        targetWords.forEach((w, i) => { if (userWords[i] === w) correct++; });
         const accuracy = Math.round((correct / targetWords.length) * 100);
         let stars = accuracy >= 90 ? '⭐⭐⭐' : accuracy >= 70 ? '⭐⭐' : '⭐';
         let comment = accuracy >= 90 ? 'Excellent pronunciation! 🎉' : accuracy >= 70 ? 'Good job! Keep practicing.' : 'Try again! Focus on the sounds.';
 
-        let correctionHtml = '';
-        if (wrongWords.length > 0 && accuracy < 85) {
-            correctionHtml = `<br><i class="fas fa-chalkboard"></i> <strong>Correction:</strong> ${wrongWords.slice(0, 3).join(', ')}`;
-        }
-
         feedbackDiv.innerHTML = `
             <i class="fas fa-comment-dots"></i> <strong>You said:</strong> "${escapeHtml(userText)}"<br>
             <i class="fas fa-chart-simple"></i> <strong>Score:</strong> ${stars} ${accuracy}%<br>
-            <i class="fas fa-smile-wink"></i> ${comment}${correctionHtml}<br>
+            <i class="fas fa-smile-wink"></i> ${comment}<br>
             <i class="fas fa-lightbulb"></i> <strong>Tip:</strong> ${escapeHtml(tip)}
         `;
-
-        // Encourage based on score
-        if (accuracy >= 80) {
-            speak(`Good job! That was ${accuracy} percent accurate. Keep it up!`);
-        } else {
-            speak(`Let's practice more. The correct pronunciation is: ${targetPhrase}`);
-        }
     };
 
     rec.onerror = () => {
         btn.classList.remove('recording-active');
-        feedbackDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Microphone error. Please allow mic access.<br><i class="fas fa-lightbulb"></i> Tip: ${escapeHtml(tip)}`;
+        feedbackDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Microphone error.<br><i class="fas fa-lightbulb"></i> Tip: ${escapeHtml(tip)}`;
     };
     rec.start();
 }
 
-// ========== VOCABULARY PRACTICE (Quiz style) ==========
+// ========== VOCABULARY QUIZ ==========
 let vocabularyQuestions = [];
 let currentQuestionIndex = 0;
 let vocabScore = 0;
+let currentQuizWord = null;
 
 function renderVocabularyPractice() {
     const container = document.getElementById('vocab-practice-container');
     if (!container || !coursesData?.A1) return;
-    container.innerHTML = '';
 
-    // Build questions from JSON
     const modules = coursesData.A1;
     const questions = [];
 
-    // Numbers
     if (modules.module_4?.numbers) {
-        const nums = Object.entries(modules.module_4.numbers).slice(0, 12);
-        nums.forEach(([eng, fr]) => {
+        Object.entries(modules.module_4.numbers).slice(0, 10).forEach(([eng, fr]) => {
             questions.push({ english: eng, french: fr, category: 'Numbers' });
         });
     }
-
-    // Days
     if (modules.module_6?.days) {
         Object.entries(modules.module_6.days).forEach(([eng, fr]) => {
             questions.push({ english: eng, french: fr, category: 'Days' });
         });
     }
-
-    // Months
     if (modules.module_7?.months) {
         Object.entries(modules.module_7.months).forEach(([eng, fr]) => {
             questions.push({ english: eng, french: fr, category: 'Months' });
         });
     }
-
-    // Colours
     if (modules.module_9?.colours) {
         Object.entries(modules.module_9.colours).forEach(([eng, fr]) => {
             questions.push({ english: eng, french: fr, category: 'Colours' });
         });
     }
 
-    // Greetings
-    if (modules.module_2?.how_to_greet?.formal) {
-        Object.keys(modules.module_2.how_to_greet.formal).forEach(g => {
-            questions.push({ english: g, french: modules.module_2.how_to_greet.formal[g], category: 'Greetings' });
-        });
-    }
-
-    vocabularyQuestions = questions;
-
-    if (vocabularyQuestions.length === 0) {
-        container.innerHTML = '<p>Loading vocabulary questions...</p>';
-        return;
-    }
-
-    // Shuffle questions
-    vocabularyQuestions = vocabularyQuestions.sort(() => Math.random() - 0.5);
+    vocabularyQuestions = questions.sort(() => Math.random() - 0.5);
     currentQuestionIndex = 0;
     vocabScore = 0;
-
     displayQuestion();
 }
 
@@ -830,9 +872,8 @@ function displayQuestion() {
             <div class="quiz-card">
                 <h3><i class="fas fa-trophy"></i> Quiz Complete!</h3>
                 <div class="score-display">Your score: ${vocabScore}/${vocabularyQuestions.length} (${finalScore}%)</div>
-                <p>${finalScore >= 70 ? '🎉 Excellent work! You\'re making great progress!' : '📚 Keep practicing! You\'ll get better every day.'}</p>
-                <button onclick="renderVocabularyPractice()"><i class="fas fa-redo-alt"></i> Start New Quiz</button>
-                <button onclick="speak('Congratulations! You completed the vocabulary quiz! Keep learning English every day.')"><i class="fas fa-volume-up"></i> Hear Result</button>
+                <p>${finalScore >= 70 ? '🎉 Excellent work!' : '📚 Keep practicing!'}</p>
+                <button onclick="renderVocabularyPractice()"><i class="fas fa-redo-alt"></i> New Quiz</button>
             </div>
         `;
         return;
@@ -841,24 +882,20 @@ function displayQuestion() {
     const q = vocabularyQuestions[currentQuestionIndex];
     currentQuizWord = q;
 
-    // Generate wrong options
     const otherOptions = vocabularyQuestions.filter(o => o.english !== q.english).sort(() => Math.random() - 0.5).slice(0, 3);
     const options = [q.english, ...otherOptions.map(o => o.english)];
     const shuffledOptions = options.sort(() => Math.random() - 0.5);
 
     container.innerHTML = `
         <div class="quiz-card">
-            <h3><i class="fas fa-question-circle"></i> Vocabulary Quiz (${q.category})</h3>
+            <h3><i class="fas fa-question-circle"></i> ${q.category} Quiz</h3>
             <div class="score-display">Score: ${vocabScore}/${vocabularyQuestions.length}</div>
             <p><strong>Question ${currentQuestionIndex + 1}/${vocabularyQuestions.length}</strong></p>
-            <p style="font-size: 18px; margin: 15px 0;">What is the English word for:<br> <span style="color: #8b5cf6; font-weight: bold;">"${escapeHtml(q.french)}"</span> ?</p>
-            <div class="quiz-options" id="quizOptions">
+            <p style="font-size: 20px; margin: 15px 0;">What is the English word for:<br> <span style="color: #8b5cf6; font-weight: bold;">"${escapeHtml(q.french)}"</span> ?</p>
+            <div class="quiz-options">
                 ${shuffledOptions.map(opt => `<div class="quiz-option" onclick="checkAnswer('${escapeHtml(opt)}')">${escapeHtml(opt)}</div>`).join('')}
             </div>
-            <div class="audio-bar">
-                <button onclick="speak('${escapeHtml(q.english)} means ${escapeHtml(q.french)} in French.')"><i class="fas fa-volume-up"></i> Listen to pronunciation</button>
-            </div>
-            <div id="quizFeedback" class="pron-feedback" style="margin-top: 15px;"></div>
+            <div id="quizFeedback" class="pron-feedback"></div>
         </div>
     `;
 }
@@ -866,45 +903,31 @@ function displayQuestion() {
 function checkAnswer(selected) {
     const isCorrect = selected === currentQuizWord.english;
     const feedbackDiv = document.getElementById('quizFeedback');
-    const optionsDiv = document.getElementById('quizOptions');
+    const options = document.querySelectorAll('.quiz-option');
 
     if (isCorrect) {
         vocabScore++;
         feedbackDiv.innerHTML = `<i class="fas fa-check-circle" style="color:#10b981;"></i> ✅ Correct! "${currentQuizWord.english}" means "${currentQuizWord.french}". Well done! 🎉`;
-        speak(`Correct! ${currentQuizWord.english} means ${currentQuizWord.french} in French. Great job!`);
-
-        // Highlight correct answer
-        if (optionsDiv) {
-            const options = optionsDiv.querySelectorAll('.quiz-option');
-            options.forEach(opt => {
-                if (opt.innerText === currentQuizWord.english) opt.classList.add('correct');
-            });
-        }
+        speak(`Correct! ${currentQuizWord.english} means ${currentQuizWord.french}. Great job!`);
     } else {
-        feedbackDiv.innerHTML = `<i class="fas fa-times-circle" style="color:#ef4444;"></i> ❌ Oops! "${selected}" is not correct. The correct answer is "${currentQuizWord.english}" which means "${currentQuizWord.french}".<br><br><i class="fas fa-volume-up"></i> Listen: `;
-        speak(`The correct answer is ${currentQuizWord.english}. ${currentQuizWord.english} means ${currentQuizWord.french} in French. Let's try the next one!`);
-
-        // Show wrong and correct
-        if (optionsDiv) {
-            const options = optionsDiv.querySelectorAll('.quiz-option');
-            options.forEach(opt => {
-                if (opt.innerText === selected && selected !== currentQuizWord.english) opt.classList.add('wrong');
-                if (opt.innerText === currentQuizWord.english) opt.classList.add('correct');
-            });
-        }
+        feedbackDiv.innerHTML = `<i class="fas fa-times-circle" style="color:#ef4444;"></i> ❌ The correct answer is "${currentQuizWord.english}" which means "${currentQuizWord.french}".`;
+        speak(`The correct answer is ${currentQuizWord.english}. ${currentQuizWord.english} means ${currentQuizWord.french}.`);
     }
 
-    // Disable further clicks on options
-    if (optionsDiv) {
-        const options = optionsDiv.querySelectorAll('.quiz-option');
-        options.forEach(opt => opt.style.pointerEvents = 'none');
+    options.forEach(opt => opt.style.pointerEvents = 'none');
+    if (isCorrect && options.length) {
+        options.forEach(opt => { if (opt.innerText === currentQuizWord.english) opt.classList.add('correct'); });
+    } else {
+        options.forEach(opt => {
+            if (opt.innerText === selected && selected !== currentQuizWord.english) opt.classList.add('wrong');
+            if (opt.innerText === currentQuizWord.english) opt.classList.add('correct');
+        });
     }
 
-    // Next question after delay
     setTimeout(() => {
         currentQuestionIndex++;
         displayQuestion();
-    }, 3000);
+    }, 2500);
 }
 
 // ========== NAVIGATION ==========
@@ -915,21 +938,22 @@ document.querySelectorAll('.nav button').forEach(btn => {
         const section = this.dataset.section;
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById('section-' + section).classList.add('active');
-
-        // Refresh content when switching tabs
         if (section === 'vocabulary') renderVocabularyPractice();
     });
 });
 
 // ========== INIT ==========
-window.speechSynthesis.onvoiceschanged = () => { getHumanVoice(); };
+window.speechSynthesis.onvoiceschanged = () => { getHumanVoice('en'); };
 
 document.addEventListener('DOMContentLoaded', () => {
     loadCourses();
     const chat = document.getElementById('chat-box');
-    const userName = document.querySelector('.header-text p')?.innerText?.replace('Connected as: ', '') || 'student';
-    chat.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Hello ${escapeHtml(userName)}! 🎓 I'm your AI English teacher. My microphone is always listening! Just speak naturally, and I'll help you learn. Try asking me anything in English! 🇬🇧✨</div>`;
-    speak(`Hello ${userName}! I'm your English teacher. Just speak to me naturally, and I'll help you practice. Let's start learning together!`);
+    const userName = document.querySelector('.header-text p')?.innerText?.replace('Connected as: ', '')?.replace('· 🇫🇷 Bilingual AI Teacher 🇬🇧', '')?.trim() || 'student';
+    chat.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Bonjour ${escapeHtml(userName)}! 👋<br><br>
+    🇫🇷 Je suis ton professeur d'anglais bilingue. Tu peux parler en français ou en anglais, je te comprendrai et t'aiderai!<br><br>
+    🇬🇧 I'm your bilingual English teacher. You can speak French or English, I'll understand and help you learn!<br><br>
+    🎤 Clique sur le microphone pour parler, ou tape ton message. Let's start! 🚀</div>`;
+    speak("Bonjour! I'm your bilingual English teacher. You can speak French or English. Let's learn together!");
 });
 </script>
 
