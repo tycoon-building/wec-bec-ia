@@ -171,7 +171,6 @@
             max-width: 85%;
             font-size: 15px;
             animation: messagePop 0.3s ease;
-            position: relative;
         }
         @keyframes messagePop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .msg.user {
@@ -186,19 +185,6 @@
             color: #f1f5f9;
             border-bottom-left-radius: 6px;
         }
-
-        .lang-badge {
-            display: inline-block;
-            font-size: 9px;
-            padding: 2px 6px;
-            border-radius: 20px;
-            margin-left: 8px;
-            font-weight: 600;
-            vertical-align: middle;
-        }
-        .lang-badge.fr { background: #0055a4; color: white; }
-        .lang-badge.en { background: #b22234; color: white; }
-
         .msg.bot .typing {
             display: inline-block;
             width: 4px;
@@ -382,7 +368,7 @@
         </div>
         <div class="header-text">
             <h1>🎓 WEC‑BEC English AI</h1>
-            <p><i class="fas fa-circle"></i> Connected as: {{ user }} · 🇬🇧 English Teacher 🇫🇷</p>
+            <p><i class="fas fa-circle"></i> Connected as: {{ user }} · Your personal AI tutor</p>
         </div>
         <div class="streak-badge"><i class="fas fa-fire"></i> 7 day streak</div>
         <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Exit</a>
@@ -400,10 +386,10 @@
             <div id="chat-box"></div>
             <div class="status">
                 <i class="fas fa-headphones"></i>
-                <span id="status">Ready to chat! 💬 Speak English, I'll help you! 🇬🇧</span>
+                <span id="status">Ready to chat! 💬</span>
             </div>
             <div class="chat-input-area">
-                <input id="msg" placeholder="Type or speak in English..." autocomplete="off" onkeypress="if(event.key==='Enter') sendMessage()">
+                <input id="msg" placeholder="Type your message in English..." autocomplete="off" onkeypress="if(event.key==='Enter') sendMessage()">
                 <button class="btn-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i> Send</button>
                 <button class="btn-mic" id="micBtn" onclick="toggleMicrophone()"><i class="fas fa-microphone"></i> Speak</button>
                 <button class="btn-clear" onclick="clearChat()"><i class="fas fa-trash-alt"></i> Clear</button>
@@ -434,95 +420,42 @@
 let coursesData = null;
 let currentUtterance = null;
 let isSpeaking = false;
-let isSending = false;
+let isSending = false; // Prevent multiple sends
 
-// ========== STRICT LANGUAGE DETECTION ==========
-// Default to ENGLISH - only switch to French if REALLY French
-function detectLanguage(text) {
-    // French characters that NEVER appear in English
-    const strictFrenchChars = /[àâçéèêëîïôûùüÿœ]/i;
-
-    // Pure French words (not used in English)
-    const pureFrenchWords = ['bonjour', 'merci', 'voilà', 'comment ça va', 'au revoir',
-                             'je suis', 'tu es', 'il est', 'elle est', 'nous sommes',
-                             'vous êtes', 'ils sont', 'elles sont', 'avec', 'pour', 'dans',
-                             'mais', 'donc', 'parce que', 'car', 'chez', 'sans', 'pendant',
-                             'très', 'beaucoup', 'peu', 'bien', 'mal', 'mieux', 'pire'];
-
-    const lowerText = text.toLowerCase();
-
-    // First check for strict French characters
-    if (strictFrenchChars.test(text)) return 'fr';
-
-    // Count pure French words
-    let frenchWordCount = 0;
-    for (let word of pureFrenchWords) {
-        if (lowerText.includes(word)) frenchWordCount++;
-    }
-
-    // If we found at least 2 French words, it's French
-    if (frenchWordCount >= 2) return 'fr';
-
-    // Default to English
-    return 'en';
-}
-
-function getHumanVoice(lang) {
+// ========== VOICE FUNCTIONS ==========
+function getHumanVoice() {
     const voices = speechSynthesis.getVoices();
-
-    if (lang === 'fr') {
-        // French voices
-        return voices.find(v => v.name.includes('Google français') && v.lang === 'fr-FR') ||
-               voices.find(v => v.name.includes('Thomas') && v.lang === 'fr-FR') ||
-               voices.find(v => v.name.includes('Amélie') && v.lang === 'fr-FR') ||
-               voices.find(v => v.lang === 'fr-FR') ||
-               voices[0];
-    } else {
-        // English voices - GOOD QUALITY
-        return voices.find(v => v.name.includes('Google UK English Female')) ||
-               voices.find(v => v.name.includes('Samantha')) ||
-               voices.find(v => v.name.includes('Microsoft Jenny')) ||
-               voices.find(v => v.name.includes('Google US English')) ||
-               voices.find(v => v.lang === 'en-US') ||
-               voices[0];
-    }
+    return voices.find(v => v.name.includes('Samantha')) ||
+           voices.find(v => v.name.includes('Google UK English Female')) ||
+           voices.find(v => v.name.includes('Microsoft Jenny')) ||
+           voices.find(v => v.name.includes('Google US English')) ||
+           voices.find(v => v.lang === 'en-US') ||
+           voices[0];
 }
 
 function speak(text, onEnd = null) {
     if (currentUtterance) window.speechSynthesis.cancel();
     isSpeaking = true;
-
-    // Detect language
-    const lang = detectLanguage(text);
-
-    if (lang === 'fr') {
-        setStatus(`Speaking French... 🇫🇷`);
-    } else {
-        setStatus(`Speaking English... 🇬🇧`);
-    }
+    setStatus('🔊 Speaking...');
 
     let utterance = new SpeechSynthesisUtterance(text);
-
-    // Set language
-    utterance.lang = lang === 'fr' ? 'fr-FR' : 'en-US';
-    utterance.rate = 0.92;
+    utterance.lang = 'en-US';
+    utterance.rate = 0.9;
     utterance.pitch = 1.05;
     utterance.volume = 1;
 
-    const selectedVoice = getHumanVoice(lang);
+    const selectedVoice = getHumanVoice();
     if (selectedVoice) utterance.voice = selectedVoice;
 
     utterance.onend = () => {
         currentUtterance = null;
         isSpeaking = false;
-        setStatus('Ready! Speak English with me! 🇬🇧');
+        setStatus('Ready 💬');
         if (onEnd) onEnd();
     };
     utterance.onerror = () => {
-        currentUtterance = null;
         isSpeaking = false;
-        setStatus('Ready! 🇬🇧');
-        if (onEnd) onEnd();
+        setStatus('Ready 💬');
     };
 
     currentUtterance = utterance;
@@ -539,7 +472,7 @@ let isWaitingForResponse = false;
 
 async function sendMessage(textFromVoice = null) {
     if (isSending || isWaitingForResponse) {
-        setStatus('⏳ Please wait...');
+        setStatus('⏳ Please wait for the teacher to respond...');
         return;
     }
 
@@ -556,6 +489,7 @@ async function sendMessage(textFromVoice = null) {
     chat.scrollTop = chat.scrollHeight;
     setStatus('🤔 Teacher is thinking...');
 
+    // Show typing indicator
     const typingId = showTypingIndicator();
 
     try {
@@ -566,15 +500,14 @@ async function sendMessage(textFromVoice = null) {
         });
         const data = await res.json();
 
+        // Remove typing indicator
         removeTypingIndicator(typingId);
 
         const reply = data.reply;
-        const replyLang = detectLanguage(reply);
-        const langBadge = replyLang === 'fr' ? '<span class="lang-badge fr">🇫🇷</span>' : '<span class="lang-badge en">🇬🇧</span>';
-
-        chat.innerHTML += `<div class="msg bot"><i class="fas fa-robot"></i> ${escapeHtml(reply)} ${langBadge}</div>`;
+        chat.innerHTML += `<div class="msg bot"><i class="fas fa-robot"></i> ${escapeHtml(reply)}</div>`;
         chat.scrollTop = chat.scrollHeight;
 
+        // Speak the reply
         speak(reply, () => {
             isWaitingForResponse = false;
         });
@@ -604,7 +537,8 @@ function removeTypingIndicator(id) {
 
 function clearChat() {
     const chat = document.getElementById('chat-box');
-    chat.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Chat cleared! 🇬🇧 Ask me anything in English. I will help you learn! 🚀</div>`;
+    const userName = document.querySelector('.header-text p')?.innerText?.replace('Connected as: ', '') || 'student';
+    chat.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Chat cleared! Ask me anything in English. 🇬🇧✨</div>`;
 }
 
 function escapeHtml(str) {
@@ -613,7 +547,7 @@ function escapeHtml(str) {
     });
 }
 
-// ========== MICROPHONE ==========
+// ========== MICROPHONE (manual, not continuous) ==========
 let recognition = null;
 let isListening = false;
 
@@ -634,7 +568,7 @@ function toggleMicrophone() {
 function startListening() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        setStatus('⚠️ Speech recognition not supported');
+        setStatus('⚠️ Speech recognition not supported on this device');
         return;
     }
 
@@ -645,7 +579,7 @@ function startListening() {
 
     recognition.onstart = () => {
         isListening = true;
-        setStatus('🎤 Listening... Speak English!');
+        setStatus('🎤 Listening... Speak now!');
     };
 
     recognition.onresult = (e) => {
@@ -667,7 +601,7 @@ function startListening() {
     recognition.onend = () => {
         isListening = false;
         if (!isWaitingForResponse) {
-            setStatus('Ready! Speak English! 🇬🇧');
+            setStatus('Ready 💬');
         }
     };
 
@@ -714,7 +648,7 @@ function renderLessons() {
         card.innerHTML = `
             <h3>${escapeHtml(title)}</h3>
             <div class="module-content">
-                <p><i class="fas fa-info-circle"></i> Click "Start Lesson" to begin!</p>
+                <p><i class="fas fa-info-circle"></i> Click "Start Lesson" to begin. The teacher will guide you!</p>
             </div>
             <div class="audio-bar">
                 <button onclick="startLesson(${idx})"><i class="fas fa-play"></i> Start Lesson</button>
@@ -741,7 +675,7 @@ function startLesson(lessonIdx) {
     speak(lessonContent);
 
     const chat = document.getElementById('chat-box');
-    chat.innerHTML += `<div class="msg bot"><i class="fas fa-robot"></i> 🎓 Teacher: ${escapeHtml(lessonContent)} Now practice in the chat!</div>`;
+    chat.innerHTML += `<div class="msg bot"><i class="fas fa-robot"></i> 🎓 Teacher: ${escapeHtml(lessonContent)} Now practice in the chat! Ask me questions about this lesson.</div>`;
     chat.scrollTop = chat.scrollHeight;
 }
 
@@ -765,7 +699,7 @@ function renderPronunciation() {
 
     if (allPhrases.length === 0) {
         allPhrases.push({ phrase: "How are you today?", tip: "Connect 'how are' to sound like 'how're'." });
-        allPhrases.push({ phrase: "I am fine, thank you", tip: "Say 'I'm' instead of 'I am'." });
+        allPhrases.push({ phrase: "I am fine, thank you", tip: "Say 'I'm' instead of 'I am' for natural flow." });
         allPhrases.push({ phrase: "What is your name?", tip: "Rising intonation for questions." });
     }
 
@@ -812,7 +746,7 @@ function recordPhrase(targetPhrase, tip, btn) {
         targetWords.forEach((w, i) => { if (userWords[i] === w) correct++; });
         const accuracy = Math.round((correct / targetWords.length) * 100);
         let stars = accuracy >= 90 ? '⭐⭐⭐' : accuracy >= 70 ? '⭐⭐' : '⭐';
-        let comment = accuracy >= 90 ? 'Excellent! 🎉' : accuracy >= 70 ? 'Good job!' : 'Try again!';
+        let comment = accuracy >= 90 ? 'Excellent pronunciation! 🎉' : accuracy >= 70 ? 'Good job! Keep practicing.' : 'Try again! Focus on the sounds.';
 
         feedbackDiv.innerHTML = `
             <i class="fas fa-comment-dots"></i> <strong>You said:</strong> "${escapeHtml(userText)}"<br>
@@ -878,7 +812,7 @@ function displayQuestion() {
         container.innerHTML = `
             <div class="quiz-card">
                 <h3><i class="fas fa-trophy"></i> Quiz Complete!</h3>
-                <div class="score-display">Score: ${vocabScore}/${vocabularyQuestions.length} (${finalScore}%)</div>
+                <div class="score-display">Your score: ${vocabScore}/${vocabularyQuestions.length} (${finalScore}%)</div>
                 <p>${finalScore >= 70 ? '🎉 Excellent work!' : '📚 Keep practicing!'}</p>
                 <button onclick="renderVocabularyPractice()"><i class="fas fa-redo-alt"></i> New Quiz</button>
             </div>
@@ -914,10 +848,10 @@ function checkAnswer(selected) {
 
     if (isCorrect) {
         vocabScore++;
-        feedbackDiv.innerHTML = `<i class="fas fa-check-circle" style="color:#10b981;"></i> ✅ Correct! "${currentQuizWord.english}" means "${currentQuizWord.french}"! 🎉`;
+        feedbackDiv.innerHTML = `<i class="fas fa-check-circle" style="color:#10b981;"></i> ✅ Correct! "${currentQuizWord.english}" means "${currentQuizWord.french}". Well done! 🎉`;
         speak(`Correct! ${currentQuizWord.english} means ${currentQuizWord.french}. Great job!`);
     } else {
-        feedbackDiv.innerHTML = `<i class="fas fa-times-circle" style="color:#ef4444;"></i> ❌ Correct answer: "${currentQuizWord.english}" = "${currentQuizWord.french}"`;
+        feedbackDiv.innerHTML = `<i class="fas fa-times-circle" style="color:#ef4444;"></i> ❌ The correct answer is "${currentQuizWord.english}" which means "${currentQuizWord.french}".`;
         speak(`The correct answer is ${currentQuizWord.english}. ${currentQuizWord.english} means ${currentQuizWord.french}.`);
     }
 
@@ -950,17 +884,13 @@ document.querySelectorAll('.nav button').forEach(btn => {
 });
 
 // ========== INIT ==========
-window.speechSynthesis.onvoiceschanged = () => { getHumanVoice('en'); };
+window.speechSynthesis.onvoiceschanged = () => { getHumanVoice(); };
 
 document.addEventListener('DOMContentLoaded', () => {
     loadCourses();
     const chat = document.getElementById('chat-box');
-    chat.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Hello! 🇬🇧 I'm your English teacher!<br><br>
-    🎯 Speak or type in English, and I will help you learn.<br>
-    📚 I will answer in English with simple words.<br>
-    🎤 Click the microphone to speak!<br><br>
-    Let's start! What would you like to learn today? 🚀</div>`;
-    speak("Hello! I'm your English teacher. Let's practice English together! Please speak in English, and I will help you.");
+    const userName = document.querySelector('.header-text p')?.innerText?.replace('Connected as: ', '') || 'student';
+    chat.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Hello ${escapeHtml(userName)}! 🎓 I'm your AI English teacher. Type or click the microphone to speak. I'll respond naturally and help you learn English! 🇬🇧✨</div>`;
 });
 </script>
 
