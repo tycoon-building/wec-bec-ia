@@ -274,6 +274,21 @@
             margin-bottom: 12px;
         }
 
+        .module-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+        .module-content p { margin-bottom: 8px; }
+        .module-content .dialogue-box {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 16px;
+            margin: 10px 0;
+        }
+        .module-content .english-word { color: #3b82f6; font-weight: 600; }
+        .module-content .french-word { color: #8b5cf6; }
+
         .audio-bar {
             display: flex;
             gap: 12px;
@@ -398,13 +413,13 @@
 
         <div id="section-lessons" class="section">
             <h2 class="section-title"><i class="fas fa-book-reader"></i> Interactive Lessons</h2>
-            <p class="section-subtitle">Choose a lesson, listen, repeat after the teacher, and get encouragement!</p>
+            <p class="section-subtitle">Complete A1 English course with dialogues, vocabulary, and audio</p>
             <div id="lessons-container"></div>
         </div>
 
         <div id="section-pronunciation" class="section">
             <h2 class="section-title"><i class="fas fa-microphone-alt"></i> Pronunciation Coach</h2>
-            <p class="section-subtitle">Listen, record, get a score and correction</p>
+            <p class="section-subtitle">Listen to phrases from your lessons, record yourself, and get a score</p>
             <div id="pron-container"></div>
         </div>
 
@@ -420,7 +435,7 @@
 let coursesData = null;
 let currentUtterance = null;
 let isSpeaking = false;
-let isSending = false; // Prevent multiple sends
+let isSending = false;
 
 // ========== VOICE FUNCTIONS ==========
 function getHumanVoice() {
@@ -489,7 +504,6 @@ async function sendMessage(textFromVoice = null) {
     chat.scrollTop = chat.scrollHeight;
     setStatus('🤔 Teacher is thinking...');
 
-    // Show typing indicator
     const typingId = showTypingIndicator();
 
     try {
@@ -500,14 +514,12 @@ async function sendMessage(textFromVoice = null) {
         });
         const data = await res.json();
 
-        // Remove typing indicator
         removeTypingIndicator(typingId);
 
         const reply = data.reply;
         chat.innerHTML += `<div class="msg bot"><i class="fas fa-robot"></i> ${escapeHtml(reply)}</div>`;
         chat.scrollTop = chat.scrollHeight;
 
-        // Speak the reply
         speak(reply, () => {
             isWaitingForResponse = false;
         });
@@ -547,7 +559,7 @@ function escapeHtml(str) {
     });
 }
 
-// ========== MICROPHONE (manual, not continuous) ==========
+// ========== MICROPHONE ==========
 let recognition = null;
 let isListening = false;
 
@@ -631,7 +643,7 @@ async function loadCourses() {
     }
 }
 
-// ========== LESSONS ==========
+// ========== LESSONS - FULL DISPLAY ==========
 function renderLessons() {
     const container = document.getElementById('lessons-container');
     if (!container || !coursesData?.A1) return;
@@ -639,47 +651,149 @@ function renderLessons() {
     const modules = coursesData.A1;
     const moduleList = Object.keys(modules);
 
-    moduleList.forEach((moduleKey, idx) => {
+    moduleList.forEach((moduleKey) => {
         const module = modules[moduleKey];
         const title = module.title || moduleKey;
+
+        let contentHtml = '';
+
+        // Dialogues
+        if (module.dialogue) {
+            contentHtml += `<div class="dialogue-box">
+                <p><strong>📖 Dialogue:</strong></p>`;
+            if (module.dialogue.question) contentHtml += `<p>❓ <span class="english-word">Q:</span> ${escapeHtml(module.dialogue.question)}</p>`;
+            if (module.dialogue.answer) contentHtml += `<p>✅ <span class="english-word">A:</span> ${escapeHtml(module.dialogue.answer)}</p>`;
+            if (module.dialogue.greeting) contentHtml += `<p>👋 <span class="english-word">Greeting:</span> ${escapeHtml(module.dialogue.greeting)}</p>`;
+            if (module.dialogue.response) contentHtml += `<p>💬 <span class="english-word">Response:</span> ${escapeHtml(module.dialogue.response)}</p>`;
+            contentHtml += `</div>`;
+        }
+
+        // Spelling dialogue
+        if (module.spelling_dialogue) {
+            contentHtml += `<div class="dialogue-box">
+                <p><strong>🔤 Spelling:</strong></p>`;
+            if (module.spelling_dialogue.question) contentHtml += `<p>❓ ${escapeHtml(module.spelling_dialogue.question)}</p>`;
+            if (module.spelling_dialogue.answer) contentHtml += `<p>✅ ${escapeHtml(module.spelling_dialogue.answer)}</p>`;
+            if (module.spelling_dialogue.question_firstname) contentHtml += `<p>❓ ${escapeHtml(module.spelling_dialogue.question_firstname)}</p>`;
+            if (module.spelling_dialogue.answer_firstname) contentHtml += `<p>✅ ${escapeHtml(module.spelling_dialogue.answer_firstname)}</p>`;
+            contentHtml += `</div>`;
+        }
+
+        // Numbers
+        if (module.numbers) {
+            const nums = Object.entries(module.numbers).slice(0, 15);
+            contentHtml += `<div class="dialogue-box">
+                <p><strong>🔢 Numbers:</strong></p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 5px;">`;
+            nums.forEach(([num, pron]) => {
+                contentHtml += `<div><span class="english-word">${num}</span> → <span class="french-word">${pron}</span></div>`;
+            });
+            contentHtml += `</div></div>`;
+        }
+
+        // Days
+        if (module.days) {
+            contentHtml += `<div class="dialogue-box">
+                <p><strong>📅 Days of the week:</strong></p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 5px;">`;
+            Object.entries(module.days).forEach(([eng, fr]) => {
+                contentHtml += `<div><span class="english-word">${eng}</span> → <span class="french-word">${fr}</span></div>`;
+            });
+            contentHtml += `</div></div>`;
+        }
+
+        // Months
+        if (module.months) {
+            contentHtml += `<div class="dialogue-box">
+                <p><strong>📆 Months of the year:</strong></p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 5px;">`;
+            Object.entries(module.months).forEach(([eng, fr]) => {
+                contentHtml += `<div><span class="english-word">${eng}</span> → <span class="french-word">${fr}</span></div>`;
+            });
+            contentHtml += `</div></div>`;
+        }
+
+        // Colours
+        if (module.colours) {
+            contentHtml += `<div class="dialogue-box">
+                <p><strong>🎨 Colours:</strong></p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 5px;">`;
+            Object.entries(module.colours).forEach(([eng, fr]) => {
+                contentHtml += `<div><span class="english-word">${eng}</span> → <span class="french-word">${fr}</span></div>`;
+            });
+            contentHtml += `</div></div>`;
+        }
+
+        // Classroom phrases
+        if (module.phrases) {
+            const phrasesList = Object.entries(module.phrases).slice(0, 10);
+            contentHtml += `<div class="dialogue-box">
+                <p><strong>🏫 Classroom Phrases:</strong></p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px;">`;
+            phrasesList.forEach(([eng, fr]) => {
+                contentHtml += `<div><span class="english-word">${escapeHtml(eng)}</span><br><span class="french-word">→ ${escapeHtml(fr)}</span></div>`;
+            });
+            contentHtml += `</div></div>`;
+        }
+
+        // Greetings
+        if (module.how_to_greet) {
+            contentHtml += `<div class="dialogue-box">
+                <p><strong>👋 Greetings:</strong></p>`;
+            if (module.how_to_greet.formal) {
+                contentHtml += `<p><span class="english-word">Formal:</span> ${Object.keys(module.how_to_greet.formal).join(', ')}</p>`;
+            }
+            if (module.how_to_greet.informal) {
+                contentHtml += `<p><span class="english-word">Informal:</span> ${Object.keys(module.how_to_greet.informal).join(', ')}</p>`;
+            }
+            contentHtml += `</div>`;
+        }
+
+        // Health questions
+        if (module.how_to_ask_about_health) {
+            const healthQs = Object.entries(module.how_to_ask_about_health).slice(0, 6);
+            contentHtml += `<div class="dialogue-box">
+                <p><strong>💬 How to ask about health:</strong></p>`;
+            healthQs.forEach(([eng, fr]) => {
+                contentHtml += `<p><span class="english-word">${escapeHtml(eng)}</span> → ${escapeHtml(fr)}</p>`;
+            });
+            contentHtml += `</div>`;
+        }
+
+        // Self introduction
+        if (module.how_to_introduce_oneself) {
+            const introList = Object.entries(module.how_to_introduce_oneself).slice(0, 8);
+            contentHtml += `<div class="dialogue-box">
+                <p><strong>👤 Self Introduction:</strong></p>`;
+            introList.forEach(([eng, fr]) => {
+                contentHtml += `<p><span class="english-word">${escapeHtml(eng)}</span><br><span class="french-word">→ ${escapeHtml(fr)}</span></p>`;
+            });
+            contentHtml += `</div>`;
+        }
+
+        if (!contentHtml) {
+            contentHtml = '<p>Click on other tabs to see more content!</p>';
+        }
 
         const card = document.createElement('div');
         card.className = 'module-card';
         card.innerHTML = `
             <h3>${escapeHtml(title)}</h3>
-            <div class="module-content">
-                <p><i class="fas fa-info-circle"></i> Click "Start Lesson" to begin. The teacher will guide you!</p>
-            </div>
+            <div class="module-content">${contentHtml}</div>
             <div class="audio-bar">
-                <button onclick="startLesson(${idx})"><i class="fas fa-play"></i> Start Lesson</button>
+                <button onclick="speakModuleText('${escapeHtml(title)}', \`${escapeHtml(contentHtml.replace(/<[^>]*>/g, ' ').substring(0, 500))}\`)"><i class="fas fa-headphones"></i> Listen to Lesson</button>
             </div>
         `;
         container.appendChild(card);
     });
 }
 
-function startLesson(lessonIdx) {
-    const modules = coursesData?.A1;
-    if (!modules) return;
-    const moduleKeys = Object.keys(modules);
-    const module = modules[moduleKeys[lessonIdx]];
-    const title = module.title || moduleKeys[lessonIdx];
-
-    let lessonContent = `Let's learn about ${title}. `;
-
-    if (module.dialogue) {
-        if (module.dialogue.question) lessonContent += `${module.dialogue.question} ${module.dialogue.answer}. `;
-        if (module.dialogue.greeting) lessonContent += `${module.dialogue.greeting}. ${module.dialogue.response}. `;
-    }
-
-    speak(lessonContent);
-
-    const chat = document.getElementById('chat-box');
-    chat.innerHTML += `<div class="msg bot"><i class="fas fa-robot"></i> 🎓 Teacher: ${escapeHtml(lessonContent)} Now practice in the chat! Ask me questions about this lesson.</div>`;
-    chat.scrollTop = chat.scrollHeight;
+function speakModuleText(title, content) {
+    const cleanText = title + '. ' + content.replace(/→/g, 'means').replace(/[0-9]/g, '');
+    speak(cleanText.substring(0, 800));
 }
 
-// ========== PRONUNCIATION ==========
+// ========== PRONUNCIATION - ALL PHRASES FROM JSON ==========
 function renderPronunciation() {
     const container = document.getElementById('pron-container');
     if (!container || !coursesData?.A1) return;
@@ -687,23 +801,74 @@ function renderPronunciation() {
     const modules = coursesData.A1;
     const allPhrases = [];
 
+    // Extract ALL dialogues and phrases from modules
     Object.keys(modules).forEach(key => {
         const module = modules[key];
+
+        // Dialogues
         if (module.dialogue) {
             if (module.dialogue.question) allPhrases.push({ phrase: module.dialogue.question, tip: "Question intonation should rise at the end." });
             if (module.dialogue.answer) allPhrases.push({ phrase: module.dialogue.answer, tip: "Answer with clear pronunciation." });
             if (module.dialogue.greeting) allPhrases.push({ phrase: module.dialogue.greeting, tip: "Stress the first syllable." });
             if (module.dialogue.response) allPhrases.push({ phrase: module.dialogue.response, tip: "Connect words naturally." });
         }
+
+        // Spelling dialogues
+        if (module.spelling_dialogue) {
+            if (module.spelling_dialogue.question) allPhrases.push({ phrase: module.spelling_dialogue.question, tip: "Say each letter clearly." });
+            if (module.spelling_dialogue.answer) allPhrases.push({ phrase: module.spelling_dialogue.answer, tip: "Pause between letters." });
+            if (module.spelling_dialogue.question_firstname) allPhrases.push({ phrase: module.spelling_dialogue.question_firstname, tip: "Practice spelling your name." });
+            if (module.spelling_dialogue.answer_firstname) allPhrases.push({ phrase: module.spelling_dialogue.answer_firstname, tip: "Say each letter with a short pause." });
+        }
+
+        // Numbers - first 10
+        if (module.numbers) {
+            const firstNumbers = Object.keys(module.numbers).slice(0, 10);
+            allPhrases.push({ phrase: firstNumbers.join(", "), tip: "Practice each number clearly." });
+        }
+
+        // Days
+        if (module.days) {
+            const days = Object.keys(module.days);
+            allPhrases.push({ phrase: days.join(", "), tip: "Monday ends with 'day' sound like 'dey'." });
+        }
+
+        // Months - first 6
+        if (module.months) {
+            const months = Object.keys(module.months).slice(0, 6);
+            allPhrases.push({ phrase: months.join(", "), tip: "January has 3 syllables: Jan-u-a-ry." });
+        }
+
+        // Colours - first 8
+        if (module.colours) {
+            const colours = Object.keys(module.colours).slice(0, 8);
+            allPhrases.push({ phrase: colours.join(", "), tip: "The 'th' in 'three' is soft." });
+        }
+
+        // Greetings
+        if (module.how_to_greet?.formal) {
+            const greetings = Object.keys(module.how_to_greet.formal);
+            allPhrases.push({ phrase: greetings.join(", "), tip: "Good morning: stress on 'morning'." });
+        }
     });
 
-    if (allPhrases.length === 0) {
-        allPhrases.push({ phrase: "How are you today?", tip: "Connect 'how are' to sound like 'how're'." });
-        allPhrases.push({ phrase: "I am fine, thank you", tip: "Say 'I'm' instead of 'I am' for natural flow." });
-        allPhrases.push({ phrase: "What is your name?", tip: "Rising intonation for questions." });
+    // Remove duplicates
+    const uniquePhrases = [];
+    const phraseSet = new Set();
+    for (let item of allPhrases) {
+        if (!phraseSet.has(item.phrase.toLowerCase())) {
+            phraseSet.add(item.phrase.toLowerCase());
+            uniquePhrases.push(item);
+        }
     }
 
-    allPhrases.forEach((item, idx) => {
+    if (uniquePhrases.length === 0) {
+        uniquePhrases.push({ phrase: "How are you today?", tip: "Connect 'how are' to sound like 'how're'." });
+        uniquePhrases.push({ phrase: "I am fine, thank you", tip: "Say 'I'm' instead of 'I am'." });
+        uniquePhrases.push({ phrase: "What is your name?", tip: "Rising intonation for questions." });
+    }
+
+    uniquePhrases.slice(0, 20).forEach((item, idx) => {
         const card = document.createElement('div');
         card.className = 'pron-card';
         card.innerHTML = `
@@ -754,6 +919,12 @@ function recordPhrase(targetPhrase, tip, btn) {
             <i class="fas fa-smile-wink"></i> ${comment}<br>
             <i class="fas fa-lightbulb"></i> <strong>Tip:</strong> ${escapeHtml(tip)}
         `;
+
+        if (accuracy >= 80) {
+            speak(`Good job! That was ${accuracy} percent accurate.`);
+        } else {
+            speak(`Let's practice. Listen: ${targetPhrase}`);
+        }
     };
 
     rec.onerror = () => {
@@ -777,7 +948,7 @@ function renderVocabularyPractice() {
     const questions = [];
 
     if (modules.module_4?.numbers) {
-        Object.entries(modules.module_4.numbers).slice(0, 10).forEach(([eng, fr]) => {
+        Object.entries(modules.module_4.numbers).slice(0, 12).forEach(([eng, fr]) => {
             questions.push({ english: eng, french: fr, category: 'Numbers' });
         });
     }
@@ -890,7 +1061,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCourses();
     const chat = document.getElementById('chat-box');
     const userName = document.querySelector('.header-text p')?.innerText?.replace('Connected as: ', '') || 'student';
-    chat.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Hello ${escapeHtml(userName)}! 🎓 I'm your AI English teacher. Type or click the microphone to speak. I'll respond naturally and help you learn English! 🇬🇧✨</div>`;
+    chat.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Hello ${escapeHtml(userName)}! 🎓 I'm your AI English teacher. Type or click the microphone to speak. I'll help you learn English! 🇬🇧✨</div>`;
 });
 </script>
 
