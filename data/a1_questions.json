@@ -1,0 +1,317 @@
+{
+  "conversations": [
+    {
+      "title": "👋 Lesson 1: Greetings and Introductions",
+      "exchanges": [
+        {
+          "question": "Hello! What is your name?",
+          "expected_answers": [
+            "my name is",
+            "i am",
+            "my name's",
+            "i'm"
+          ],
+          "good_reply": "Nice to meet you 😊 Tell me, how are you today?",
+          "wrong_reply": "Try again. Say: My name is [your name] or I am [your name]."
+        },
+        {
+          "question": "How are you today?",
+          "expected_answers": [
+            "i am fine",
+            "i'm fine",
+            "i am good",
+            "i'm good",
+            "fine",
+            "good"
+          ],
+          "good_reply": "I'm happy to hear that! 😊 Where are you from?",
+          "wrong_reply": "Try again. Say: I am fine, thank you. or I'm good."
+        },
+        {
+          "question": "Where are you from?",
+          "expected_answers": [
+            "i am from",
+            "i'm from",
+            "from"
+          ],
+          "good_reply": "That's a beautiful country! 🗺️ How old are you?",
+          "wrong_reply": "Try again. Say: I am from [country name] or I'm from [city name]."
+        },
+        {
+          "question": "How old are you?",
+          "expected_answers": [
+            "i am",
+            "i'm",
+            "years old",
+            "year old"
+          ],
+          "good_reply": "Great! Thank you for telling me about yourself. What do you like to do in your free time? 🎉",
+          "wrong_reply": "Try again. Say: I am [number] years old or I'm [number]."
+        },
+        {
+          "question": "What do you like to do in your free time?",
+          "expected_answers": [
+            "i like",
+            "i love",
+            "i enjoy",
+            "playing",
+            "reading",
+            "watching",
+            "listening"
+          ],
+          "good_reply": "That sounds fun! 🎯 Let's talk about your family now.",
+          "wrong_reply": "Try again. Say: I like playing football, I like reading books, or I enjoy watching movies."
+        }
+      ]
+    },
+    {
+      "title": "🏠 Lesson 2: Family",
+      "exchanges": [
+        {
+          "question": "Do you have a big family?",
+          "expected_answers": [
+            "yes i do",
+            "yes",
+            "yeah",
+            "no i don't",
+            "no",
+            "i have",
+            "small",
+            "big"
+          ],
+          "good_reply": "That's nice! 👨‍👩‍👧‍👦 How many people are in your family?",
+          "wrong_reply": "Try again. Say: Yes, I do (for big family) or No, I don't (for small family)."
+        },
+        {
+          "question": "How many people are in your family?",
+          "expected_answers": [
+            "there are",
+            "people",
+            "persons",
+            "including me",
+            "including myself"
+          ],
+          "good_reply": "Wonderful! 👏 Do you have any brothers or sisters?",
+          "wrong_reply": "Try again. Say: There are [number] people in my family."
+        },
+        {
+          "question": "Do you have any brothers or sisters?",
+          "expected_answers": [
+            "yes i have",
+            "no i don't",
+            "i have",
+            "brother",
+            "sister",
+            "one brother",
+            "one sister",
+            "two brothers",
+            "two sisters"
+          ],
+          "good_reply": "That's lovely! 💕 Tell me, do you live with your parents?",
+          "wrong_reply": "Try again. Say: Yes, I have one brother. or No, I don't have any brothers or sisters."
+        },
+        {
+          "question": "Do you live with your parents?",
+          "expected_answers": [
+            "yes i do",
+            "yes",
+            "no i don't",
+            "no",
+            "i live with",
+            "with my parents"
+          ],
+          "good_reply": "Thank you for sharing about your family! Now let's talk about food. 🍕",
+          "wrong_reply": "Try again. Say: Yes, I live with my parents. or No, I don't live with my parents."
+        }
+      ]
+    },
+    {
+      "title": "🍎 Lesson 3: Food and Drinks",
+      "exchanges": [
+        {
+          "question": "What is your favorite food?",
+          "expected_answers": [
+            "my favorite food is",
+            "i like",
+            "i love",
+            "favorite",
+            "pizza",
+            "pasta",
+            "rice",
+            "burger",
+            "chicken"
+          ],
+          "good_reply": "Yummy! 😋 That sounds delicious! Do you like apples?",
+          "wrong_reply": "Try again. Say: My favorite food is pizza. or I like pasta."
+        },
+        {
+          "question": "Do you like apples?",
+          "expected_answers": [
+            "yes i like",
+            "yes",
+            "yeah",
+            "no i don't like",
+            "no",
+            "i love apples",
+            "i hate apples"
+          ],
+          "good_reply": "Good to know! 🍎 What do you eat for breakfast?",
+          "wrong_reply": "Try again. Say: Yes, I like apples. or No, I don't like apples."
+        },
+        {
+          "question": "What do you eat for breakfast?",
+          "expected_answers": [
+            "i eat",
+            "for breakfast i eat",
+            "cereal",
+            "bread",
+            "eggs",
+            "milk",
+            "coffee",
+            "tea",
+            "toast"
+          ],
+          "good_reply": "That's a healthy breakfast! 💪 Do you like drinking coffee or tea?",
+          "wrong_reply": "Try again. Say: I eat cereal for breakfast. or I eat bread and eggs."
+        },
+        {
+          "question": "Do you like drinking coffee or tea?",
+          "expected_answers": [
+            "coffee",
+            "tea",
+            "i like coffee",
+            "i like tea",
+            "both",
+            "i don't like",
+            "neither"
+          ],
+          "good_reply": "Excellent! ☕ Now let's learn about colors! 🎨",
+          "wrong_reply": "Try again. Say: I like coffee. or I prefer tea. or I don't like both."
+        }
+      ]
+    },
+    {
+      "title": "🎨 Lesson 4: Colors and Numbers",
+      "exchanges": [
+        {
+          "question": "What is your favorite color?",
+          "expected_answers": [
+            "my favorite color is",
+            "i like",
+            "i love",
+            "blue",
+            "red",
+            "green",
+            "yellow",
+            "black",
+            "white",
+            "pink",
+            "purple",
+            "orange"
+          ],
+          "good_reply": "Beautiful choice! 😍 What color is the sky?",
+          "wrong_reply": "Try again. Say: My favorite color is blue. or I like red."
+        },
+        {
+          "question": "What color is the sky?",
+          "expected_answers": [
+            "blue",
+            "the sky is blue",
+            "it is blue",
+            "it's blue"
+          ],
+          "good_reply": "Correct! ☀️ What color are bananas?",
+          "wrong_reply": "Try again. The sky is blue during the day. Say: The sky is blue."
+        },
+        {
+          "question": "What color are bananas?",
+          "expected_answers": [
+            "yellow",
+            "bananas are yellow",
+            "they are yellow",
+            "it's yellow"
+          ],
+          "good_reply": "Perfect! 🍌 How many fingers do you have on one hand?",
+          "wrong_reply": "Try again. Bananas are yellow. Say: Bananas are yellow."
+        },
+        {
+          "question": "How many fingers do you have on one hand?",
+          "expected_answers": [
+            "5",
+            "five",
+            "five fingers",
+            "5 fingers"
+          ],
+          "good_reply": "Very good! 👍 You are learning fast! Let's talk about the weather now. 🌤️",
+          "wrong_reply": "Try again. Count your fingers! Say: I have five fingers on one hand."
+        }
+      ]
+    },
+    {
+      "title": "☀️ Lesson 5: Weather",
+      "exchanges": [
+        {
+          "question": "What is the weather like today?",
+          "expected_answers": [
+            "sunny",
+            "rainy",
+            "cloudy",
+            "windy",
+            "snowy",
+            "hot",
+            "cold",
+            "warm",
+            "today is",
+            "it is"
+          ],
+          "good_reply": "I see! 🌈 Do you like sunny weather?",
+          "wrong_reply": "Try again. Say: Today is sunny. or It is rainy today."
+        },
+        {
+          "question": "Do you like sunny weather?",
+          "expected_answers": [
+            "yes i like",
+            "yes",
+            "yeah",
+            "no i don't like",
+            "no",
+            "i love sunny",
+            "i hate sunny"
+          ],
+          "good_reply": "That's interesting! ☀️ Do you like rain?",
+          "wrong_reply": "Try again. Say: Yes, I like sunny weather. or No, I don't like sunny weather."
+        },
+        {
+          "question": "Do you like rain?",
+          "expected_answers": [
+            "yes i like",
+            "yes",
+            "yeah",
+            "no i don't like",
+            "no",
+            "i love rain",
+            "i hate rain",
+            "sometimes"
+          ],
+          "good_reply": "Good to know! 🌧️ Is it hot or cold outside today?",
+          "wrong_reply": "Try again. Say: Yes, I like rain. or No, I don't like rain."
+        },
+        {
+          "question": "Is it hot or cold outside today?",
+          "expected_answers": [
+            "hot",
+            "cold",
+            "it is hot",
+            "it is cold",
+            "it's hot",
+            "it's cold",
+            "very hot",
+            "very cold"
+          ],
+          "good_reply": "Thank you for practicing with me! 🎉 You did a great job! Remember to practice every day. Would you like to continue with more lessons? 🚀",
+          "wrong_reply": "Try again. Say: It is hot today. or It is cold outside."
+        }
+      ]
+    }
+  ]
+}
