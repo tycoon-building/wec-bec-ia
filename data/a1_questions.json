@@ -1,315 +1,1080 @@
 {
   "conversations": [
     {
-      "title": "👋 Lesson 1: Greetings and Introductions",
+      "title": "🤝 Lesson 6: Making Someone's Acquaintance",
       "exchanges": [
         {
-          "question": "Hello! What is your name?",
+          "question": "May I know your name?",
           "expected_answers": [
+            "yes you may",
             "my name is",
-            "i am",
-            "my name's",
-            "i'm"
+            "my name's"
           ],
-          "good_reply": "Nice to meet you 😊 Tell me, how are you today?",
-          "wrong_reply": "Try again. Say: My name is [your name] or I am [your name]."
+          "good_reply": "Nice! Can you introduce yourself please? 😊",
+          "wrong_reply": "Try again. Say: Yes, you may. My name is [name]."
         },
         {
-          "question": "How are you today?",
+          "question": "Could you introduce your friend to me?",
           "expected_answers": [
-            "i am fine",
-            "i'm fine",
-            "i am good",
-            "i'm good",
-            "fine",
-            "good"
+            "yes i could",
+            "this is",
+            "this is my friend"
           ],
-          "good_reply": "I'm happy to hear that! 😊 Where are you from?",
-          "wrong_reply": "Try again. Say: I am fine, thank you. or I'm good."
+          "good_reply": "What is her name? (for a girl) / What is his name? (for a boy) 👤",
+          "wrong_reply": "Try again. Say: Yes I could, this is Mr./Ms. [name]."
         },
         {
-          "question": "Where are you from?",
+          "question": "What is her name?",
           "expected_answers": [
-            "i am from",
-            "i'm from",
-            "from"
+            "her name is"
           ],
-          "good_reply": "That's a beautiful country! 🗺️ How old are you?",
-          "wrong_reply": "Try again. Say: I am from [country name] or I'm from [city name]."
+          "good_reply": "What is his name? 👤",
+          "wrong_reply": "Try again. Say: Her name is [name]."
         },
         {
-          "question": "How old are you?",
+          "question": "What is his name?",
           "expected_answers": [
-            "i am",
-            "i'm",
-            "years old",
-            "year old"
+            "his name is"
           ],
-          "good_reply": "Great! Thank you for telling me about yourself. What do you like to do in your free time? 🎉",
-          "wrong_reply": "Try again. Say: I am [number] years old or I'm [number]."
+          "good_reply": "I am glad/happy/delighted/pleased to meet you! 🎉",
+          "wrong_reply": "Try again. Say: His name is [name]."
         },
         {
-          "question": "What do you like to do in your free time?",
+          "question": "How do you say 'Enchanté' in English?",
           "expected_answers": [
-            "i like",
-            "i love",
-            "i enjoy",
-            "playing",
+            "nice to meet you",
+            "nice to meet you too",
+            "the same to me",
+            "me too",
+            "me as well",
+            "it has been nice meeting you",
+            "it was a big pleasure to know you"
+          ],
+          "good_reply": "Excellent! You've mastered introductions! 🎯",
+          "wrong_reply": "Try again. Say: Nice to meet you, or Me too."
+        }
+      ]
+    },
+    {
+      "title": "😊 Lesson 7: Expressing Feelings (Extremely, Entirely, Really)",
+      "exchanges": [
+        {
+          "question": "What are your feelings about WEC-BEC?",
+          "expected_answers": [
+            "the best center",
+            "i am so happy",
+            "i am very happy",
+            "i am highly happy",
+            "i am hugely happy",
+            "i am immensely cheery",
+            "i am so merry",
+            "i am enormously glad",
+            "i am fully joyful",
+            "i am majorly cheerful",
+            "i am entirely delighted",
+            "i am so ecstatic",
+            "i am filled with joy",
+            "i am so excited"
+          ],
+          "good_reply": "Are you happy to be here at WEC-BEC? 🏆",
+          "wrong_reply": "Try again. Say: I am very happy, or I am so excited."
+        },
+        {
+          "question": "Are you happy to be here at WEC-BEC?",
+          "expected_answers": [
+            "of course",
+            "yes",
+            "i am so happy"
+          ],
+          "good_reply": "Me too! Let's continue learning! 📚",
+          "wrong_reply": "Try again. Say: Of course, I am so happy to be here."
+        }
+      ]
+    },
+    {
+      "title": "📖 Lesson 8: Meanings and Translations",
+      "exchanges": [
+        {
+          "question": "What do you mean by that?",
+          "expected_answers": [
+            "i mean"
+          ],
+          "good_reply": "What does pawpaw mean in French? 🍈",
+          "wrong_reply": "Try again. Say: I mean [explanation]."
+        },
+        {
+          "question": "What does pawpaw mean in French?",
+          "expected_answers": [
+            "pawpaw means la papaye"
+          ],
+          "good_reply": "What is the meaning of 'host family' in French? 🏠",
+          "wrong_reply": "Try again. Say: Pawpaw means 'la papaye' in French."
+        },
+        {
+          "question": "What is the meaning of 'host family' in French?",
+          "expected_answers": [
+            "famille d'accueil"
+          ],
+          "good_reply": "How do you say 'le riz' in English? 🍚",
+          "wrong_reply": "Try again. Say: The meaning of host family in French is 'famille d'accueil'."
+        },
+        {
+          "question": "How do you say 'le riz' in English?",
+          "expected_answers": [
+            "rice"
+          ],
+          "good_reply": "What does WEC-BEC stand for? 🏫",
+          "wrong_reply": "Try again. Say: It is rice in English."
+        },
+        {
+          "question": "What does WEC-BEC stand for?",
+          "expected_answers": [
+            "foreign languages training center"
+          ],
+          "good_reply": "Perfect! You understand translations well! 🌟",
+          "wrong_reply": "Try again. Say: WEC-BEC stands for Foreign Languages Training Center."
+        }
+      ]
+    },
+    {
+      "title": "🐛 Lesson 9: Caterpillar and Butterfly",
+      "exchanges": [
+        {
+          "question": "How do you say 'fat' in French?",
+          "expected_answers": [
+            "gros"
+          ],
+          "good_reply": "Great job! Keep asking questions! 🦋",
+          "wrong_reply": "Try again. Say: It is 'gros' in French."
+        }
+      ]
+    },
+    {
+      "title": "📅 Lesson 10: There is / There was / There will be",
+      "exchanges": [
+        {
+          "question": "Can you tell me about the different uses of 'il y a', 'il y avait', and 'il y aura'?",
+          "expected_answers": [
+            "present tense there is there are",
+            "past tense there was there were",
+            "future tense there will be"
+          ],
+          "good_reply": "Give me an example with 'there is'! ✨",
+          "wrong_reply": "Try again. Explain: Present = there is/are, Past = there was/were, Future = there will be."
+        }
+      ]
+    },
+    {
+      "title": "🔤 Lesson 11: Indefinite Article: A and An",
+      "exchanges": [
+        {
+          "question": "What's the difference between 'a' and 'an'?",
+          "expected_answers": [
+            "a before consonants",
+            "an before vowels"
+          ],
+          "good_reply": "Perfect! Give me an example with 'a'. 📝",
+          "wrong_reply": "Try again. Say: We use 'a' before consonants and 'an' before vowels."
+        }
+      ]
+    },
+    {
+      "title": "📍 Lesson 12: Difference between 'At' and 'To'",
+      "exchanges": [
+        {
+          "question": "What's the dichotomy between 'at' and 'to'?",
+          "expected_answers": [
+            "at if no movement",
+            "to if movement"
+          ],
+          "good_reply": "Correct! Give me an example with 'at'. 🏠",
+          "wrong_reply": "Try again. Say: 'At' is for no movement, 'To' is for movement."
+        }
+      ]
+    },
+    {
+      "title": "🔑 Lesson 13: Possessive Case",
+      "exchanges": [
+        {
+          "question": "When do we use the possessive case?",
+          "expected_answers": [
+            "to express possession",
+            "to express ownership",
+            "possessor apostrophe s"
+          ],
+          "good_reply": "How do you say 'the house of Greg' using possessive case? 🏡",
+          "wrong_reply": "Try again. Say: We use possessive case to express possession or ownership."
+        },
+        {
+          "question": "How do you say 'the house of Greg' in possessive case?",
+          "expected_answers": [
+            "greg's house"
+          ],
+          "good_reply": "What about plural? How do you say 'the house of the Gregs'? 👨‍👩‍👧‍👦",
+          "wrong_reply": "Try again. Say: Greg's house."
+        },
+        {
+          "question": "How do you say 'the house of the Gregs' in possessive case (plural)?",
+          "expected_answers": [
+            "gregs' house"
+          ],
+          "good_reply": "Excellent! You've mastered possessive case! 🎉",
+          "wrong_reply": "Try again. For plural, put apostrophe after 's': Gregs' house."
+        }
+      ]
+    },
+    {
+      "title": "⏰ Lesson 14: Telling the Time",
+      "exchanges": [
+        {
+          "question": "What time is it? / What time do you make it? / What time do you have? / What's the time?",
+          "expected_answers": [
+            "it's three o'clock",
+            "it's three sharp",
+            "it's ten past three",
+            "it's ten after three",
+            "it's a quarter past three",
+            "it's half past three",
+            "it's ten to four",
+            "it's a quarter to four",
+            "it's three ten minutes"
+          ],
+          "good_reply": "Perfect! Now you can tell time in English! 🕐",
+          "wrong_reply": "Try again. Say: It's [number] o'clock, or It's [minutes] past [hour]."
+        }
+      ]
+    },
+    {
+      "title": "🔄 Lesson 15: Revision Questions",
+      "exchanges": [
+        {
+          "question": "How did you spend your night?",
+          "expected_answers": [
+            "i spent an awful night"
+          ],
+          "good_reply": "What was our last lesson about? 📚",
+          "wrong_reply": "Try again. Say: I spent an awful / good night."
+        },
+        {
+          "question": "What is a decade?",
+          "expected_answers": [
+            "a period of ten years"
+          ],
+          "good_reply": "What is a century? 📅",
+          "wrong_reply": "Try again. Say: A decade is a period of ten years."
+        },
+        {
+          "question": "What is a century?",
+          "expected_answers": [
+            "a period of one hundred years"
+          ],
+          "good_reply": "How many seasons are there in Europe? 🌍",
+          "wrong_reply": "Try again. Say: A century is a period of one hundred years."
+        },
+        {
+          "question": "How many seasons are there in Europe?",
+          "expected_answers": [
+            "4 seasons",
+            "four seasons",
+            "winter autumn spring summer"
+          ],
+          "good_reply": "How many seasons are there in central Africa? ☀️",
+          "wrong_reply": "Try again. Say: There are 4 seasons in Europe: Winter, Autumn, Spring, Summer."
+        },
+        {
+          "question": "How many seasons are there in central Africa?",
+          "expected_answers": [
+            "2 seasons",
+            "two seasons",
+            "dry season",
+            "rain season"
+          ],
+          "good_reply": "Great revision! Keep practicing! 🎯",
+          "wrong_reply": "Try again. Say: There are 2 seasons in central Africa: dry season and rain season."
+        }
+      ]
+    },
+    {
+      "title": "📞 Lesson 16: References and Contacts",
+      "exchanges": [
+        {
+          "question": "What is your full name?",
+          "expected_answers": [
+            "my full name is"
+          ],
+          "good_reply": "How do you spell your name? 🔤",
+          "wrong_reply": "Try again. Say: My full name is [first name + last name]."
+        },
+        {
+          "question": "How do you spell your name?",
+          "expected_answers": [
+            "i spell my name"
+          ],
+          "good_reply": "What is your email address? 📧",
+          "wrong_reply": "Try again. Say: I spell my name [letters]."
+        },
+        {
+          "question": "What is your email address?",
+          "expected_answers": [
+            "my email address is"
+          ],
+          "good_reply": "What is your dwelling place / address? 🏠",
+          "wrong_reply": "Try again. Say: My email address is [email]."
+        },
+        {
+          "question": "What is your phone number?",
+          "expected_answers": [
+            "my phone number is"
+          ],
+          "good_reply": "Perfect! Now I can contact you! 📱",
+          "wrong_reply": "Try again. Say: My phone number is [number]."
+        }
+      ]
+    },
+    {
+      "title": "🗺️ Lesson 17: Provenance, Nationality and Origin",
+      "exchanges": [
+        {
+          "question": "Where are you coming from now?",
+          "expected_answers": [
+            "i am coming from home",
+            "i am coming from the center"
+          ],
+          "good_reply": "Where were you? 📍",
+          "wrong_reply": "Try again. Say: I am coming from [place]."
+        },
+        {
+          "question": "Where were you? / Where have you been?",
+          "expected_answers": [
+            "i was at school",
+            "i have been at my sister's house"
+          ],
+          "good_reply": "What is your nationality? 🌍",
+          "wrong_reply": "Try again. Say: I was at [place]."
+        },
+        {
+          "question": "What is your nationality?",
+          "expected_answers": [
+            "i am congolese by birth",
+            "i am congolese"
+          ],
+          "good_reply": "Where do you come from? 🗺️",
+          "wrong_reply": "Try again. Say: I am [nationality] by birth."
+        },
+        {
+          "question": "Where do you hail from?",
+          "expected_answers": [
+            "i hail from congo"
+          ],
+          "good_reply": "What is your ethnic group / tribe? 👥",
+          "wrong_reply": "Try again. Say: I hail from [country]."
+        }
+      ]
+    },
+    {
+      "title": "🎂 Lesson 18: Age",
+      "exchanges": [
+        {
+          "question": "How old are you? / What's your age?",
+          "expected_answers": [
+            "i am twenty-six",
+            "i am 18 years old",
+            "i am a twenty year old boy",
+            "i am a twenty year old girl",
+            "i am eighteen years of age"
+          ],
+          "good_reply": "What's the age gap between you and your brother? 👨‍👦",
+          "wrong_reply": "Try again. Say: I am [number] years old."
+        },
+        {
+          "question": "What's the age gap between you and your brother?",
+          "expected_answers": [
+            "we have the age gap of three years"
+          ],
+          "good_reply": "Great! Now I know your age! 🎉",
+          "wrong_reply": "Try again. Say: We have the age gap of [number] years."
+        }
+      ]
+    },
+    {
+      "title": "📅 Lesson 19: Date and Place of Birth",
+      "exchanges": [
+        {
+          "question": "When were you born?",
+          "expected_answers": [
+            "i was born in 1989"
+          ],
+          "good_reply": "Where were you born? 🏥",
+          "wrong_reply": "Try again. Say: I was born in [year]."
+        },
+        {
+          "question": "Where were you born?",
+          "expected_answers": [
+            "i was born in brazzaville"
+          ],
+          "good_reply": "When is your birthday? 🎂",
+          "wrong_reply": "Try again. Say: I was born in [city]."
+        },
+        {
+          "question": "When is your birthday?",
+          "expected_answers": [
+            "my birthday is in august"
+          ],
+          "good_reply": "Where did you grow up? 🌱",
+          "wrong_reply": "Try again. Say: My birthday is in [month]."
+        },
+        {
+          "question": "Who brought you up?",
+          "expected_answers": [
+            "my grand mother"
+          ],
+          "good_reply": "Thank you for sharing! 💕",
+          "wrong_reply": "Try again. Say: My [grand mother/father/parents] brought me up."
+        }
+      ]
+    },
+    {
+      "title": "👨‍👩‍👧‍👦 Lesson 20: Position in the Family",
+      "exchanges": [
+        {
+          "question": "What position are you in your family?",
+          "expected_answers": [
+            "i am the eldest",
+            "i am the last but one",
+            "i am the last"
+          ],
+          "good_reply": "How many are you in your family? 👨‍👩‍👧‍👦",
+          "wrong_reply": "Try again. Say: I am the eldest, or I am the last, or I am the last but one."
+        }
+      ]
+    },
+    {
+      "title": "💍 Lesson 21: Marital Status",
+      "exchanges": [
+        {
+          "question": "What is your marital status?",
+          "expected_answers": [
+            "i am a single",
+            "i am single",
+            "i am married",
+            "i am divorced"
+          ],
+          "good_reply": "Are you engaged to someone? 💑",
+          "wrong_reply": "Try again. Say: I am single / married / divorced."
+        },
+        {
+          "question": "Are you engaged to someone?",
+          "expected_answers": [
+            "i am engaged to",
+            "yes",
+            "no"
+          ],
+          "good_reply": "Have you got a boyfriend or girlfriend? 💕",
+          "wrong_reply": "Try again. Say: I am engaged to [name], or No, I am not."
+        },
+        {
+          "question": "Have you got a boyfriend or girlfriend?",
+          "expected_answers": [
+            "no i haven't",
+            "i am free",
+            "yes i have"
+          ],
+          "good_reply": "Are you faithful to your partner? 💖",
+          "wrong_reply": "Try again. Say: Yes I have, or No I haven't, I am free."
+        }
+      ]
+    },
+    {
+      "title": "📆 Lesson 22: Days, Weeks, Months and Dates",
+      "exchanges": [
+        {
+          "question": "How many days are there in the week?",
+          "expected_answers": [
+            "seven days",
+            "7 days"
+          ],
+          "good_reply": "How many weeks are there in the month? 📅",
+          "wrong_reply": "Try again. Say: There are seven days in the week."
+        },
+        {
+          "question": "How many weeks are there in the month?",
+          "expected_answers": [
+            "4 weeks",
+            "four weeks"
+          ],
+          "good_reply": "How many months are there in the year? 🗓️",
+          "wrong_reply": "Try again. Say: There are 4 weeks in the month."
+        },
+        {
+          "question": "What is the date today? / What's today's date?",
+          "expected_answers": [
+            "today is monday july 3rd"
+          ],
+          "good_reply": "What was the date yesterday? ⏪",
+          "wrong_reply": "Try again. Say: Today is [day, month date]."
+        },
+        {
+          "question": "What will be the date tomorrow?",
+          "expected_answers": [
+            "tomorrow will be sunday 4th"
+          ],
+          "good_reply": "Perfect! You understand dates! 📅",
+          "wrong_reply": "Try again. Say: Tomorrow will be [day, month date]."
+        }
+      ]
+    },
+    {
+      "title": "🏖️ Lesson 23: Free Time and Holidays",
+      "exchanges": [
+        {
+          "question": "What do you do during your holidays / vacations / free time / day off?",
+          "expected_answers": [
+            "i travel",
+            "i surf",
+            "i read"
+          ],
+          "good_reply": "That sounds fun! 🎉",
+          "wrong_reply": "Try again. Say: During my holidays I travel, or During my free time I read."
+        }
+      ]
+    },
+    {
+      "title": "🔐 Lesson 24: Possession",
+      "exchanges": [
+        {
+          "question": "Whose bag is this?",
+          "expected_answers": [
+            "it is mine"
+          ],
+          "good_reply": "Who is the owner of this house? 🏠",
+          "wrong_reply": "Try again. Say: It is mine, or It belongs to me."
+        },
+        {
+          "question": "To whom does this pen belong?",
+          "expected_answers": [
+            "it belongs to me"
+          ],
+          "good_reply": "Perfect! You've mastered possession! 🔑",
+          "wrong_reply": "Try again. Say: It belongs to me, or It is mine."
+        }
+      ]
+    },
+    {
+      "title": "❤️ Lesson 25: Preferences",
+      "exchanges": [
+        {
+          "question": "What do you like and dislike? / What are your likes and dislikes?",
+          "expected_answers": [
+            "i like eating and dislike starving",
+            "i like fruits and i dislike vegetables"
+          ],
+          "good_reply": "What is your favorite dish? 🍽️",
+          "wrong_reply": "Try again. Say: I like [something] and dislike [something]."
+        },
+        {
+          "question": "What is your favorite dish?",
+          "expected_answers": [
+            "my favorite dish is meat"
+          ],
+          "good_reply": "Who is your idol / best artist in music? 🎵",
+          "wrong_reply": "Try again. Say: My favorite dish is [food]."
+        },
+        {
+          "question": "What is your pet aversion?",
+          "expected_answers": [
+            "i hate beers"
+          ],
+          "good_reply": "Good to know your preferences! 🌟",
+          "wrong_reply": "Try again. Say: I hate [something]."
+        }
+      ]
+    },
+    {
+      "title": "🎓 Lesson 26: Education",
+      "exchanges": [
+        {
+          "question": "Where is your center located / situated?",
+          "expected_answers": [
+            "our center is located at thomas"
+          ],
+          "good_reply": "What's the time table of your center? 🕐",
+          "wrong_reply": "Try again. Say: Our center is located at [place]."
+        },
+        {
+          "question": "How often do you study per week?",
+          "expected_answers": [
+            "three times a week",
+            "3 times a week"
+          ],
+          "good_reply": "Is there any library in your school? 📚",
+          "wrong_reply": "Try again. Say: We study [number] times a week."
+        },
+        {
+          "question": "Which university do you attend?",
+          "expected_answers": [
+            "i attend marien ngouabi university"
+          ],
+          "good_reply": "What is your department at the university? 📖",
+          "wrong_reply": "Try again. Say: I attend [university name]."
+        },
+        {
+          "question": "What is your level / grade?",
+          "expected_answers": [
+            "i am in the first level",
+            "i am in the first form of primary school",
+            "i am in the first level of junior secondary school",
+            "i am in the first grade of senior secondary school"
+          ],
+          "good_reply": "Have you moved up to the next class? ⬆️",
+          "wrong_reply": "Try again. Say: I am in [level/grade]."
+        }
+      ]
+    },
+    {
+      "title": "🎯 Lesson 27: Speciality",
+      "exchanges": [
+        {
+          "question": "What is your major / speciality?",
+          "expected_answers": [
+            "my major is science",
+            "my speciality is arts",
+            "my speciality is humanities"
+          ],
+          "good_reply": "What have you majored in at the university? 🏫",
+          "wrong_reply": "Try again. Say: My major is [subject]."
+        },
+        {
+          "question": "What's your section at school?",
+          "expected_answers": [
+            "i am in a section"
+          ],
+          "good_reply": "What are your qualifications? 🎓",
+          "wrong_reply": "Try again. Say: I am in [letter] section."
+        },
+        {
+          "question": "When will be your graduation?",
+          "expected_answers": [
+            "my graduation will take place on monday"
+          ],
+          "good_reply": "Congratulations in advance! 🎉",
+          "wrong_reply": "Try again. Say: My graduation will take place on [day]."
+        }
+      ]
+    },
+    {
+      "title": "🇺🇸 Lesson 28: American Education System",
+      "exchanges": [
+        {
+          "question": "What's your grade? / What year are you?",
+          "expected_answers": [
+            "i am a fresher",
+            "i am a freshman",
+            "i am a freshwoman",
+            "i am a sophomore",
+            "i am a junior",
+            "i am a senior",
+            "i am in my first year",
+            "i am in bachelor degree",
+            "i am in master degree",
+            "i am graduate",
+            "i am undergraduate student",
+            "i am postgraduate student"
+          ],
+          "good_reply": "Do you have a B.A or M.A? 📜",
+          "wrong_reply": "Try again. Say: I am a freshman/sophomore/junior/senior."
+        }
+      ]
+    },
+    {
+      "title": "🎯 Lesson 29: To Expect, To Aim, Goal and Motivation",
+      "exchanges": [
+        {
+          "question": "What do you expect / target / aim / purpose / intend / plan / want to do in life?",
+          "expected_answers": [
+            "i expect to be a healer",
+            "i target to be a pastor",
+            "i aim to be a business man",
+            "i purpose to be a boss",
+            "i intend to be a barrister",
+            "i plan to become a trader",
+            "i want to be a healer"
+          ],
+          "good_reply": "What would you like to do after studies? 🎓",
+          "wrong_reply": "Try again. Say: I expect to be a [profession]."
+        },
+        {
+          "question": "What is your goal / target / aim / purpose / intention / objective / plan / vision in life?",
+          "expected_answers": [
+            "i want to do business",
+            "my target is to be a pastor",
+            "my aim is to become a boss",
+            "my purpose is to go overseas",
+            "my intention is to be trader",
+            "my objective is to be a pastor",
+            "my plan is to go abroad",
+            "my vision is to travel a lot"
+          ],
+          "good_reply": "What motivated you to learn English? 💪",
+          "wrong_reply": "Try again. Say: My goal is to [action]."
+        },
+        {
+          "question": "What motivated you to learn English? / What pushed you to learn English? / What urged you to learn English?",
+          "expected_answers": [
+            "my work reasons",
+            "i want to travel abroad",
+            "to achieve great things",
+            "necessity and spread of english"
+          ],
+          "good_reply": "Excellent motivation! Keep going! 🚀",
+          "wrong_reply": "Try again. Say: I want to travel abroad, or for work reasons."
+        }
+      ]
+    },
+    {
+      "title": "🎮 Lesson 30: Hobby and Game",
+      "exchanges": [
+        {
+          "question": "What is your hobby / leisure / pastime / spare time / distraction / diversion / entertainment / interest / game?",
+          "expected_answers": [
+            "watching tv",
             "reading",
-            "watching",
-            "listening"
+            "watching cartoons",
+            "swimming",
+            "playing soccer",
+            "strolling",
+            "listening to music",
+            "playing cards",
+            "jogging"
           ],
-          "good_reply": "That sounds fun! 🎯 Let's talk about your family now.",
-          "wrong_reply": "Try again. Say: I like playing football, I like reading books, or I enjoy watching movies."
+          "good_reply": "Great! Hobbies are important for relaxation! 🎯",
+          "wrong_reply": "Try again. Say: My hobby is [activity]."
         }
       ]
     },
     {
-      "title": "🏠 Lesson 2: Family",
+      "title": "🗣️ Lesson 31: English Language Ability",
       "exchanges": [
         {
-          "question": "Do you have a big family?",
+          "question": "Are you monolingual, bilingual, trilingual, quadrilingual or multilingual?",
+          "expected_answers": [
+            "i am a bilingual"
+          ],
+          "good_reply": "Can you express yourself in English? 💬",
+          "wrong_reply": "Try again. Say: I am bilingual / trilingual / multilingual."
+        },
+        {
+          "question": "Can you speak English?",
+          "expected_answers": [
+            "i don't know how to speak english",
+            "no but i can try",
+            "i know nothing about english",
+            "i am still a beginner"
+          ],
+          "good_reply": "What is the secret of learning? 🔑",
+          "wrong_reply": "Try again. Say: I am still a beginner, or I know nothing about English."
+        },
+        {
+          "question": "What is the secret of learning?",
+          "expected_answers": [
+            "you must read a lot"
+          ],
+          "good_reply": "What is the importance of learning many languages? 🌍",
+          "wrong_reply": "Try again. Say: You must read a lot."
+        },
+        {
+          "question": "What is the relevance or importance of learning many languages?",
+          "expected_answers": [
+            "you will easily have a job"
+          ],
+          "good_reply": "Can you convey a message in English now? 📨",
+          "wrong_reply": "Try again. Say: If you know many languages, you will easily have a job."
+        }
+      ]
+    },
+    {
+      "title": "🔍 Lesson 32: To Look For and To Wait For",
+      "exchanges": [
+        {
+          "question": "Who are you looking for?",
+          "expected_answers": [
+            "i am looking for somebody"
+          ],
+          "good_reply": "What are you looking for? 🔍",
+          "wrong_reply": "Try again. Say: I am looking for [person]."
+        },
+        {
+          "question": "What are you looking for?",
+          "expected_answers": [
+            "i am looking for my wallet"
+          ],
+          "good_reply": "Who are you waiting for? ⏳",
+          "wrong_reply": "Try again. Say: I am looking for [object]."
+        },
+        {
+          "question": "Who are you waiting for?",
+          "expected_answers": [
+            "i am waiting for my darling"
+          ],
+          "good_reply": "What are you waiting for? 🕐",
+          "wrong_reply": "Try again. Say: I am waiting for [person]."
+        }
+      ]
+    },
+    {
+      "title": "💼 Lesson 33: Profession",
+      "exchanges": [
+        {
+          "question": "Who do you rely on? / Who do you depend on?",
+          "expected_answers": [
+            "i rely on my parents",
+            "i depend on my parents"
+          ],
+          "good_reply": "Are your parents alive? 👨‍👩‍👧",
+          "wrong_reply": "Try again. Say: I rely on my parents."
+        },
+        {
+          "question": "What does your father do?",
+          "expected_answers": [
+            "my father is a soldier"
+          ],
+          "good_reply": "What rank is your father? 🎖️",
+          "wrong_reply": "Try again. Say: My father is a [profession]."
+        },
+        {
+          "question": "What is your profession? / What do you do as work?",
+          "expected_answers": [
+            "i am a worker",
+            "i am a civil servant"
+          ],
+          "good_reply": "Thank you for sharing! 💼",
+          "wrong_reply": "Try again. Say: I am a [profession]."
+        }
+      ]
+    },
+    {
+      "title": "⛪ Lesson 34: Religion",
+      "exchanges": [
+        {
+          "question": "Do you pray?",
           "expected_answers": [
             "yes i do",
-            "yes",
-            "yeah",
-            "no i don't",
-            "no",
-            "i have",
-            "small",
-            "big"
+            "i am a christian"
           ],
-          "good_reply": "That's nice! 👨‍👩‍👧‍👦 How many people are in your family?",
-          "wrong_reply": "Try again. Say: Yes, I do (for big family) or No, I don't (for small family)."
+          "good_reply": "Where do you pray? 🕌",
+          "wrong_reply": "Try again. Say: Yes I do, I am a Christian."
         },
         {
-          "question": "How many people are in your family?",
+          "question": "Are you born again?",
           "expected_answers": [
-            "there are",
-            "people",
-            "persons",
-            "including me",
-            "including myself"
+            "yes i am"
           ],
-          "good_reply": "Wonderful! 👏 Do you have any brothers or sisters?",
-          "wrong_reply": "Try again. Say: There are [number] people in my family."
+          "good_reply": "Are you a believer? 🙏",
+          "wrong_reply": "Try again. Say: Yes I am, or No I am not."
         },
         {
-          "question": "Do you have any brothers or sisters?",
+          "question": "What is your religion?",
           "expected_answers": [
-            "yes i have",
-            "no i don't",
-            "i have",
-            "brother",
-            "sister",
-            "one brother",
-            "one sister",
-            "two brothers",
-            "two sisters"
+            "my religion is christianism",
+            "i am a muslim"
           ],
-          "good_reply": "That's lovely! 💕 Tell me, do you live with your parents?",
-          "wrong_reply": "Try again. Say: Yes, I have one brother. or No, I don't have any brothers or sisters."
-        },
-        {
-          "question": "Do you live with your parents?",
-          "expected_answers": [
-            "yes i do",
-            "yes",
-            "no i don't",
-            "no",
-            "i live with",
-            "with my parents"
-          ],
-          "good_reply": "Thank you for sharing about your family! Now let's talk about food. 🍕",
-          "wrong_reply": "Try again. Say: Yes, I live with my parents. or No, I don't live with my parents."
+          "good_reply": "Does dooms day exist? ⚠️",
+          "wrong_reply": "Try again. Say: My religion is [religion]."
         }
       ]
     },
     {
-      "title": "🍎 Lesson 3: Food and Drinks",
+      "title": "✈️ Lesson 35: To Go Abroad and To Go Overseas",
       "exchanges": [
         {
-          "question": "What is your favorite food?",
+          "question": "Have you ever been abroad?",
           "expected_answers": [
-            "my favorite food is",
-            "i like",
-            "i love",
-            "favorite",
-            "pizza",
-            "pasta",
-            "rice",
-            "burger",
-            "chicken"
+            "i have never been abroad"
           ],
-          "good_reply": "Yummy! 😋 That sounds delicious! Do you like apples?",
-          "wrong_reply": "Try again. Say: My favorite food is pizza. or I like pasta."
+          "good_reply": "When will you go abroad? 🗓️",
+          "wrong_reply": "Try again. Say: I have never been abroad, or Yes I have."
         },
         {
-          "question": "Do you like apples?",
+          "question": "Are you hoping to travel overseas?",
           "expected_answers": [
-            "yes i like",
-            "yes",
-            "yeah",
-            "no i don't like",
-            "no",
-            "i love apples",
-            "i hate apples"
+            "yes of course"
           ],
-          "good_reply": "Good to know! 🍎 What do you eat for breakfast?",
-          "wrong_reply": "Try again. Say: Yes, I like apples. or No, I don't like apples."
-        },
-        {
-          "question": "What do you eat for breakfast?",
-          "expected_answers": [
-            "i eat",
-            "for breakfast i eat",
-            "cereal",
-            "bread",
-            "eggs",
-            "milk",
-            "coffee",
-            "tea",
-            "toast"
-          ],
-          "good_reply": "That's a healthy breakfast! 💪 Do you like drinking coffee or tea?",
-          "wrong_reply": "Try again. Say: I eat cereal for breakfast. or I eat bread and eggs."
-        },
-        {
-          "question": "Do you like drinking coffee or tea?",
-          "expected_answers": [
-            "coffee",
-            "tea",
-            "i like coffee",
-            "i like tea",
-            "both",
-            "i don't like",
-            "neither"
-          ],
-          "good_reply": "Excellent! ☕ Now let's learn about colors! 🎨",
-          "wrong_reply": "Try again. Say: I like coffee. or I prefer tea. or I don't like both."
+          "good_reply": "Do you hope to live overseas? 🌍",
+          "wrong_reply": "Try again. Say: Yes of course, or No."
         }
       ]
     },
     {
-      "title": "🎨 Lesson 4: Colors and Numbers",
+      "title": "🤕 Lesson 36: Sufferings",
       "exchanges": [
         {
-          "question": "What is your favorite color?",
+          "question": "What is going on? / What is happening to you? / What is wrong with you?",
           "expected_answers": [
-            "my favorite color is",
-            "i like",
-            "i love",
-            "blue",
-            "red",
-            "green",
-            "yellow",
-            "black",
-            "white",
-            "pink",
-            "purple",
-            "orange"
+            "i am sick",
+            "i am ill",
+            "i am not feeling ok",
+            "my leg is paining",
+            "my leg is aching"
           ],
-          "good_reply": "Beautiful choice! 😍 What color is the sky?",
-          "wrong_reply": "Try again. Say: My favorite color is blue. or I like red."
+          "good_reply": "What are you suffering from? 🩺",
+          "wrong_reply": "Try again. Say: I am sick, or My leg is paining."
         },
         {
-          "question": "What color is the sky?",
+          "question": "What are you suffering from?",
           "expected_answers": [
-            "blue",
-            "the sky is blue",
-            "it is blue",
-            "it's blue"
+            "i am suffering from a headache",
+            "suffering from a bellyache",
+            "suffering from painful menses"
           ],
-          "good_reply": "Correct! ☀️ What color are bananas?",
-          "wrong_reply": "Try again. The sky is blue during the day. Say: The sky is blue."
-        },
-        {
-          "question": "What color are bananas?",
-          "expected_answers": [
-            "yellow",
-            "bananas are yellow",
-            "they are yellow",
-            "it's yellow"
-          ],
-          "good_reply": "Perfect! 🍌 How many fingers do you have on one hand?",
-          "wrong_reply": "Try again. Bananas are yellow. Say: Bananas are yellow."
-        },
-        {
-          "question": "How many fingers do you have on one hand?",
-          "expected_answers": [
-            "5",
-            "five",
-            "five fingers",
-            "5 fingers"
-          ],
-          "good_reply": "Very good! 👍 You are learning fast! Let's talk about the weather now. 🌤️",
-          "wrong_reply": "Try again. Count your fingers! Say: I have five fingers on one hand."
+          "good_reply": "Get well soon! 💊",
+          "wrong_reply": "Try again. Say: I am suffering from a headache."
         }
       ]
     },
     {
-      "title": "☀️ Lesson 5: Weather",
+      "title": "🇨🇬 Lesson 37: General Knowledge about Congo",
       "exchanges": [
         {
-          "question": "What is the weather like today?",
+          "question": "Are you a Congolese citizen?",
           "expected_answers": [
-            "sunny",
-            "rainy",
-            "cloudy",
-            "windy",
-            "snowy",
-            "hot",
-            "cold",
-            "warm",
-            "today is",
-            "it is"
+            "yes i am"
           ],
-          "good_reply": "I see! 🌈 Do you like sunny weather?",
-          "wrong_reply": "Try again. Say: Today is sunny. or It is rainy today."
+          "good_reply": "What is the capital city of Congo? 🏙️",
+          "wrong_reply": "Try again. Say: Yes I am."
         },
         {
-          "question": "Do you like sunny weather?",
+          "question": "What is the capital city of Congo?",
           "expected_answers": [
-            "yes i like",
-            "yes",
-            "yeah",
-            "no i don't like",
-            "no",
-            "i love sunny",
-            "i hate sunny"
+            "brazzaville"
           ],
-          "good_reply": "That's interesting! ☀️ Do you like rain?",
-          "wrong_reply": "Try again. Say: Yes, I like sunny weather. or No, I don't like sunny weather."
+          "good_reply": "What is the official language in Congo? 🗣️",
+          "wrong_reply": "Try again. Say: The capital of Congo is Brazzaville."
         },
         {
-          "question": "Do you like rain?",
+          "question": "What are the national languages in Congo?",
           "expected_answers": [
-            "yes i like",
-            "yes",
-            "yeah",
-            "no i don't like",
-            "no",
-            "i love rain",
-            "i hate rain",
-            "sometimes"
+            "lingala and kituba"
           ],
-          "good_reply": "Good to know! 🌧️ Is it hot or cold outside today?",
-          "wrong_reply": "Try again. Say: Yes, I like rain. or No, I don't like rain."
+          "good_reply": "What is the population of Congo? 👥",
+          "wrong_reply": "Try again. Say: Lingala and Kituba."
         },
         {
-          "question": "Is it hot or cold outside today?",
+          "question": "What are the colors of the Congolese flag?",
           "expected_answers": [
-            "hot",
-            "cold",
-            "it is hot",
-            "it is cold",
-            "it's hot",
-            "it's cold",
-            "very hot",
-            "very cold"
+            "green yellow red"
           ],
-          "good_reply": "Thank you for practicing with me! 🎉 You did a great job! Remember to practice every day. Would you like to continue with more lessons? 🚀",
-          "wrong_reply": "Try again. Say: It is hot today. or It is cold outside."
+          "good_reply": "Who is the explorer of Congo? 🧭",
+          "wrong_reply": "Try again. Say: Green, yellow, and red."
+        },
+        {
+          "question": "What is the Congolese currency?",
+          "expected_answers": [
+            "cfa",
+            "c.f.a"
+          ],
+          "good_reply": "Great! You know Congo well! 🇨🇬",
+          "wrong_reply": "Try again. Say: The currency is CFA."
+        }
+      ]
+    },
+    {
+      "title": "👍👎 Lesson 38: Advantages and Disadvantages",
+      "exchanges": [
+        {
+          "question": "What are the advantages and disadvantages of reading a lot?",
+          "expected_answers": [
+            "discover many things",
+            "become knowledgeable",
+            "travel spiritually",
+            "become clever",
+            "become crazy"
+          ],
+          "good_reply": "What are the pros and cons of love? 💕",
+          "wrong_reply": "Try again. Say: Advantages: you discover things. Disadvantages: you can become crazy."
+        }
+      ]
+    },
+    {
+      "title": "❓ Lesson 39: Quiz (General Knowledge Questions)",
+      "exchanges": [
+        {
+          "question": "Who discovered America?",
+          "expected_answers": [
+            "christopher columbus",
+            "christophe colombus"
+          ],
+          "good_reply": "Who created the plane? ✈️",
+          "wrong_reply": "Try again. Say: Christopher Columbus discovered America in 1492."
+        },
+        {
+          "question": "Who created the telephone?",
+          "expected_answers": [
+            "alexander bell"
+          ],
+          "good_reply": "Who made the atomic bomb? 💣",
+          "wrong_reply": "Try again. Say: Alexander Bell created the telephone."
+        },
+        {
+          "question": "Who is the first astronaut?",
+          "expected_answers": [
+            "neil armstrong"
+          ],
+          "good_reply": "Who was the first president of France's Fifth Republic? 🇫🇷",
+          "wrong_reply": "Try again. Say: Neil Armstrong is the first astronaut."
+        },
+        {
+          "question": "Who created the airplane?",
+          "expected_answers": [
+            "orville wright",
+            "wilbur wright",
+            "the wright brothers"
+          ],
+          "good_reply": "Excellent general knowledge! 🎓",
+          "wrong_reply": "Try again. Say: The Wright brothers created the airplane."
+        }
+      ]
+    },
+    {
+      "title": "⏳ Lesson 40: How long... for, since, and ago",
+      "exchanges": [
+        {
+          "question": "How long have you been learning English?",
+          "expected_answers": [
+            "for a long time",
+            "for one month",
+            "for two days",
+            "for three weeks",
+            "for four years",
+            "since long time",
+            "since last month",
+            "since 2005",
+            "since my childhood"
+          ],
+          "good_reply": "How long ago did you visit Oyo? 🗓️",
+          "wrong_reply": "Try again. Say: I have been learning English for [time] or since [date]."
+        },
+        {
+          "question": "How long ago did you visit Oyo?",
+          "expected_answers": [
+            "three years ago"
+          ],
+          "good_reply": "Perfect! You understand 'for', 'since', and 'ago'! ⏰",
+          "wrong_reply": "Try again. Say: I visited [place] [number] years ago."
+        }
+      ]
+    },
+    {
+      "title": "🛒 Lesson 41: Seller and Customer (How much)",
+      "exchanges": [
+        {
+          "question": "How much is it? / How much money is it? / How much does it cost?",
+          "expected_answers": [
+            "it is one hundred",
+            "it is one million",
+            "it is one billion",
+            "it costs one thousand"
+          ],
+          "good_reply": "I am sorry, I am short of money. 💸",
+          "wrong_reply": "Try again. Say: It is [amount], or It costs [amount]."
         }
       ]
     }

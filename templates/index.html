@@ -503,32 +503,59 @@ function escapeHtml(str) {
 
 window.speechSynthesis.onvoiceschanged = () => { getHumanVoice(); };
 
-// ========== LESSONS ==========
-const lessonsData = [
-    { title: '🌍 Greetings & Introductions', level: 'Beginner · A1', text: 'Hello! My name is Anna. I am from France. Nice to meet you! How are you today? I am fine, thank you. This is my friend, John. He is from England.' },
-    { title: '☕ Daily Routines', level: 'Beginner · A2', text: 'Every morning I wake up at seven o\'clock. I brush my teeth, take a shower, and eat breakfast. Then I go to work by bus. In the evening I read a book or watch TV.' },
-    { title: '🛒 Shopping & Food', level: 'Intermediate · B1', text: 'I need to buy some groceries. Can I have a kilo of apples, please? How much does this cost? That is too expensive. Do you have any discounts? I will pay with my credit card.' },
-    { title: '✈️ Travel & Directions', level: 'Intermediate · B1', text: 'Excuse me, where is the train station? Go straight ahead, then turn left at the traffic light. It is next to the big supermarket. Thank you very much! Have a nice day.' },
-];
+// ========== LESSONS (chargement depuis courses.json) ==========
+let coursesData = [];
+
+async function loadCourses() {
+    try {
+        const response = await fetch('/courses');
+        const data = await response.json();
+        coursesData = data.conversations || [];
+        renderLessons();
+        renderPronunciation();
+    } catch (error) {
+        console.error('Erreur chargement courses.json:', error);
+        document.getElementById('lessons-container').innerHTML =
+            '<div class="lesson-card"><p>❌ Error loading lessons. Please check courses.json file.</p></div>';
+    }
+}
+
+function getLessonLevel(title) {
+    if (title.includes('A1') || title.includes('Beginner') || (title.match(/Lesson [1-5]/))) return 'Beginner · A1';
+    if (title.includes('A2')) return 'Elementary · A2';
+    if (title.includes('B1')) return 'Intermediate · B1';
+    if (title.includes('B2')) return 'Upper Intermediate · B2';
+    return 'All levels';
+}
 
 function renderLessons() {
     const container = document.getElementById('lessons-container');
     container.innerHTML = '';
-    lessonsData.forEach((lesson, idx) => {
+
+    if (coursesData.length === 0) {
+        container.innerHTML = '<div class="lesson-card"><p>📚 No lessons available at the moment.</p></div>';
+        return;
+    }
+
+    coursesData.forEach((lesson, idx) => {
         const card = document.createElement('div');
         card.className = 'lesson-card';
+
+        let previewText = lesson.content || '';
+        if (previewText.length > 150) previewText = previewText.substring(0, 150) + '...';
+
         card.innerHTML = `
-            <h3>${lesson.title}</h3>
-            <div class="meta">${lesson.level} · Lesson ${idx+1}</div>
-            <p>${lesson.text}</p>
+            <h3>${escapeHtml(lesson.title)}</h3>
+            <div class="meta">Lesson ${idx+1} · ${getLessonLevel(lesson.title)}</div>
+            <p>${escapeHtml(previewText)}</p>
             <div class="audio-bar">
                 <button onclick="playLessonAudio(${idx})"><i class="fas fa-headphones"></i> Listen to Lesson</button>
-                <button class="secondary" onclick="repeatPhrase(${idx})"><i class="fas fa-redo-alt"></i> Repeat phrase</button>
+                <button class="secondary" onclick="repeatLessonPhrase(${idx})"><i class="fas fa-redo-alt"></i> Repeat phrase</button>
             </div>
             <div class="lesson-progress">
                 <i class="fas fa-chart-line"></i>
-                <div class="bar"><span style="width:${(idx+1)*25}%"></span></div>
-                <span>${(idx+1)*25}%</span>
+                <div class="bar"><span style="width:${Math.min((idx+1) * (100/coursesData.length), 100)}%"></span></div>
+                <span>${Math.round((idx+1) / coursesData.length * 100)}%</span>
             </div>
         `;
         container.appendChild(card);
@@ -536,97 +563,113 @@ function renderLessons() {
 }
 
 function playLessonAudio(idx) {
-    const lesson = lessonsData[idx];
+    const lesson = coursesData[idx];
     if (!lesson) return;
-    speak(lesson.text);
+    speak(lesson.content || lesson.title);
 }
 
-function repeatPhrase(idx) {
-    const lesson = lessonsData[idx];
+function repeatLessonPhrase(idx) {
+    const lesson = coursesData[idx];
     if (!lesson) return;
-    const sentences = lesson.text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const content = lesson.content || '';
+    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
     if (sentences.length) {
         const phrase = sentences[Math.floor(Math.random() * sentences.length)].trim() + '.';
         speak(phrase);
     } else {
-        speak(lesson.text);
+        speak(content.substring(0, 200));
     }
 }
 
-// ========== PRONUNCIATION (from first file) ==========
-const pronData = [
-    { phrase: 'The weather is beautiful today.', tip: 'Focus on the "th" sound — place your tongue between your teeth.' },
-    { phrase: 'I would like a cup of coffee, please.', tip: 'Link "would like" — it sounds like "w’d like".' },
-    { phrase: 'She works at the hospital every morning.', tip: 'The "s" in "works" is pronounced /s/ after a voiceless consonant.' },
-    { phrase: 'Could you tell me where the library is?', tip: 'Rising intonation at the end for polite requests.' },
-];
-
+// ========== PRONUNCIATION (à partir des leçons chargées) ==========
 function renderPronunciation() {
     const container = document.getElementById('pron-container');
     container.innerHTML = '';
-    pronData.forEach((item, idx) => {
+
+    if (coursesData.length === 0) {
+        container.innerHTML = '<div class="pron-card"><p>🎙️ Select a lesson to practice pronunciation.</p></div>';
+        return;
+    }
+
+    // Prendre les 12 premières leçons pour la prononciation
+    const pronLessons = coursesData.slice(0, 12);
+
+    pronLessons.forEach((lesson, idx) => {
+        let phrase = lesson.content || '';
+        const firstSentence = phrase.split(/[.!?]/)[0];
+        phrase = firstSentence.length > 30 ? firstSentence.substring(0, 80) : (phrase.substring(0, 80) || lesson.title);
+
         const card = document.createElement('div');
         card.className = 'pron-card';
         card.innerHTML = `
-            <h3>Phrase ${idx+1}</h3>
-            <div class="phrase">"${escapeHtml(item.phrase)}"</div>
+            <h3>From: ${escapeHtml(lesson.title)}</h3>
+            <div class="phrase">"${escapeHtml(phrase)}..."</div>
             <div class="actions">
-                <button class="btn-listen" onclick="listenPhrase(${idx})"><i class="fas fa-play"></i> Listen</button>
-                <button class="btn-record" onclick="recordPhrase(${idx})"><i class="fas fa-microphone"></i> Record & Compare</button>
+                <button class="btn-listen" onclick="listenPronPhrase('${escapeHtml(phrase).replace(/'/g, "\\'")}')"><i class="fas fa-play"></i> Listen</button>
+                <button class="btn-record" onclick="recordPronPhrase('${escapeHtml(phrase).replace(/'/g, "\\'")}', ${idx})"><i class="fas fa-microphone"></i> Record & Compare</button>
             </div>
             <div class="pron-feedback" id="pron-feedback-${idx}">
-                <i class="fas fa-lightbulb"></i> <strong>Tip:</strong> ${escapeHtml(item.tip)}
+                <i class="fas fa-lightbulb"></i> <strong>Tip:</strong> Listen carefully and try to repeat exactly.
             </div>
         `;
         container.appendChild(card);
     });
 }
 
-function listenPhrase(idx) {
-    const item = pronData[idx];
-    if (item) speak(item.phrase);
+function listenPronPhrase(phrase) {
+    speak(phrase);
 }
 
-async function recordPhrase(idx) {
-    const item = pronData[idx];
-    if (!item) return;
+async function recordPronPhrase(targetPhrase, idx) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) { alert('Recording not supported in this browser.'); return; }
+
     const rec = new SpeechRecognition();
     rec.lang = 'en-US';
     rec.interimResults = false;
     rec.maxAlternatives = 1;
+
     const feedbackDiv = document.getElementById(`pron-feedback-${idx}`);
+    if (!feedbackDiv) return;
+
     feedbackDiv.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> Listening... 🎤`;
+
     rec.onresult = (e) => {
         const userText = e.results[0][0].transcript;
-        const target = item.phrase.toLowerCase().replace(/[^\w\s]/g, '');
+        const target = targetPhrase.toLowerCase().replace(/[^\w\s]/g, '');
         const user = userText.toLowerCase().replace(/[^\w\s]/g, '');
+
         const wordsTarget = target.split(/\s+/);
         const wordsUser = user.split(/\s+/);
         let correct = 0;
         wordsTarget.forEach((w, i) => { if (wordsUser[i] === w) correct++; });
         const accuracy = Math.round((correct / wordsTarget.length) * 100);
+
         let stars = accuracy >= 90 ? '⭐⭐⭐' : accuracy >= 70 ? '⭐⭐' : '⭐';
-        let comment = accuracy >= 90 ? 'Excellent! Very clear.' : accuracy >= 70 ? 'Good job! A little more practice.' : 'Keep trying! Focus on the sounds.';
+        let comment = accuracy >= 90 ? 'Excellent! Very clear pronunciation.' :
+                      accuracy >= 70 ? 'Good job! A little more practice.' :
+                      'Keep trying! Focus on the sounds.';
+
         feedbackDiv.innerHTML = `
             <i class="fas fa-comment-dots"></i> <strong>You said:</strong> "${escapeHtml(userText)}"<br>
             <i class="fas fa-chart-simple"></i> <strong>Accuracy:</strong> ${stars} (${accuracy}%)<br>
             <i class="fas fa-smile-wink"></i> ${comment}<br>
-            <i class="fas fa-lightbulb"></i> <strong>Tip:</strong> ${item.tip}
+            <i class="fas fa-lightbulb"></i> <strong>Target:</strong> "${escapeHtml(targetPhrase)}"
         `;
     };
-    rec.onerror = () => { feedbackDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Microphone error. Please try again.<br><i class="fas fa-lightbulb"></i> <strong>Tip:</strong> ${item.tip}`; };
+
+    rec.onerror = () => {
+        feedbackDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Microphone error. Please try again.<br><i class="fas fa-lightbulb"></i> <strong>Target:</strong> "${escapeHtml(targetPhrase)}"`;
+    };
+
     rec.start();
 }
 
 // ========== INIT ==========
-renderLessons();
-renderPronunciation();
-
 document.addEventListener('DOMContentLoaded', () => {
+    loadCourses();
     const chat = document.getElementById('chat-box');
-    const userName = document.querySelector('.header-text p')?.innerText?.replace('Connected as: ', '') || 'student';
+    const userName = document.querySelector('.header-text p')?.innerText?.replace('Connected as: ', '').replace(' · Your personal AI tutor', '') || 'student';
     chat.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Hello ${escapeHtml(userName)}! I'm your AI tutor. Ask me anything or choose a lesson from the menu. 🚀</div>`;
 });
 </script>
