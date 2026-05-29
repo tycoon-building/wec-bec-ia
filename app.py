@@ -94,10 +94,10 @@ class A1ConversationManager:
 
             self.user_sessions[user_email] = {
                 "current_conversation_index": 0,
-                "current_step": 1,  # Déjà à l'étape 1 car on a envoyé la question
+                "current_step": 1,
                 "current_attempts": 0,
                 "conversation_history": [],
-                "waiting_for_answer": True,  # En attente d'une réponse
+                "waiting_for_answer": True,
                 "current_question": first_question
             }
 
@@ -113,7 +113,6 @@ class A1ConversationManager:
         # Si l'utilisateur envoie un message et qu'on attend sa réponse
         if user_answer is not None:
             if not session_data.get("waiting_for_answer", False):
-                # Ce cas ne devrait plus arriver normalement
                 current_q = session_data.get("current_question", "Please answer the question.")
                 return {
                     "reply": f"👋 {current_q}",
@@ -124,9 +123,7 @@ class A1ConversationManager:
 
             current_conv_index = session_data["current_conversation_index"]
             current_step = session_data["current_step"]
-            current_question_data = session_data.get("current_question_data", {})
 
-            # Vérifier si on a fini toutes les conversations
             if current_conv_index >= len(A1_CONVERSATIONS):
                 return {
                     "reply": "🎉 Congratulations! You've completed all A1 conversations! Type 'reset' to start over.",
@@ -137,10 +134,8 @@ class A1ConversationManager:
             conversation = A1_CONVERSATIONS[current_conv_index]
             exchanges = conversation.get("exchanges", [])
 
-            # La question à vérifier est à l'index current_step - 1
             question_index = current_step - 1
             if question_index >= len(exchanges):
-                # On a fini cette conversation, passer à la suivante
                 session_data["current_conversation_index"] += 1
                 session_data["current_step"] = 1
                 session_data["current_attempts"] = 0
@@ -153,7 +148,6 @@ class A1ConversationManager:
                         "repeat_question": False
                     }
 
-                # Charger la nouvelle conversation
                 new_conv = A1_CONVERSATIONS[session_data["current_conversation_index"]]
                 new_exchange = new_conv.get("exchanges", [])[0]
                 new_question = new_exchange.get("question", "")
@@ -170,7 +164,6 @@ class A1ConversationManager:
                     "repeat_question": False
                 }
 
-            # Vérifier la réponse de l'utilisateur
             current_exchange = exchanges[question_index]
             expected_answers = current_exchange.get("expected_answers", [])
             good_reply = current_exchange.get("good_reply", "Good job! 👍")
@@ -193,27 +186,23 @@ class A1ConversationManager:
                     "question_to_repeat": current_exchange.get("question", "")
                 }
 
-            # Réponse correcte - passer à l'étape suivante
             session_data["current_attempts"] = 0
             session_data["current_step"] += 1
             session_data["waiting_for_answer"] = True
             current_step = session_data["current_step"]
 
-            # Vérifier si on a fini cette conversation
             if current_step > len(exchanges):
-                # Passer à la conversation suivante automatiquement
                 session_data["current_conversation_index"] += 1
                 session_data["current_step"] = 1
 
                 if session_data["current_conversation_index"] >= len(A1_CONVERSATIONS):
                     session_data["waiting_for_answer"] = False
                     return {
-                        "reply": f"{good_reply}\n\n🎉 Félicitations! You have completed all A1 conversations! 🎉\n\nType 'reset' to start over or continue with the AI assistant.",
+                        "reply": f"{good_reply}\n\n🎉 Félicitations! You have completed all A1 conversations! 🎉\n\nType 'reset' to start over.",
                         "conversation_end": True,
                         "repeat_question": False
                     }
 
-                # Charger la nouvelle conversation
                 new_conv = A1_CONVERSATIONS[session_data["current_conversation_index"]]
                 new_exchange = new_conv.get("exchanges", [])[0]
                 new_question = new_exchange.get("question", "")
@@ -230,7 +219,6 @@ class A1ConversationManager:
                     "repeat_question": False
                 }
 
-            # Continuer avec la question suivante dans la même conversation
             next_exchange = exchanges[current_step - 1]
             next_question = next_exchange.get("question", "")
             next_expected = next_exchange.get("expected_answers", [])
@@ -245,7 +233,6 @@ class A1ConversationManager:
                 "repeat_question": False
             }
 
-        # Si on arrive ici, c'est qu'on demande la question actuelle (pas de user_answer)
         if session_data.get("waiting_for_answer", False):
             current_q = session_data.get("current_question", "")
             if current_q:
@@ -256,7 +243,6 @@ class A1ConversationManager:
                     "question_to_repeat": current_q
                 }
 
-        # Fallback: renvoyer la première question
         if A1_CONVERSATIONS:
             conv = A1_CONVERSATIONS[0]
             exch = conv.get("exchanges", [])[0]
@@ -280,10 +266,8 @@ class A1ConversationManager:
         return None
 
     def reset_user(self, user_email):
-        """Réinitialise complètement la progression de l'utilisateur"""
         if user_email in self.user_sessions:
             del self.user_sessions[user_email]
-        # Recréer la session avec la première question
         self.get_next_question(user_email)
         return True
 
@@ -331,6 +315,14 @@ class A1ConversationManager:
                 "current_attempts": session_data.get("current_attempts", 0)
             }
         return None
+
+
+# =========================
+# 🗣️ INITIALISATION DU GESTIONNAIRE A1
+# =========================
+a1_manager = A1ConversationManager()
+
+
 # =========================
 # 🤖 OPENROUTER CONFIG
 # =========================
@@ -420,7 +412,8 @@ def chat():
             progress = a1_manager.get_progress(user_email)
             if progress:
                 return jsonify({
-                                   "reply": f"📊 **Your A1 Progress**:\n📚 {progress['conversation_title']}\nConversation {progress['current_conversation']}/{progress['total_conversations']}\nProgress: {progress['progress_percent']:.1f}%\n\nCommands:\n- 'reset' to start over\n- 'menu' for this menu\n- 'hint' for a hint"})
+                    "reply": f"📊 **Your A1 Progress**:\n📚 {progress['conversation_title']}\nConversation {progress['current_conversation']}/{progress['total_conversations']}\nProgress: {progress['progress_percent']:.1f}%\n\nCommands:\n- 'reset' to start over\n- 'menu' for this menu\n- 'hint' for a hint"
+                })
             return jsonify({"reply": "No A1 conversations loaded."})
 
         if message.lower() == "hint":
@@ -429,7 +422,7 @@ def chat():
 
         if message.lower() == "reset":
             a1_manager.reset_user(user_email)
-            result = a1_manager.get_next_question(user_email)
+            result = a1_manager.get_next_question(user_email, None)
             return jsonify({"reply": result["reply"] if result else "Conversation reset! Type anything to start."})
 
         # Normal A1 conversation
