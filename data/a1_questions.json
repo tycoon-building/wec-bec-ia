@@ -5,42 +5,71 @@
       "exchanges": [
         {
           "question": "May I know your name?",
-          "expected_answers": [
-            "yes you may",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Yes, you may. My name is John.",
+          "accepted_topics": [
+            "name",
             "my name is",
-            "my name's"
+            "my name's",
+            "yes",
+            "i am"
           ],
+          "expected_answers": [],
           "good_reply": "Nice! Can you introduce yourself please? 😊",
-          "wrong_reply": "Try again. Say: Yes, you may. My name is [name]."
+          "wrong_reply": "The question asks for your name. Example: 'My name is John.' Please try again."
         },
         {
           "question": "Could you introduce your friend to me?",
-          "expected_answers": [
-            "yes i could",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Yes, I could. This is my friend, Mr. Smith.",
+          "accepted_topics": [
             "this is",
-            "this is my friend"
+            "my friend",
+            "meet",
+            "introduce",
+            "yes"
           ],
-          "good_reply": "What is her name? (for a girl) / What is his name? (for a boy) 👤",
-          "wrong_reply": "Try again. Say: Yes I could, this is Mr./Ms. [name]."
+          "expected_answers": [],
+          "good_reply": "Great! Now tell me about your friend. 👤",
+          "wrong_reply": "Try to introduce your friend. Example: 'Yes, I could. This is my friend [name].'"
         },
         {
           "question": "What is her name?",
-          "expected_answers": [
-            "her name is"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Her name is Sarah.",
+          "accepted_topics": [
+            "her name",
+            "she is",
+            "her name's",
+            "she"
           ],
+          "expected_answers": [],
           "good_reply": "What is his name? 👤",
-          "wrong_reply": "Try again. Say: Her name is [name]."
+          "wrong_reply": "The question asks for her name. Example: 'Her name is Sarah.'"
         },
         {
           "question": "What is his name?",
-          "expected_answers": [
-            "his name is"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "His name is John.",
+          "accepted_topics": [
+            "his name",
+            "he is",
+            "his name's",
+            "he"
           ],
-          "good_reply": "I am glad/happy/delighted/pleased to meet you! 🎉",
-          "wrong_reply": "Try again. Say: His name is [name]."
+          "expected_answers": [],
+          "good_reply": "I am glad to meet you! 🎉",
+          "wrong_reply": "The question asks for his name. Example: 'His name is John.'"
         },
         {
           "question": "How do you say 'Enchanté' in English?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
             "nice to meet you",
             "nice to meet you too",
@@ -51,43 +80,47 @@
             "it was a big pleasure to know you"
           ],
           "good_reply": "Excellent! You've mastered introductions! 🎯",
-          "wrong_reply": "Try again. Say: Nice to meet you, or Me too."
+          "wrong_reply": "Try again. Say: 'Nice to meet you' or 'Me too.'"
         }
       ]
     },
     {
-      "title": "😊 Lesson 7: Expressing Feelings (Extremely, Entirely, Really)",
+      "title": "😊 Lesson 7: Expressing Feelings",
       "exchanges": [
         {
           "question": "What are your feelings about WEC-BEC?",
-          "expected_answers": [
-            "the best center",
-            "i am so happy",
-            "i am very happy",
-            "i am highly happy",
-            "i am hugely happy",
-            "i am immensely cheery",
-            "i am so merry",
-            "i am enormously glad",
-            "i am fully joyful",
-            "i am majorly cheerful",
-            "i am entirely delighted",
-            "i am so ecstatic",
-            "i am filled with joy",
-            "i am so excited"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "For me, WEC-BEC is the best center. I am so happy to be here.",
+          "accepted_topics": [
+            "happy",
+            "best",
+            "good",
+            "center",
+            "feel",
+            "love",
+            "like",
+            "great"
           ],
+          "expected_answers": [],
           "good_reply": "Are you happy to be here at WEC-BEC? 🏆",
-          "wrong_reply": "Try again. Say: I am very happy, or I am so excited."
+          "wrong_reply": "Tell me how you feel about WEC-BEC. Example: 'I am very happy to be here.'"
         },
         {
           "question": "Are you happy to be here at WEC-BEC?",
-          "expected_answers": [
-            "of course",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Of course, I am so happy to be here at WEC-BEC.",
+          "accepted_topics": [
             "yes",
-            "i am so happy"
+            "happy",
+            "of course",
+            "sure",
+            "absolutely"
           ],
+          "expected_answers": [],
           "good_reply": "Me too! Let's continue learning! 📚",
-          "wrong_reply": "Try again. Say: Of course, I am so happy to be here."
+          "wrong_reply": "Answer the question. Example: 'Yes, I am very happy to be here.'"
         }
       ]
     },
@@ -96,43 +129,63 @@
       "exchanges": [
         {
           "question": "What do you mean by that?",
-          "expected_answers": [
-            "i mean"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I mean that English is very important.",
+          "accepted_topics": [
+            "mean",
+            "i mean",
+            "it means"
           ],
+          "expected_answers": [],
           "good_reply": "What does pawpaw mean in French? 🍈",
-          "wrong_reply": "Try again. Say: I mean [explanation]."
+          "wrong_reply": "Explain what you mean. Example: 'I mean [explanation].'"
         },
         {
           "question": "What does pawpaw mean in French?",
+          "validation_type": "translation",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
-            "pawpaw means la papaye"
+            "papaye",
+            "la papaye"
           ],
           "good_reply": "What is the meaning of 'host family' in French? 🏠",
-          "wrong_reply": "Try again. Say: Pawpaw means 'la papaye' in French."
+          "wrong_reply": "Try again. 'Pawpaw' means 'la papaye' in French."
         },
         {
           "question": "What is the meaning of 'host family' in French?",
+          "validation_type": "translation",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
             "famille d'accueil"
           ],
           "good_reply": "How do you say 'le riz' in English? 🍚",
-          "wrong_reply": "Try again. Say: The meaning of host family in French is 'famille d'accueil'."
+          "wrong_reply": "Try again. 'Host family' means 'famille d'accueil' in French."
         },
         {
           "question": "How do you say 'le riz' in English?",
+          "validation_type": "translation",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
             "rice"
           ],
           "good_reply": "What does WEC-BEC stand for? 🏫",
-          "wrong_reply": "Try again. Say: It is rice in English."
+          "wrong_reply": "Try again. 'Le riz' is 'rice' in English."
         },
         {
           "question": "What does WEC-BEC stand for?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
-            "foreign languages training center"
+            "world english club, basic english center",
+            "world english club basic english center"
           ],
           "good_reply": "Perfect! You understand translations well! 🌟",
-          "wrong_reply": "Try again. Say: WEC-BEC stands for Foreign Languages Training Center."
+          "wrong_reply": "Try again. WEC-BEC stands for 'world english club, basic english center.'"
         }
       ]
     },
@@ -141,11 +194,15 @@
       "exchanges": [
         {
           "question": "How do you say 'fat' in French?",
+          "validation_type": "translation",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
-            "gros"
+            "gros",
+            "grosse"
           ],
           "good_reply": "Great job! Keep asking questions! 🦋",
-          "wrong_reply": "Try again. Say: It is 'gros' in French."
+          "wrong_reply": "Try again. 'Fat' in French is 'gros.'"
         }
       ]
     },
@@ -154,13 +211,22 @@
       "exchanges": [
         {
           "question": "Can you tell me about the different uses of 'il y a', 'il y avait', and 'il y aura'?",
-          "expected_answers": [
-            "present tense there is there are",
-            "past tense there was there were",
-            "future tense there will be"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "In the present tense we use 'there is' and 'there are'. In the past tense we use 'there was' and 'there were'. In the future tense we use 'there will be'.",
+          "accepted_topics": [
+            "present",
+            "past",
+            "future",
+            "there is",
+            "there are",
+            "there was",
+            "there were",
+            "there will be"
           ],
+          "expected_answers": [],
           "good_reply": "Give me an example with 'there is'! ✨",
-          "wrong_reply": "Try again. Explain: Present = there is/are, Past = there was/were, Future = there will be."
+          "wrong_reply": "Explain the three tenses. Example: 'Present = there is/are, Past = there was/were, Future = there will be.'"
         }
       ]
     },
@@ -169,12 +235,16 @@
       "exchanges": [
         {
           "question": "What's the difference between 'a' and 'an'?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
             "a before consonants",
-            "an before vowels"
+            "an before vowels",
+            "a is used before consonant sounds and an before vowel sounds"
           ],
           "good_reply": "Perfect! Give me an example with 'a'. 📝",
-          "wrong_reply": "Try again. Say: We use 'a' before consonants and 'an' before vowels."
+          "wrong_reply": "Try again. Say: 'We use 'a' before consonants and 'an' before vowels.'"
         }
       ]
     },
@@ -182,13 +252,17 @@
       "title": "📍 Lesson 12: Difference between 'At' and 'To'",
       "exchanges": [
         {
-          "question": "What's the dichotomy between 'at' and 'to'?",
+          "question": "What's the difference between 'at' and 'to'?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
-            "at if no movement",
-            "to if movement"
+            "at is used when there is no movement",
+            "to is used when there is movement",
+            "at for static position to for direction"
           ],
           "good_reply": "Correct! Give me an example with 'at'. 🏠",
-          "wrong_reply": "Try again. Say: 'At' is for no movement, 'To' is for movement."
+          "wrong_reply": "Try again. Say: 'At' is for no movement, 'To' is for movement/direction."
         }
       ]
     },
@@ -197,29 +271,40 @@
       "exchanges": [
         {
           "question": "When do we use the possessive case?",
-          "expected_answers": [
-            "to express possession",
-            "to express ownership",
-            "possessor apostrophe s"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "We use the possessive case to express possession or ownership.",
+          "accepted_topics": [
+            "possession",
+            "ownership",
+            "belongs to",
+            "possessive"
           ],
+          "expected_answers": [],
           "good_reply": "How do you say 'the house of Greg' using possessive case? 🏡",
-          "wrong_reply": "Try again. Say: We use possessive case to express possession or ownership."
+          "wrong_reply": "Explain when to use the possessive case. Example: 'To show possession or ownership.'"
         },
         {
           "question": "How do you say 'the house of Greg' in possessive case?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
             "greg's house"
           ],
           "good_reply": "What about plural? How do you say 'the house of the Gregs'? 👨‍👩‍👧‍👦",
-          "wrong_reply": "Try again. Say: Greg's house."
+          "wrong_reply": "Try again. 'Greg's house' is the correct possessive form."
         },
         {
           "question": "How do you say 'the house of the Gregs' in possessive case (plural)?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
             "gregs' house"
           ],
           "good_reply": "Excellent! You've mastered possessive case! 🎉",
-          "wrong_reply": "Try again. For plural, put apostrophe after 's': Gregs' house."
+          "wrong_reply": "For plural, put apostrophe after 's': 'Gregs' house'."
         }
       ]
     },
@@ -227,20 +312,22 @@
       "title": "⏰ Lesson 14: Telling the Time",
       "exchanges": [
         {
-          "question": "What time is it? / What time do you make it? / What time do you have? / What's the time?",
-          "expected_answers": [
-            "it's three o'clock",
-            "it's three sharp",
-            "it's ten past three",
-            "it's ten after three",
-            "it's a quarter past three",
-            "it's half past three",
-            "it's ten to four",
-            "it's a quarter to four",
-            "it's three ten minutes"
+          "question": "What time is it?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "It's three o'clock.",
+          "accepted_topics": [
+            "o'clock",
+            "past",
+            "to",
+            "half",
+            "quarter",
+            "hour",
+            "minute"
           ],
+          "expected_answers": [],
           "good_reply": "Perfect! Now you can tell time in English! 🕐",
-          "wrong_reply": "Try again. Say: It's [number] o'clock, or It's [minutes] past [hour]."
+          "wrong_reply": "Tell the current time. Example: 'It's [number] o'clock' or 'It's [minutes] past [hour].'"
         }
       ]
     },
@@ -249,48 +336,72 @@
       "exchanges": [
         {
           "question": "How did you spend your night?",
-          "expected_answers": [
-            "i spent an awful night"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I spent a good night.",
+          "accepted_topics": [
+            "slept",
+            "night",
+            "spent",
+            "good",
+            "bad",
+            "awful"
           ],
+          "expected_answers": [],
           "good_reply": "What was our last lesson about? 📚",
-          "wrong_reply": "Try again. Say: I spent an awful / good night."
+          "wrong_reply": "Tell me about your night. Example: 'I spent a good night.'"
         },
         {
           "question": "What is a decade?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
-            "a period of ten years"
+            "a period of ten years",
+            "ten years"
           ],
           "good_reply": "What is a century? 📅",
-          "wrong_reply": "Try again. Say: A decade is a period of ten years."
+          "wrong_reply": "Try again. A decade is a period of ten years."
         },
         {
           "question": "What is a century?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
-            "a period of one hundred years"
+            "a period of one hundred years",
+            "one hundred years",
+            "100 years"
           ],
           "good_reply": "How many seasons are there in Europe? 🌍",
-          "wrong_reply": "Try again. Say: A century is a period of one hundred years."
+          "wrong_reply": "Try again. A century is a period of one hundred years."
         },
         {
           "question": "How many seasons are there in Europe?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
+            "four",
             "4 seasons",
-            "four seasons",
-            "winter autumn spring summer"
+            "winter spring summer autumn",
+            "winter spring summer fall"
           ],
           "good_reply": "How many seasons are there in central Africa? ☀️",
-          "wrong_reply": "Try again. Say: There are 4 seasons in Europe: Winter, Autumn, Spring, Summer."
+          "wrong_reply": "Try again. There are 4 seasons in Europe: Winter, Spring, Summer, Autumn."
         },
         {
           "question": "How many seasons are there in central Africa?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
+            "two",
             "2 seasons",
-            "two seasons",
-            "dry season",
-            "rain season"
+            "dry season and rainy season"
           ],
           "good_reply": "Great revision! Keep practicing! 🎯",
-          "wrong_reply": "Try again. Say: There are 2 seasons in central Africa: dry season and rain season."
+          "wrong_reply": "Try again. There are 2 seasons in central Africa: dry season and rainy season."
         }
       ]
     },
@@ -299,35 +410,63 @@
       "exchanges": [
         {
           "question": "What is your full name?",
-          "expected_answers": [
-            "my full name is"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My full name is John Smith.",
+          "accepted_topics": [
+            "my name",
+            "full name",
+            "i am",
+            "call me"
           ],
+          "expected_answers": [],
           "good_reply": "How do you spell your name? 🔤",
-          "wrong_reply": "Try again. Say: My full name is [first name + last name]."
+          "wrong_reply": "Tell me your full name. Example: 'My full name is [first name + last name].'"
         },
         {
           "question": "How do you spell your name?",
-          "expected_answers": [
-            "i spell my name"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I spell my name T-Y-C-O-O-N.",
+          "accepted_topics": [
+            "spell",
+            "letters",
+            "i spell"
           ],
+          "expected_answers": [],
           "good_reply": "What is your email address? 📧",
-          "wrong_reply": "Try again. Say: I spell my name [letters]."
+          "wrong_reply": "Spell your name letter by letter. Example: 'I spell my name J-O-H-N.'"
         },
         {
           "question": "What is your email address?",
-          "expected_answers": [
-            "my email address is"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My email address is john.smith@gmail.com.",
+          "accepted_topics": [
+            "email",
+            "@",
+            "dot com",
+            "gmail",
+            "yahoo"
           ],
-          "good_reply": "What is your dwelling place / address? 🏠",
-          "wrong_reply": "Try again. Say: My email address is [email]."
+          "expected_answers": [],
+          "good_reply": "What is your phone number? 📱",
+          "wrong_reply": "Give me your email address. Example: 'My email address is [email].'"
         },
         {
           "question": "What is your phone number?",
-          "expected_answers": [
-            "my phone number is"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My phone number is 06-488-69-23.",
+          "accepted_topics": [
+            "phone",
+            "number",
+            "call",
+            "contact"
           ],
+          "expected_answers": [],
           "good_reply": "Perfect! Now I can contact you! 📱",
-          "wrong_reply": "Try again. Say: My phone number is [number]."
+          "wrong_reply": "Give me your phone number. Example: 'My phone number is [number].'"
         }
       ]
     },
@@ -336,38 +475,68 @@
       "exchanges": [
         {
           "question": "Where are you coming from now?",
-          "expected_answers": [
-            "i am coming from home",
-            "i am coming from the center"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am coming from home.",
+          "accepted_topics": [
+            "coming from",
+            "home",
+            "school",
+            "work",
+            "center",
+            "church",
+            "market"
           ],
+          "expected_answers": [],
           "good_reply": "Where were you? 📍",
-          "wrong_reply": "Try again. Say: I am coming from [place]."
+          "wrong_reply": "Tell me where you are coming from. Example: 'I am coming from [place].'"
         },
         {
-          "question": "Where were you? / Where have you been?",
-          "expected_answers": [
-            "i was at school",
-            "i have been at my sister's house"
+          "question": "Where were you?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I was at school.",
+          "accepted_topics": [
+            "was at",
+            "school",
+            "home",
+            "work",
+            "hospital",
+            "church"
           ],
+          "expected_answers": [],
           "good_reply": "What is your nationality? 🌍",
-          "wrong_reply": "Try again. Say: I was at [place]."
+          "wrong_reply": "Tell me where you were. Example: 'I was at [place].'"
         },
         {
           "question": "What is your nationality?",
-          "expected_answers": [
-            "i am congolese by birth",
-            "i am congolese"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am Congolese.",
+          "accepted_topics": [
+            "congolese",
+            "nationality",
+            "i am from",
+            "citizen"
           ],
+          "expected_answers": [],
           "good_reply": "Where do you come from? 🗺️",
-          "wrong_reply": "Try again. Say: I am [nationality] by birth."
+          "wrong_reply": "Tell me your nationality. Example: 'I am [nationality].'"
         },
         {
-          "question": "Where do you hail from?",
-          "expected_answers": [
-            "i hail from congo"
+          "question": "Where do you come from?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I come from Congo.",
+          "accepted_topics": [
+            "come from",
+            "congo",
+            "country",
+            "i am from"
           ],
-          "good_reply": "What is your ethnic group / tribe? 👥",
-          "wrong_reply": "Try again. Say: I hail from [country]."
+          "expected_answers": [],
+          "good_reply": "What is your ethnic group? 👥",
+          "wrong_reply": "Tell me where you are from. Example: 'I come from [country].'"
         }
       ]
     },
@@ -375,24 +544,34 @@
       "title": "🎂 Lesson 18: Age",
       "exchanges": [
         {
-          "question": "How old are you? / What's your age?",
-          "expected_answers": [
-            "i am twenty-six",
-            "i am 18 years old",
-            "i am a twenty year old boy",
-            "i am a twenty year old girl",
-            "i am eighteen years of age"
+          "question": "How old are you?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am 20 years old.",
+          "accepted_topics": [
+            "years old",
+            "age",
+            "i am"
           ],
-          "good_reply": "What's the age gap between you and your brother? 👨‍👦",
-          "wrong_reply": "Try again. Say: I am [number] years old."
+          "expected_answers": [],
+          "good_reply": "What is the age gap between you and your brother? 👨‍👦",
+          "wrong_reply": "Tell me your age. Example: 'I am [number] years old.'"
         },
         {
-          "question": "What's the age gap between you and your brother?",
-          "expected_answers": [
-            "we have the age gap of three years"
+          "question": "What is the age gap between you and your brother?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "We have an age gap of three years.",
+          "accepted_topics": [
+            "gap",
+            "years",
+            "older",
+            "younger",
+            "difference"
           ],
+          "expected_answers": [],
           "good_reply": "Great! Now I know your age! 🎉",
-          "wrong_reply": "Try again. Say: We have the age gap of [number] years."
+          "wrong_reply": "Tell me the difference in age. Example: 'We have an age gap of [number] years.'"
         }
       ]
     },
@@ -401,35 +580,68 @@
       "exchanges": [
         {
           "question": "When were you born?",
-          "expected_answers": [
-            "i was born in 1989"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I was born in 2000.",
+          "accepted_topics": [
+            "born in",
+            "i was born",
+            "year"
           ],
+          "expected_answers": [],
           "good_reply": "Where were you born? 🏥",
-          "wrong_reply": "Try again. Say: I was born in [year]."
+          "wrong_reply": "Tell me your birth year. Example: 'I was born in [year].'"
         },
         {
           "question": "Where were you born?",
-          "expected_answers": [
-            "i was born in brazzaville"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I was born in Brazzaville.",
+          "accepted_topics": [
+            "born in",
+            "city",
+            "town",
+            "village",
+            "brazzaville",
+            "oyo"
           ],
+          "expected_answers": [],
           "good_reply": "When is your birthday? 🎂",
-          "wrong_reply": "Try again. Say: I was born in [city]."
+          "wrong_reply": "Tell me your birth place. Example: 'I was born in [city].'"
         },
         {
           "question": "When is your birthday?",
-          "expected_answers": [
-            "my birthday is in august"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My birthday is in August.",
+          "accepted_topics": [
+            "birthday",
+            "month",
+            "january",
+            "february",
+            "august"
           ],
+          "expected_answers": [],
           "good_reply": "Where did you grow up? 🌱",
-          "wrong_reply": "Try again. Say: My birthday is in [month]."
+          "wrong_reply": "Tell me your birthday month. Example: 'My birthday is in [month].'"
         },
         {
           "question": "Who brought you up?",
-          "expected_answers": [
-            "my grand mother"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My grandmother brought me up.",
+          "accepted_topics": [
+            "grandmother",
+            "grandfather",
+            "parents",
+            "mother",
+            "father",
+            "aunt",
+            "uncle"
           ],
+          "expected_answers": [],
           "good_reply": "Thank you for sharing! 💕",
-          "wrong_reply": "Try again. Say: My [grand mother/father/parents] brought me up."
+          "wrong_reply": "Tell me who raised you. Example: 'My [grandmother/parents] brought me up.'"
         }
       ]
     },
@@ -438,13 +650,37 @@
       "exchanges": [
         {
           "question": "What position are you in your family?",
-          "expected_answers": [
-            "i am the eldest",
-            "i am the last but one",
-            "i am the last"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am the eldest.",
+          "accepted_topics": [
+            "eldest",
+            "last",
+            "first",
+            "second",
+            "youngest",
+            "position",
+            "child"
           ],
+          "expected_answers": [],
           "good_reply": "How many are you in your family? 👨‍👩‍👧‍👦",
-          "wrong_reply": "Try again. Say: I am the eldest, or I am the last, or I am the last but one."
+          "wrong_reply": "Tell me your birth order. Example: 'I am the eldest' or 'I am the last child.'"
+        },
+        {
+          "question": "How many are you in your family?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "We are seven in our family.",
+          "accepted_topics": [
+            "we are",
+            "family",
+            "brothers",
+            "sisters",
+            "children"
+          ],
+          "expected_answers": [],
+          "good_reply": "Thank you for sharing about your family! 💕",
+          "wrong_reply": "Tell me the size of your family. Example: 'We are [number] in our family.'"
         }
       ]
     },
@@ -453,34 +689,53 @@
       "exchanges": [
         {
           "question": "What is your marital status?",
-          "expected_answers": [
-            "i am a single",
-            "i am single",
-            "i am married",
-            "i am divorced"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am single.",
+          "accepted_topics": [
+            "single",
+            "married",
+            "divorced",
+            "engaged",
+            "widowed"
           ],
+          "expected_answers": [],
           "good_reply": "Are you engaged to someone? 💑",
-          "wrong_reply": "Try again. Say: I am single / married / divorced."
+          "wrong_reply": "Tell me if you are single, married, or divorced. Example: 'I am single.'"
         },
         {
           "question": "Are you engaged to someone?",
-          "expected_answers": [
-            "i am engaged to",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "No, I am not engaged.",
+          "accepted_topics": [
             "yes",
-            "no"
+            "no",
+            "engaged",
+            "fiance",
+            "fiancee"
           ],
+          "expected_answers": [],
           "good_reply": "Have you got a boyfriend or girlfriend? 💕",
-          "wrong_reply": "Try again. Say: I am engaged to [name], or No, I am not."
+          "wrong_reply": "Answer yes or no. Example: 'Yes, I am engaged to [name]' or 'No, I am not.'"
         },
         {
           "question": "Have you got a boyfriend or girlfriend?",
-          "expected_answers": [
-            "no i haven't",
-            "i am free",
-            "yes i have"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "No, I haven't. I am free.",
+          "accepted_topics": [
+            "yes",
+            "no",
+            "boyfriend",
+            "girlfriend",
+            "partner",
+            "single",
+            "free"
           ],
+          "expected_answers": [],
           "good_reply": "Are you faithful to your partner? 💖",
-          "wrong_reply": "Try again. Say: Yes I have, or No I haven't, I am free."
+          "wrong_reply": "Tell me about your relationship status. Example: 'Yes, I have a girlfriend' or 'No, I am single.'"
         }
       ]
     },
@@ -489,37 +744,87 @@
       "exchanges": [
         {
           "question": "How many days are there in the week?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
-            "seven days",
-            "7 days"
+            "seven",
+            "7",
+            "seven days"
           ],
           "good_reply": "How many weeks are there in the month? 📅",
-          "wrong_reply": "Try again. Say: There are seven days in the week."
+          "wrong_reply": "Try again. There are seven days in the week."
         },
         {
           "question": "How many weeks are there in the month?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
-            "4 weeks",
+            "four",
+            "4",
             "four weeks"
           ],
           "good_reply": "How many months are there in the year? 🗓️",
-          "wrong_reply": "Try again. Say: There are 4 weeks in the month."
+          "wrong_reply": "Try again. There are 4 weeks in a month."
         },
         {
-          "question": "What is the date today? / What's today's date?",
+          "question": "How many months are there in the year?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
-            "today is monday july 3rd"
+            "twelve",
+            "12",
+            "twelve months"
           ],
+          "good_reply": "How many days are there in the year? 📆",
+          "wrong_reply": "Try again. There are 12 months in a year."
+        },
+        {
+          "question": "How many days are there in the year?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
+          "expected_answers": [
+            "three hundred sixty five",
+            "365"
+          ],
+          "good_reply": "What is the date today? 🗓️",
+          "wrong_reply": "Try again. There are 365 days in a year."
+        },
+        {
+          "question": "What is the date today?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Today is Monday, July 3rd.",
+          "accepted_topics": [
+            "today",
+            "date",
+            "monday",
+            "tuesday",
+            "january",
+            "february",
+            "1st",
+            "2nd",
+            "3rd"
+          ],
+          "expected_answers": [],
           "good_reply": "What was the date yesterday? ⏪",
-          "wrong_reply": "Try again. Say: Today is [day, month date]."
+          "wrong_reply": "Tell me today's date. Example: 'Today is [day], [month] [date].'"
         },
         {
-          "question": "What will be the date tomorrow?",
-          "expected_answers": [
-            "tomorrow will be sunday 4th"
+          "question": "What was the date yesterday?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Yesterday was Tuesday, July 2nd.",
+          "accepted_topics": [
+            "yesterday",
+            "date"
           ],
-          "good_reply": "Perfect! You understand dates! 📅",
-          "wrong_reply": "Try again. Say: Tomorrow will be [day, month date]."
+          "expected_answers": [],
+          "good_reply": "What will be the date tomorrow? ⏩",
+          "wrong_reply": "Tell me yesterday's date. Example: 'Yesterday was [day], [month] [date].'"
         }
       ]
     },
@@ -527,14 +832,25 @@
       "title": "🏖️ Lesson 23: Free Time and Holidays",
       "exchanges": [
         {
-          "question": "What do you do during your holidays / vacations / free time / day off?",
-          "expected_answers": [
-            "i travel",
-            "i surf",
-            "i read"
+          "question": "What do you do during your free time?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "During my free time I read books.",
+          "accepted_topics": [
+            "read",
+            "watch",
+            "play",
+            "listen",
+            "travel",
+            "sleep",
+            "eat",
+            "sport",
+            "music",
+            "movie"
           ],
+          "expected_answers": [],
           "good_reply": "That sounds fun! 🎉",
-          "wrong_reply": "Try again. Say: During my holidays I travel, or During my free time I read."
+          "wrong_reply": "Tell me what you like to do in your free time. Example: 'I like to read.'"
         }
       ]
     },
@@ -543,19 +859,50 @@
       "exchanges": [
         {
           "question": "Whose bag is this?",
-          "expected_answers": [
-            "it is mine"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "It is mine.",
+          "accepted_topics": [
+            "mine",
+            "yours",
+            "his",
+            "hers",
+            "theirs",
+            "belongs",
+            "my"
           ],
+          "expected_answers": [],
           "good_reply": "Who is the owner of this house? 🏠",
-          "wrong_reply": "Try again. Say: It is mine, or It belongs to me."
+          "wrong_reply": "Tell me who the bag belongs to. Example: 'It is mine' or 'It belongs to me.'"
+        },
+        {
+          "question": "Who is the owner of this house?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am the owner of this house.",
+          "accepted_topics": [
+            "owner",
+            "i am",
+            "me",
+            "belongs to me"
+          ],
+          "expected_answers": [],
+          "good_reply": "To whom does this pen belong? ✒️",
+          "wrong_reply": "Tell me who owns the house. Example: 'I am the owner.'"
         },
         {
           "question": "To whom does this pen belong?",
-          "expected_answers": [
-            "it belongs to me"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "It belongs to me.",
+          "accepted_topics": [
+            "belongs",
+            "mine",
+            "me"
           ],
+          "expected_answers": [],
           "good_reply": "Perfect! You've mastered possession! 🔑",
-          "wrong_reply": "Try again. Say: It belongs to me, or It is mine."
+          "wrong_reply": "Tell me who the pen belongs to. Example: 'It belongs to me.'"
         }
       ]
     },
@@ -563,29 +910,51 @@
       "title": "❤️ Lesson 25: Preferences",
       "exchanges": [
         {
-          "question": "What do you like and dislike? / What are your likes and dislikes?",
-          "expected_answers": [
-            "i like eating and dislike starving",
-            "i like fruits and i dislike vegetables"
+          "question": "What are your likes and dislikes?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I like fruits and I dislike vegetables.",
+          "accepted_topics": [
+            "like",
+            "dislike",
+            "love",
+            "hate",
+            "enjoy"
           ],
+          "expected_answers": [],
           "good_reply": "What is your favorite dish? 🍽️",
-          "wrong_reply": "Try again. Say: I like [something] and dislike [something]."
+          "wrong_reply": "Tell me what you like and dislike. Example: 'I like [something] and dislike [something].'"
         },
         {
           "question": "What is your favorite dish?",
-          "expected_answers": [
-            "my favorite dish is meat"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My favorite dish is meat.",
+          "accepted_topics": [
+            "favorite",
+            "dish",
+            "food",
+            "like",
+            "love"
           ],
-          "good_reply": "Who is your idol / best artist in music? 🎵",
-          "wrong_reply": "Try again. Say: My favorite dish is [food]."
+          "expected_answers": [],
+          "good_reply": "Who is your favorite musician? 🎵",
+          "wrong_reply": "Tell me your favorite food. Example: 'My favorite dish is [food].'"
         },
         {
           "question": "What is your pet aversion?",
-          "expected_answers": [
-            "i hate beers"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I hate beer.",
+          "accepted_topics": [
+            "hate",
+            "dislike",
+            "can't stand",
+            "aversion"
           ],
+          "expected_answers": [],
           "good_reply": "Good to know your preferences! 🌟",
-          "wrong_reply": "Try again. Say: I hate [something]."
+          "wrong_reply": "Tell me something you hate. Example: 'I hate [something].'"
         }
       ]
     },
@@ -593,488 +962,731 @@
       "title": "🎓 Lesson 26: Education",
       "exchanges": [
         {
-          "question": "Where is your center located / situated?",
-          "expected_answers": [
-            "our center is located at thomas"
+          "question": "Where do you study English?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I study English at WEC-BEC.",
+          "accepted_topics": [
+            "wec-bec",
+            "center",
+            "school",
+            "university",
+            "college"
           ],
-          "good_reply": "What's the time table of your center? 🕐",
-          "wrong_reply": "Try again. Say: Our center is located at [place]."
+          "expected_answers": [],
+          "good_reply": "How often do you study per week? 🕐",
+          "wrong_reply": "Tell me where you learn English. Example: 'I study at [center name].'"
         },
         {
           "question": "How often do you study per week?",
-          "expected_answers": [
-            "three times a week",
-            "3 times a week"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "We study three times a week.",
+          "accepted_topics": [
+            "times",
+            "days",
+            "per week",
+            "once",
+            "twice",
+            "three times"
           ],
-          "good_reply": "Is there any library in your school? 📚",
-          "wrong_reply": "Try again. Say: We study [number] times a week."
+          "expected_answers": [],
+          "good_reply": "Which university do you attend? 🏫",
+          "wrong_reply": "Tell me how many times a week you study. Example: 'I study [number] times a week.'"
         },
         {
           "question": "Which university do you attend?",
-          "expected_answers": [
-            "i attend marien ngouabi university"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I attend Marien Ngouabi University.",
+          "accepted_topics": [
+            "university",
+            "attend",
+            "study at",
+            "marien ngouabi"
           ],
-          "good_reply": "What is your department at the university? 📖",
-          "wrong_reply": "Try again. Say: I attend [university name]."
+          "expected_answers": [],
+          "good_reply": "What is your major? 📖",
+          "wrong_reply": "Tell me your university name. Example: 'I attend [university name].'"
         },
         {
-          "question": "What is your level / grade?",
-          "expected_answers": [
-            "i am in the first level",
-            "i am in the first form of primary school",
-            "i am in the first level of junior secondary school",
-            "i am in the first grade of senior secondary school"
+          "question": "What is your major?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My major is English.",
+          "accepted_topics": [
+            "major",
+            "study",
+            "subject",
+            "english",
+            "science",
+            "arts",
+            "law",
+            "medicine"
           ],
+          "expected_answers": [],
           "good_reply": "Have you moved up to the next class? ⬆️",
-          "wrong_reply": "Try again. Say: I am in [level/grade]."
+          "wrong_reply": "Tell me your field of study. Example: 'My major is [subject].'"
+        },
+        {
+          "question": "What is your level?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am in the first level of secondary school.",
+          "accepted_topics": [
+            "level",
+            "grade",
+            "form",
+            "primary",
+            "secondary",
+            "first",
+            "second",
+            "third"
+          ],
+          "expected_answers": [],
+          "good_reply": "Great! Keep studying hard! 📚",
+          "wrong_reply": "Tell me your grade or level. Example: 'I am in [level].'"
         }
       ]
     },
     {
-      "title": "🎯 Lesson 27: Speciality",
+      "title": "🎯 Lesson 27: Goals and Motivation",
       "exchanges": [
         {
-          "question": "What is your major / speciality?",
-          "expected_answers": [
-            "my major is science",
-            "my speciality is arts",
-            "my speciality is humanities"
+          "question": "What do you want to do in life?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I want to be a doctor.",
+          "accepted_topics": [
+            "want to be",
+            "doctor",
+            "teacher",
+            "engineer",
+            "lawyer",
+            "business",
+            "profession"
           ],
-          "good_reply": "What have you majored in at the university? 🏫",
-          "wrong_reply": "Try again. Say: My major is [subject]."
+          "expected_answers": [],
+          "good_reply": "What is your goal in life? 🎯",
+          "wrong_reply": "Tell me your dream job. Example: 'I want to be a [profession].'"
         },
         {
-          "question": "What's your section at school?",
-          "expected_answers": [
-            "i am in a section"
+          "question": "What is your goal in life?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My goal is to travel abroad.",
+          "accepted_topics": [
+            "goal",
+            "aim",
+            "target",
+            "travel",
+            "abroad",
+            "success",
+            "learn"
           ],
-          "good_reply": "What are your qualifications? 🎓",
-          "wrong_reply": "Try again. Say: I am in [letter] section."
+          "expected_answers": [],
+          "good_reply": "Why do you want to learn English? 💪",
+          "wrong_reply": "Tell me what you want to achieve. Example: 'My goal is to [action].'"
         },
         {
-          "question": "When will be your graduation?",
-          "expected_answers": [
-            "my graduation will take place on monday"
+          "question": "Why do you want to learn English?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I want to learn English because I want to travel abroad.",
+          "accepted_topics": [
+            "travel",
+            "work",
+            "study",
+            "abroad",
+            "communication",
+            "job",
+            "business"
           ],
-          "good_reply": "Congratulations in advance! 🎉",
-          "wrong_reply": "Try again. Say: My graduation will take place on [day]."
-        }
-      ]
-    },
-    {
-      "title": "🇺🇸 Lesson 28: American Education System",
-      "exchanges": [
-        {
-          "question": "What's your grade? / What year are you?",
-          "expected_answers": [
-            "i am a fresher",
-            "i am a freshman",
-            "i am a freshwoman",
-            "i am a sophomore",
-            "i am a junior",
-            "i am a senior",
-            "i am in my first year",
-            "i am in bachelor degree",
-            "i am in master degree",
-            "i am graduate",
-            "i am undergraduate student",
-            "i am postgraduate student"
-          ],
-          "good_reply": "Do you have a B.A or M.A? 📜",
-          "wrong_reply": "Try again. Say: I am a freshman/sophomore/junior/senior."
-        }
-      ]
-    },
-    {
-      "title": "🎯 Lesson 29: To Expect, To Aim, Goal and Motivation",
-      "exchanges": [
-        {
-          "question": "What do you expect / target / aim / purpose / intend / plan / want to do in life?",
-          "expected_answers": [
-            "i expect to be a healer",
-            "i target to be a pastor",
-            "i aim to be a business man",
-            "i purpose to be a boss",
-            "i intend to be a barrister",
-            "i plan to become a trader",
-            "i want to be a healer"
-          ],
-          "good_reply": "What would you like to do after studies? 🎓",
-          "wrong_reply": "Try again. Say: I expect to be a [profession]."
-        },
-        {
-          "question": "What is your goal / target / aim / purpose / intention / objective / plan / vision in life?",
-          "expected_answers": [
-            "i want to do business",
-            "my target is to be a pastor",
-            "my aim is to become a boss",
-            "my purpose is to go overseas",
-            "my intention is to be trader",
-            "my objective is to be a pastor",
-            "my plan is to go abroad",
-            "my vision is to travel a lot"
-          ],
-          "good_reply": "What motivated you to learn English? 💪",
-          "wrong_reply": "Try again. Say: My goal is to [action]."
-        },
-        {
-          "question": "What motivated you to learn English? / What pushed you to learn English? / What urged you to learn English?",
-          "expected_answers": [
-            "my work reasons",
-            "i want to travel abroad",
-            "to achieve great things",
-            "necessity and spread of english"
-          ],
+          "expected_answers": [],
           "good_reply": "Excellent motivation! Keep going! 🚀",
-          "wrong_reply": "Try again. Say: I want to travel abroad, or for work reasons."
+          "wrong_reply": "Tell me your reason for learning English. Example: 'I want to learn English because [reason].'"
         }
       ]
     },
     {
-      "title": "🎮 Lesson 30: Hobby and Game",
+      "title": "🎮 Lesson 28: Hobbies",
       "exchanges": [
         {
-          "question": "What is your hobby / leisure / pastime / spare time / distraction / diversion / entertainment / interest / game?",
-          "expected_answers": [
-            "watching tv",
-            "reading",
-            "watching cartoons",
-            "swimming",
-            "playing soccer",
-            "strolling",
-            "listening to music",
-            "playing cards",
-            "jogging"
+          "question": "What is your hobby?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My hobby is playing soccer.",
+          "accepted_topics": [
+            "hobby",
+            "like",
+            "enjoy",
+            "play",
+            "read",
+            "watch",
+            "listen",
+            "sport",
+            "music"
           ],
+          "expected_answers": [],
           "good_reply": "Great! Hobbies are important for relaxation! 🎯",
-          "wrong_reply": "Try again. Say: My hobby is [activity]."
+          "wrong_reply": "Tell me what you like to do for fun. Example: 'My hobby is [activity].'"
         }
       ]
     },
     {
-      "title": "🗣️ Lesson 31: English Language Ability",
+      "title": "🗣️ Lesson 29: English Language Ability",
       "exchanges": [
-        {
-          "question": "Are you monolingual, bilingual, trilingual, quadrilingual or multilingual?",
-          "expected_answers": [
-            "i am a bilingual"
-          ],
-          "good_reply": "Can you express yourself in English? 💬",
-          "wrong_reply": "Try again. Say: I am bilingual / trilingual / multilingual."
-        },
         {
           "question": "Can you speak English?",
-          "expected_answers": [
-            "i don't know how to speak english",
-            "no but i can try",
-            "i know nothing about english",
-            "i am still a beginner"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am still a beginner, but I am learning.",
+          "accepted_topics": [
+            "beginner",
+            "learning",
+            "little",
+            "not much",
+            "try",
+            "yes",
+            "no"
           ],
+          "expected_answers": [],
           "good_reply": "What is the secret of learning? 🔑",
-          "wrong_reply": "Try again. Say: I am still a beginner, or I know nothing about English."
+          "wrong_reply": "Tell me about your English level. Example: 'I am a beginner' or 'I can speak a little.'"
         },
         {
           "question": "What is the secret of learning?",
-          "expected_answers": [
-            "you must read a lot"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "You must read a lot and practice every day.",
+          "accepted_topics": [
+            "read",
+            "practice",
+            "study",
+            "work hard",
+            "listen",
+            "repeat",
+            "memorize"
           ],
-          "good_reply": "What is the importance of learning many languages? 🌍",
-          "wrong_reply": "Try again. Say: You must read a lot."
+          "expected_answers": [],
+          "good_reply": "Why is learning languages important? 🌍",
+          "wrong_reply": "Tell me how to learn well. Example: 'You must read a lot and practice.'"
         },
         {
-          "question": "What is the relevance or importance of learning many languages?",
-          "expected_answers": [
-            "you will easily have a job"
+          "question": "Why is learning languages important?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "If you know many languages, you will easily find a job.",
+          "accepted_topics": [
+            "job",
+            "work",
+            "travel",
+            "communicate",
+            "understand",
+            "opportunities"
           ],
+          "expected_answers": [],
           "good_reply": "Can you convey a message in English now? 📨",
-          "wrong_reply": "Try again. Say: If you know many languages, you will easily have a job."
+          "wrong_reply": "Tell me the benefits of knowing languages. Example: 'It helps you get a job.'"
+        },
+        {
+          "question": "Can you convey a message in English now?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Yes, I can try to speak English.",
+          "accepted_topics": [
+            "yes",
+            "no",
+            "try",
+            "little",
+            "convey",
+            "message",
+            "communicate"
+          ],
+          "expected_answers": [],
+          "good_reply": "Keep practicing! You will improve! 💪",
+          "wrong_reply": "Answer yes or no. Example: 'Yes, I can communicate a little.'"
         }
       ]
     },
     {
-      "title": "🔍 Lesson 32: To Look For and To Wait For",
+      "title": "🔍 Lesson 30: To Look For and To Wait For",
       "exchanges": [
         {
-          "question": "Who are you looking for?",
-          "expected_answers": [
-            "i am looking for somebody"
-          ],
-          "good_reply": "What are you looking for? 🔍",
-          "wrong_reply": "Try again. Say: I am looking for [person]."
-        },
-        {
           "question": "What are you looking for?",
-          "expected_answers": [
-            "i am looking for my wallet"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am looking for my wallet.",
+          "accepted_topics": [
+            "looking for",
+            "searching",
+            "find",
+            "pen",
+            "book",
+            "wallet",
+            "keys",
+            "person",
+            "friend"
           ],
+          "expected_answers": [],
           "good_reply": "Who are you waiting for? ⏳",
-          "wrong_reply": "Try again. Say: I am looking for [object]."
+          "wrong_reply": "Tell me what you are searching for. Example: 'I am looking for [object/person].'"
         },
         {
           "question": "Who are you waiting for?",
-          "expected_answers": [
-            "i am waiting for my darling"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am waiting for my friend.",
+          "accepted_topics": [
+            "waiting for",
+            "friend",
+            "sister",
+            "brother",
+            "mother",
+            "father",
+            "teacher"
           ],
-          "good_reply": "What are you waiting for? 🕐",
-          "wrong_reply": "Try again. Say: I am waiting for [person]."
+          "expected_answers": [],
+          "good_reply": "I hope they come soon! 🕐",
+          "wrong_reply": "Tell me who you are expecting. Example: 'I am waiting for [person].'"
         }
       ]
     },
     {
-      "title": "💼 Lesson 33: Profession",
+      "title": "💼 Lesson 31: Profession",
       "exchanges": [
         {
-          "question": "Who do you rely on? / Who do you depend on?",
-          "expected_answers": [
-            "i rely on my parents",
-            "i depend on my parents"
-          ],
-          "good_reply": "Are your parents alive? 👨‍👩‍👧",
-          "wrong_reply": "Try again. Say: I rely on my parents."
-        },
-        {
           "question": "What does your father do?",
-          "expected_answers": [
-            "my father is a soldier"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My father is a doctor.",
+          "accepted_topics": [
+            "father",
+            "dad",
+            "doctor",
+            "teacher",
+            "soldier",
+            "police",
+            "driver",
+            "business"
           ],
-          "good_reply": "What rank is your father? 🎖️",
-          "wrong_reply": "Try again. Say: My father is a [profession]."
+          "expected_answers": [],
+          "good_reply": "What does your mother do? 👩‍⚕️",
+          "wrong_reply": "Tell me your father's job. Example: 'My father is a [profession].'"
         },
         {
-          "question": "What is your profession? / What do you do as work?",
-          "expected_answers": [
-            "i am a worker",
-            "i am a civil servant"
+          "question": "What does your mother do?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My mother is a teacher.",
+          "accepted_topics": [
+            "mother",
+            "mom",
+            "mum",
+            "teacher",
+            "nurse",
+            "housewife",
+            "business"
           ],
+          "expected_answers": [],
+          "good_reply": "What do you want to be? 💼",
+          "wrong_reply": "Tell me your mother's job. Example: 'My mother is a [profession].'"
+        },
+        {
+          "question": "What do you want to be?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I want to be an engineer.",
+          "accepted_topics": [
+            "want to be",
+            "become",
+            "future",
+            "engineer",
+            "doctor",
+            "teacher"
+          ],
+          "expected_answers": [],
           "good_reply": "Thank you for sharing! 💼",
-          "wrong_reply": "Try again. Say: I am a [profession]."
+          "wrong_reply": "Tell me your dream job. Example: 'I want to be a [profession].'"
         }
       ]
     },
     {
-      "title": "⛪ Lesson 34: Religion",
+      "title": "⛪ Lesson 32: Religion",
       "exchanges": [
         {
           "question": "Do you pray?",
-          "expected_answers": [
-            "yes i do",
-            "i am a christian"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Yes, I do. I am a Christian.",
+          "accepted_topics": [
+            "yes",
+            "no",
+            "pray",
+            "christian",
+            "muslim",
+            "god"
           ],
+          "expected_answers": [],
           "good_reply": "Where do you pray? 🕌",
-          "wrong_reply": "Try again. Say: Yes I do, I am a Christian."
+          "wrong_reply": "Answer yes or no. Example: 'Yes, I pray' or 'No, I don't.'"
         },
         {
-          "question": "Are you born again?",
-          "expected_answers": [
-            "yes i am"
+          "question": "Where do you pray?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I pray at the Catholic Church.",
+          "accepted_topics": [
+            "church",
+            "mosque",
+            "temple",
+            "home",
+            "catholic",
+            "protestant"
           ],
-          "good_reply": "Are you a believer? 🙏",
-          "wrong_reply": "Try again. Say: Yes I am, or No I am not."
+          "expected_answers": [],
+          "good_reply": "What is your religion? 🙏",
+          "wrong_reply": "Tell me where you worship. Example: 'I pray at [place].'"
         },
         {
           "question": "What is your religion?",
-          "expected_answers": [
-            "my religion is christianism",
-            "i am a muslim"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My religion is Christianity.",
+          "accepted_topics": [
+            "christianity",
+            "islam",
+            "muslim",
+            "catholic",
+            "protestant",
+            "religion"
           ],
-          "good_reply": "Does dooms day exist? ⚠️",
-          "wrong_reply": "Try again. Say: My religion is [religion]."
+          "expected_answers": [],
+          "good_reply": "Thank you for sharing! 🙏",
+          "wrong_reply": "Tell me your religion. Example: 'I am Christian' or 'I am Muslim.'"
         }
       ]
     },
     {
-      "title": "✈️ Lesson 35: To Go Abroad and To Go Overseas",
+      "title": "✈️ Lesson 33: To Go Abroad",
       "exchanges": [
         {
           "question": "Have you ever been abroad?",
-          "expected_answers": [
-            "i have never been abroad"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "No, I have never been abroad.",
+          "accepted_topics": [
+            "yes",
+            "no",
+            "never",
+            "travel",
+            "abroad",
+            "country",
+            "overseas",
+            "france",
+            "england",
+            "usa"
           ],
-          "good_reply": "When will you go abroad? 🗓️",
-          "wrong_reply": "Try again. Say: I have never been abroad, or Yes I have."
+          "expected_answers": [],
+          "good_reply": "Would you like to travel overseas? 🌍",
+          "wrong_reply": "Answer yes or no. Example: 'Yes, I have been abroad' or 'No, I haven't.'"
         },
         {
-          "question": "Are you hoping to travel overseas?",
-          "expected_answers": [
-            "yes of course"
+          "question": "Would you like to travel overseas?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Yes, I would love to travel abroad.",
+          "accepted_topics": [
+            "yes",
+            "no",
+            "love to",
+            "want to",
+            "would like",
+            "travel",
+            "abroad",
+            "country",
+            "overseas",
+            "visit"
           ],
-          "good_reply": "Do you hope to live overseas? 🌍",
-          "wrong_reply": "Try again. Say: Yes of course, or No."
+          "expected_answers": [],
+          "good_reply": "I hope you get to travel soon! ✈️",
+          "wrong_reply": "Tell me if you want to travel. Example: 'Yes, I want to travel abroad.'"
         }
       ]
     },
     {
-      "title": "🤕 Lesson 36: Sufferings",
+      "title": "🤕 Lesson 34: Health and Sufferings",
       "exchanges": [
         {
-          "question": "What is going on? / What is happening to you? / What is wrong with you?",
-          "expected_answers": [
-            "i am sick",
-            "i am ill",
-            "i am not feeling ok",
-            "my leg is paining",
-            "my leg is aching"
+          "question": "What is wrong with you?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am sick. I have a headache.",
+          "accepted_topics": [
+            "sick",
+            "headache",
+            "fever",
+            "pain",
+            "hurt",
+            "ache",
+            "tired"
           ],
+          "expected_answers": [],
           "good_reply": "What are you suffering from? 🩺",
-          "wrong_reply": "Try again. Say: I am sick, or My leg is paining."
+          "wrong_reply": "Tell me what is bothering you. Example: 'I have a headache.'"
         },
         {
           "question": "What are you suffering from?",
-          "expected_answers": [
-            "i am suffering from a headache",
-            "suffering from a bellyache",
-            "suffering from painful menses"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am suffering from a fever.",
+          "accepted_topics": [
+            "fever",
+            "headache",
+            "stomach ache",
+            "cold",
+            "flu",
+            "pain",
+            "suffering"
           ],
+          "expected_answers": [],
           "good_reply": "Get well soon! 💊",
-          "wrong_reply": "Try again. Say: I am suffering from a headache."
+          "wrong_reply": "Tell me your symptoms. Example: 'I have a fever' or 'My leg hurts.'"
         }
       ]
     },
     {
-      "title": "🇨🇬 Lesson 37: General Knowledge about Congo",
+      "title": "🇨🇬 Lesson 35: General Knowledge about Congo",
       "exchanges": [
         {
-          "question": "Are you a Congolese citizen?",
-          "expected_answers": [
-            "yes i am"
-          ],
-          "good_reply": "What is the capital city of Congo? 🏙️",
-          "wrong_reply": "Try again. Say: Yes I am."
-        },
-        {
           "question": "What is the capital city of Congo?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
             "brazzaville"
           ],
           "good_reply": "What is the official language in Congo? 🗣️",
-          "wrong_reply": "Try again. Say: The capital of Congo is Brazzaville."
+          "wrong_reply": "Try again. The capital of Congo is Brazzaville."
+        },
+        {
+          "question": "What is the official language in Congo?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
+          "expected_answers": [
+            "french"
+          ],
+          "good_reply": "What are the national languages in Congo? 🌍",
+          "wrong_reply": "Try again. The official language of Congo is French."
         },
         {
           "question": "What are the national languages in Congo?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
-            "lingala and kituba"
+            "lingala and kituba",
+            "kituba and lingala"
           ],
-          "good_reply": "What is the population of Congo? 👥",
-          "wrong_reply": "Try again. Say: Lingala and Kituba."
+          "good_reply": "What are the colors of the Congolese flag? 🏁",
+          "wrong_reply": "Try again. The national languages are Lingala and Kituba."
         },
         {
           "question": "What are the colors of the Congolese flag?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
-            "green yellow red"
-          ],
-          "good_reply": "Who is the explorer of Congo? 🧭",
-          "wrong_reply": "Try again. Say: Green, yellow, and red."
+                "green yellow red",
+                "green, yellow, red",
+                "green, yellow and red",
+                "green yellow and red"
+         ],
+          "good_reply": "What is the Congolese currency? 💰",
+          "wrong_reply": "Try again. The colors of the Congolese flag are green, yellow and red."
         },
         {
           "question": "What is the Congolese currency?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
             "cfa",
-            "c.f.a"
+            "cfa franc"
           ],
           "good_reply": "Great! You know Congo well! 🇨🇬",
-          "wrong_reply": "Try again. Say: The currency is CFA."
+          "wrong_reply": "Try again. The currency is CFA franc."
         }
       ]
     },
     {
-      "title": "👍👎 Lesson 38: Advantages and Disadvantages",
+      "title": "👍👎 Lesson 36: Advantages and Disadvantages",
       "exchanges": [
         {
-          "question": "What are the advantages and disadvantages of reading a lot?",
-          "expected_answers": [
-            "discover many things",
-            "become knowledgeable",
-            "travel spiritually",
-            "become clever",
-            "become crazy"
+          "question": "What are the advantages of reading?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Reading helps you discover new things and become knowledgeable.",
+          "accepted_topics": [
+            "learn",
+            "discover",
+            "knowledge",
+            "smart",
+            "intelligent",
+            "information",
+            "benefits"
           ],
-          "good_reply": "What are the pros and cons of love? 💕",
-          "wrong_reply": "Try again. Say: Advantages: you discover things. Disadvantages: you can become crazy."
+          "expected_answers": [],
+          "good_reply": "What are the disadvantages of reading too much? 📚",
+          "wrong_reply": "Tell me the benefits of reading. Example: 'Reading helps you learn new things.'"
+        },
+        {
+          "question": "What are the disadvantages of reading too much?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "If you read too much, you can become crazy or get eye problems.",
+          "accepted_topics": [
+            "crazy",
+            "eyes",
+            "tired",
+            "headache",
+            "addiction",
+            "no social life"
+          ],
+          "expected_answers": [],
+          "good_reply": "Good analysis! Everything has pros and cons! ⚖️",
+          "wrong_reply": "Tell me the negative effects of reading too much. Example: 'You can get tired or have eye problems.'"
         }
       ]
     },
     {
-      "title": "❓ Lesson 39: Quiz (General Knowledge Questions)",
+      "title": "❓ Lesson 37: General Knowledge Quiz",
       "exchanges": [
         {
           "question": "Who discovered America?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
             "christopher columbus",
-            "christophe colombus"
+            "columbus"
           ],
-          "good_reply": "Who created the plane? ✈️",
-          "wrong_reply": "Try again. Say: Christopher Columbus discovered America in 1492."
+          "good_reply": "Who invented the telephone? 📞",
+          "wrong_reply": "Try again. Christopher Columbus discovered America in 1492."
         },
         {
-          "question": "Who created the telephone?",
+          "question": "Who invented the telephone?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
+            "alexander graham bell",
             "alexander bell"
           ],
-          "good_reply": "Who made the atomic bomb? 💣",
-          "wrong_reply": "Try again. Say: Alexander Bell created the telephone."
+          "good_reply": "Who was the first person on the moon? 🌙",
+          "wrong_reply": "Try again. Alexander Graham Bell invented the telephone in 1876."
         },
         {
-          "question": "Who is the first astronaut?",
+          "question": "Who was the first person on the moon?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
             "neil armstrong"
           ],
-          "good_reply": "Who was the first president of France's Fifth Republic? 🇫🇷",
-          "wrong_reply": "Try again. Say: Neil Armstrong is the first astronaut."
+          "good_reply": "Who created the airplane? ✈️",
+          "wrong_reply": "Try again. Neil Armstrong was the first person on the moon in 1969."
         },
         {
           "question": "Who created the airplane?",
+          "validation_type": "exact",
+          "allow_correction": false,
+          "accepted_topics": [],
           "expected_answers": [
+            "the wright brothers",
             "orville wright",
             "wilbur wright",
-            "the wright brothers"
+            "wright brothers"
           ],
           "good_reply": "Excellent general knowledge! 🎓",
-          "wrong_reply": "Try again. Say: The Wright brothers created the airplane."
+          "wrong_reply": "Try again. The Wright brothers created the airplane in 1903."
         }
       ]
     },
     {
-      "title": "⏳ Lesson 40: How long... for, since, and ago",
+      "title": "⏳ Lesson 38: For, Since, and Ago",
       "exchanges": [
         {
           "question": "How long have you been learning English?",
-          "expected_answers": [
-            "for a long time",
-            "for one month",
-            "for two days",
-            "for three weeks",
-            "for four years",
-            "since long time",
-            "since last month",
-            "since 2005",
-            "since my childhood"
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I have been learning English for two years.",
+          "accepted_topics": [
+            "for",
+            "since",
+            "years",
+            "months",
+            "weeks",
+            "days"
           ],
-          "good_reply": "How long ago did you visit Oyo? 🗓️",
-          "wrong_reply": "Try again. Say: I have been learning English for [time] or since [date]."
+          "expected_answers": [],
+          "good_reply": "How long ago did you start learning English? 🗓️",
+          "wrong_reply": "Tell me how long you have studied English. Example: 'I have been learning for [time].'"
         },
         {
-          "question": "How long ago did you visit Oyo?",
-          "expected_answers": [
-            "three years ago"
+          "question": "How long ago did you start learning English?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I started learning English two years ago.",
+          "accepted_topics": [
+            "ago",
+            "started",
+            "years ago",
+            "months ago"
           ],
+          "expected_answers": [],
           "good_reply": "Perfect! You understand 'for', 'since', and 'ago'! ⏰",
-          "wrong_reply": "Try again. Say: I visited [place] [number] years ago."
+          "wrong_reply": "Tell me when you started. Example: 'I started [number] years/months ago.'"
         }
       ]
     },
     {
-      "title": "🛒 Lesson 41: Seller and Customer (How much)",
+      "title": "🛒 Lesson 39: Shopping and Prices",
       "exchanges": [
         {
-          "question": "How much is it? / How much money is it? / How much does it cost?",
-          "expected_answers": [
-            "it is one hundred",
-            "it is one million",
-            "it is one billion",
-            "it costs one thousand"
+          "question": "How much is this?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "It is one thousand CFA.",
+          "accepted_topics": [
+            "cfa",
+            "francs",
+            "dollars",
+            "euros",
+            "price",
+            "costs"
           ],
-          "good_reply": "I am sorry, I am short of money. 💸",
-          "wrong_reply": "Try again. Say: It is [amount], or It costs [amount]."
+          "expected_answers": [],
+          "good_reply": "Do you have enough money? 💸",
+          "wrong_reply": "Tell me the price. Example: 'It is [amount] CFA francs.'"
+        },
+        {
+          "question": "Do you have enough money?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "No, I am short of money. I can't afford it.",
+          "accepted_topics": [
+            "yes",
+            "no",
+            "enough",
+            "short",
+            "can't afford",
+            "not enough"
+          ],
+          "expected_answers": [],
+          "good_reply": "I hope you can buy it another time! 🛍️",
+          "wrong_reply": "Answer yes or no. Example: 'Yes, I have enough money' or 'No, I don't.'"
         }
       ]
     }
