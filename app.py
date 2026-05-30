@@ -51,7 +51,7 @@ def get_system_prompt(student_level="A1", validation_type="free", allow_correcti
         "Whenever the word WEC-BEC appears in your response, you MUST include its pronunciation.\n"
         "You can write it like this: WEC-BEC (pronounced: wèk bèk)\n"
         "For A1 students, always help pronunciation clearly. You can also say: 'It sounds like: wèk bèk'\n"
-        "Example: 'Welcome to WEC-BEC (wèk bèk)! 🎓'\n"
+        "Example: 'Welcome to WEC-BEC ! 🎓'\n"
         "========================================\n\n"
         "For A1 students: "
         "Use very easy English, short sentences, basic vocabulary, and slow explanations. "
@@ -600,7 +600,7 @@ Current question: {current_question}
 Student answer: {message}
 
 Please evaluate the student's answer according to the rules.
-Remember: WEC-BEC is pronounced 'wèk bèk' and you must include this pronunciation whenever you use the name.
+Remember: WEC-BEC is pronounced 'wèk bèk'.
 """
 
         response = requests.post(
@@ -643,7 +643,7 @@ def ask_ai(message, student_level="B1"):
             f"You are WEC-BEC English Teacher AI. The student is at level {student_level}. {level_instruction} "
             "Be friendly, patient, and professional. Correct grammar politely. Ask only ONE question at a time.\n\n"
             "🔊 PRONUNCIATION RULE: WEC-BEC is pronounced 'wèk bèk'. "
-            "Whenever you use the name WEC-BEC, always include its pronunciation like this: WEC-BEC (wèk bèk)."
+
         )
 
         response = requests.post(
