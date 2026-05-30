@@ -56,11 +56,9 @@
         .msg { padding: 14px 20px; border-radius: 24px; line-height: 1.5; max-width: 85%; font-size: 15px; position: relative; }
         .msg.user { margin-left: auto; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border-bottom-right-radius: 6px; }
         .msg.bot { margin-right: auto; background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255, 255, 255, 0.1); color: #f1f5f9; border-bottom-left-radius: 6px; }
-        .msg-actions { margin-top: 8px; display: flex; gap: 8px; justify-content: flex-end; }
-        .msg.bot .msg-actions { justify-content: flex-start; }
+        .msg-actions { margin-top: 8px; display: flex; gap: 8px; justify-content: flex-start; }
         .listen-btn { background: rgba(59, 130, 246, 0.2); border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; color: #60a5fa; font-size: 12px; transition: 0.3s; display: inline-flex; align-items: center; gap: 6px; }
         .listen-btn:hover { background: #3b82f6; color: white; }
-        .listen-btn.listening { background: #10b981; color: white; opacity: 0.7; }
         .chat-input-area { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
         .chat-input-area input { flex: 1; border: none; outline: none; padding: 14px 20px; border-radius: 60px; background: rgba(30, 41, 59, 0.9); color: white; font-size: 15px; border: 1px solid rgba(255, 255, 255, 0.1); }
         .chat-input-area input:focus { border-color: #3b82f6; }
@@ -72,11 +70,11 @@
         .status { font-size: 12px; color: #94a3b8; padding: 8px 0; display: flex; align-items: center; gap: 8px; }
         .section-title { font-size: 24px; font-weight: 800; background: linear-gradient(135deg, #fff, #94a3b8); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 8px; }
         .section-subtitle { color: #94a3b8; margin-bottom: 24px; font-size: 14px; }
-        .lesson-card { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 20px 24px; margin-bottom: 16px; transition: all 0.3s ease; }
+        .lesson-card { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px; padding: 20px 24px; margin-bottom: 16px; transition: all 0.3s ease; cursor: pointer; }
         .lesson-card:hover { transform: translateY(-3px); border-color: rgba(59,130,246,0.3); }
         .lesson-card h3 { font-size: 20px; font-weight: 700; color: white; margin-bottom: 4px; }
         .lesson-card .meta { font-size: 12px; color: #8b5cf6; margin-bottom: 12px; }
-        .lesson-card .content { font-size: 14px; line-height: 1.6; color: #cbd5e1; margin-bottom: 14px; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+        .lesson-card .content { font-size: 14px; line-height: 1.6; color: #cbd5e1; margin-bottom: 14px; white-space: pre-wrap; }
         .audio-bar { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0 12px; }
         .audio-bar button { border: none; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 8px 20px; border-radius: 40px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
         .audio-bar button.secondary { background: rgba(100, 116, 139, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); }
@@ -90,13 +88,14 @@
         .pron-feedback { margin-top: 14px; padding: 14px 18px; background: rgba(0, 0, 0, 0.3); border-radius: 14px; border-left: 4px solid #3b82f6; font-size: 13px; color: #cbd5e1; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         @media (max-width: 768px) { .app { height: 100vh; margin: 0; border-radius: 0; } .main { padding: 16px; } .msg { max-width: 95%; } }
+        .loading { text-align: center; padding: 40px; color: #94a3b8; }
     </style>
 </head>
 <body>
 <div class="app">
     <div class="header">
         <div class="header-text">
-            <h1>🎓 WEC‑BEC (wèk bèk)</h1>
+            <h1>🎓 WEC-BEC (wèk bèk)</h1>
             <p><i class="fas fa-circle"></i> Connected as: {{ user }} · Level: {{ student_level }}</p>
         </div>
         <div class="streak-badge"><i class="fas fa-fire"></i> 7 day streak</div>
@@ -110,7 +109,7 @@
     <div class="main">
         <div id="section-chat" class="section active">
             <div id="chat-box"></div>
-            <div class="status" id="status"><i class="fas fa-circle"></i> Ready 🎤</div>
+            <div class="status" id="status"><i class="fas fa-circle"></i> Ready</div>
             <div class="chat-input-area">
                 <input id="msg" placeholder="Type or speak in English..." autocomplete="off">
                 <button class="btn-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i> Send</button>
@@ -121,12 +120,12 @@
         <div id="section-lessons" class="section">
             <h2 class="section-title"><i class="fas fa-book-reader"></i> Audio Lessons</h2>
             <p class="section-subtitle">All lessons from courses.json. Click listen to hear the full content.</p>
-            <div id="lessons-container"></div>
+            <div id="lessons-container"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Loading lessons...</div></div>
         </div>
         <div id="section-pronunciation" class="section">
             <h2 class="section-title"><i class="fas fa-microphone-alt"></i> Pronunciation Coach</h2>
             <p class="section-subtitle">Practice pronunciation with real phrases from our lessons.</p>
-            <div id="pron-container"></div>
+            <div id="pron-container"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Loading pronunciation exercises...</div></div>
         </div>
     </div>
 </div>
@@ -147,7 +146,6 @@ const chatBox = document.getElementById('chat-box');
 // ========== SPEECH SYNTHESIS (TEXT TO SPEECH) ==========
 function getBestVoice() {
     const voices = speechSynthesis.getVoices();
-    // Prioritize English voices
     let voice = voices.find(v => v.name.includes('Samantha'));
     if (!voice) voice = voices.find(v => v.name.includes('Google UK English Female'));
     if (!voice) voice = voices.find(v => v.name.includes('Microsoft Jenny'));
@@ -158,8 +156,7 @@ function getBestVoice() {
 
 function setStatus(message, isError = false) {
     if (statusEl) {
-        const icon = isError ? '❌' : (isSpeaking ? '🔊' : (isListening ? '🎤' : '🎧'));
-        statusEl.innerHTML = `<i class="fas fa-circle"></i> ${message} ${icon}`;
+        statusEl.innerHTML = `<i class="fas fa-circle"></i> ${message}`;
     }
 }
 
@@ -179,10 +176,8 @@ function speakText(text) {
             return;
         }
 
-        // Stop any ongoing speech
         stopSpeaking();
 
-        // Clean text: remove emojis and special characters for better pronunciation
         let cleanText = text
             .replace(/[^\w\s\.,!?;:()\-'\u00C0-\u00FF]/g, ' ')
             .replace(/\s+/g, ' ')
@@ -195,7 +190,7 @@ function speakText(text) {
 
         currentUtterance = new SpeechSynthesisUtterance(cleanText);
         currentUtterance.lang = 'en-US';
-        currentUtterance.rate = 0.85;  // Slightly slower for better understanding
+        currentUtterance.rate = 0.85;
         currentUtterance.pitch = 1.0;
         currentUtterance.volume = 1.0;
 
@@ -212,18 +207,13 @@ function speakText(text) {
             currentUtterance = null;
             setStatus('Ready');
             resolve();
-
-            // If voice mode is on, restart listening after a pause
-            if (voiceMode && !isListening) {
-                setTimeout(() => startListening(), 500);
-            }
         };
 
         currentUtterance.onerror = (event) => {
             console.error('Speech error:', event);
             isSpeaking = false;
             currentUtterance = null;
-            setStatus('Speech error', true);
+            setStatus('Speech error');
             reject(event);
         };
 
@@ -245,8 +235,8 @@ function startListening() {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        setStatus('Speech recognition not supported', true);
-        alert('Your browser does not support speech recognition. Please use Chrome, Edge, or Safari.');
+        setStatus('Speech recognition not supported');
+        alert('Please use Chrome, Edge, or Safari for voice features.');
         return;
     }
 
@@ -275,7 +265,6 @@ function startListening() {
             }
         }
 
-        // Show interim result in input
         if (msgInput) {
             if (finalTranscript) {
                 msgInput.value = finalTranscript;
@@ -287,17 +276,11 @@ function startListening() {
 
     currentRecognition.onerror = (event) => {
         console.error('Recognition error:', event.error);
-        let errorMsg = 'Microphone error';
-        if (event.error === 'no-speech') errorMsg = 'No speech detected';
-        else if (event.error === 'audio-capture') errorMsg = 'No microphone found';
-        else if (event.error === 'not-allowed') errorMsg = 'Microphone permission denied';
-        setStatus(errorMsg, true);
         stopListening();
     };
 
     currentRecognition.onend = () => {
         stopListening();
-        // If we got a final transcript, send the message
         if (msgInput && msgInput.value && !msgInput.value.endsWith('...')) {
             const message = msgInput.value;
             msgInput.value = '';
@@ -330,13 +313,11 @@ function stopAllAudio() {
 
 function toggleVoiceMode() {
     if (isListening || voiceMode) {
-        // Turn off voice mode
         voiceMode = false;
         stopListening();
         setStatus('Voice mode off');
         if (micBtn) micBtn.classList.remove('listening');
     } else {
-        // Turn on voice mode
         voiceMode = true;
         startListening();
     }
@@ -350,12 +331,10 @@ function escapeHtml(str) {
         if (m === '<') return '&lt;';
         if (m === '>') return '&gt;';
         return m;
-    }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-        return c;
     });
 }
 
-function addMessage(text, isUser = false) {
+function addMessage(text, isUser = false, autoSpeak = true) {
     const div = document.createElement('div');
     div.className = `msg ${isUser ? 'user' : 'bot'}`;
 
@@ -365,7 +344,7 @@ function addMessage(text, isUser = false) {
         ${icon} ${escapeHtml(text)}
         ${!isUser ? `
         <div class="msg-actions">
-            <button class="listen-btn" onclick="speakText('${escapeHtml(text).replace(/'/g, "\\'")}')">
+            <button class="listen-btn" onclick="speakText('${escapeHtml(text).replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
                 <i class="fas fa-headphones"></i> Listen
             </button>
         </div>
@@ -374,6 +353,10 @@ function addMessage(text, isUser = false) {
 
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
+
+    if (!isUser && autoSpeak) {
+        speakText(text);
+    }
     return div;
 }
 
@@ -381,8 +364,7 @@ async function sendMessage(voiceText = null) {
     const message = voiceText !== null ? voiceText : msgInput.value.trim();
     if (!message) return;
 
-    // Display user message
-    addMessage(message, true);
+    addMessage(message, true, false);
 
     if (voiceText === null) {
         msgInput.value = '';
@@ -400,17 +382,15 @@ async function sendMessage(voiceText = null) {
         const data = await response.json();
 
         if (data.reply) {
-            addMessage(data.reply, false);
-            // Auto-speak the response
-            await speakText(data.reply);
+            addMessage(data.reply, false, true);
         } else {
-            addMessage('Sorry, I could not process your request.', false);
-            setStatus('Error', true);
+            addMessage('Sorry, I could not process your request.', false, true);
+            setStatus('Error');
         }
     } catch (error) {
         console.error('Chat error:', error);
-        addMessage('Connection error. Please try again.', false);
-        setStatus('Connection error', true);
+        addMessage('Connection error. Please try again.', false, true);
+        setStatus('Connection error');
     }
 }
 
@@ -434,7 +414,7 @@ function renderLessons() {
     if (!container) return;
     container.innerHTML = '';
 
-    if (coursesData.length === 0) {
+    if (!coursesData || coursesData.length === 0) {
         container.innerHTML = '<div class="lesson-card"><p>📚 No lessons available.</p></div>';
         return;
     }
@@ -448,11 +428,8 @@ function renderLessons() {
             <div class="meta">Lesson ${idx+1}</div>
             <div class="content">${escapeHtml(contentPreview)}${lesson.content && lesson.content.length > 300 ? '...' : ''}</div>
             <div class="audio-bar">
-                <button onclick="speakText('${escapeHtml(lesson.content || '').replace(/'/g, "\\'")}')">
+                <button onclick="event.stopPropagation(); speakText('${escapeHtml(lesson.content || '').replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
                     <i class="fas fa-headphones"></i> Listen to Full Lesson
-                </button>
-                <button class="secondary" onclick="speakText('${escapeHtml((lesson.content || '').substring(0, 500)).replace(/'/g, "\\'")}')">
-                    <i class="fas fa-redo-alt"></i> Repeat
                 </button>
             </div>
         `;
@@ -466,28 +443,44 @@ function renderPronunciation() {
     if (!container) return;
     container.innerHTML = '';
 
-    if (coursesData.length === 0) {
+    if (!coursesData || coursesData.length === 0) {
         container.innerHTML = '<div class="pron-card"><p>🎙️ No lessons loaded yet.</p></div>';
         return;
     }
 
-    // Take first 20 lessons for pronunciation practice
-    coursesData.slice(0, 20).forEach((lesson, idx) => {
-        let content = lesson.content || '';
-        // Extract first meaningful sentence
-        let sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10 && s.trim().length < 100);
-        let practicePhrase = sentences.length > 0 ? sentences[0].trim() + '.' : (content.substring(0, 80) || lesson.title);
+    const phrasesToPractice = [];
 
+    for (let i = 0; i < coursesData.length && phrasesToPractice.length < 30; i++) {
+        const lesson = coursesData[i];
+        let content = lesson.content || '';
+        let sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10 && s.trim().length < 100);
+
+        for (let j = 0; j < sentences.length && phrasesToPractice.length < 30; j++) {
+            phrasesToPractice.push({
+                phrase: sentences[j].trim() + '.',
+                title: lesson.title
+            });
+        }
+    }
+
+    if (phrasesToPractice.length === 0 && coursesData.length > 0) {
+        phrasesToPractice.push({
+            phrase: "Hello, how are you today?",
+            title: "Basic Greetings"
+        });
+    }
+
+    phrasesToPractice.forEach((item, idx) => {
         const card = document.createElement('div');
         card.className = 'pron-card';
         card.innerHTML = `
-            <h3>📖 From: ${escapeHtml(lesson.title)}</h3>
-            <div class="phrase">"${escapeHtml(practicePhrase)}"</div>
+            <h3>📖 From: ${escapeHtml(item.title)}</h3>
+            <div class="phrase">"${escapeHtml(item.phrase)}"</div>
             <div class="actions">
-                <button class="btn-listen" onclick="speakText('${escapeHtml(practicePhrase).replace(/'/g, "\\'")}')">
+                <button class="btn-listen" onclick="speakText('${escapeHtml(item.phrase).replace(/'/g, "\\'")}')">
                     <i class="fas fa-play"></i> Listen
                 </button>
-                <button class="btn-record" onclick="recordPhrase('${escapeHtml(practicePhrase).replace(/'/g, "\\'")}', ${idx})">
+                <button class="btn-record" onclick="recordPhrase('${escapeHtml(item.phrase).replace(/'/g, "\\'")}', ${idx})">
                     <i class="fas fa-microphone"></i> Record
                 </button>
             </div>
@@ -502,20 +495,14 @@ function renderPronunciation() {
 async function recordPhrase(targetPhrase, idx) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        alert('Recording not supported in this browser. Please use Chrome, Edge, or Safari.');
+        alert('Recording not supported in this browser.');
         return;
     }
 
     const feedbackDiv = document.getElementById(`pron-feedback-${idx}`);
-    const recordBtn = document.querySelector(`#pron-container .pron-card:nth-child(${idx+1}) .btn-record`);
-
     if (!feedbackDiv) return;
 
     feedbackDiv.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> Listening... Please speak clearly.`;
-    if (recordBtn) {
-        recordBtn.classList.add('recording');
-        recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Recording...';
-    }
 
     const rec = new SpeechRecognition();
     rec.lang = 'en-US';
@@ -525,7 +512,6 @@ async function recordPhrase(targetPhrase, idx) {
     rec.onresult = (e) => {
         const userText = e.results[0][0].transcript;
 
-        // Compare pronunciation accuracy
         const target = targetPhrase.toLowerCase().replace(/[^\w\s]/g, '');
         const user = userText.toLowerCase().replace(/[^\w\s]/g, '');
         const targetWords = target.split(/\s+/).filter(w => w.length > 1);
@@ -546,56 +532,37 @@ async function recordPhrase(targetPhrase, idx) {
             <i class="fas fa-smile-wink"></i> ${comment}<br>
             <i class="fas fa-lightbulb"></i> <strong>Target:</strong> "${escapeHtml(targetPhrase)}"
         `;
-
-        if (recordBtn) {
-            recordBtn.classList.remove('recording');
-            recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Record';
-        }
     };
 
     rec.onerror = (event) => {
-        console.error('Recording error:', event.error);
-        let errorMsg = 'Microphone error. ';
-        if (event.error === 'no-speech') errorMsg = 'No speech detected. ';
-        else if (event.error === 'audio-capture') errorMsg = 'No microphone found. ';
-        else if (event.error === 'not-allowed') errorMsg = 'Microphone permission denied. ';
-        feedbackDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${errorMsg}Please try again.`;
-        if (recordBtn) {
-            recordBtn.classList.remove('recording');
-            recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Record';
-        }
-    };
-
-    rec.onend = () => {
-        if (recordBtn && recordBtn.classList.contains('recording')) {
-            recordBtn.classList.remove('recording');
-            recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Record';
-        }
+        feedbackDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Microphone error. Please try again.`;
     };
 
     rec.start();
 }
 
+// ========== NAVIGATION ==========
+document.querySelectorAll('.nav button').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('section-' + this.dataset.section).classList.add('active');
+    });
+});
+
 // ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize voices
     if (window.speechSynthesis) {
-        // Preload voices
         window.speechSynthesis.getVoices();
-        window.speechSynthesis.onvoiceschanged = () => {
-            console.log('Voices loaded');
-        };
     }
 
-    // Load courses
     loadCourses();
 
-    // Add initial bot message
     if (chatBox && chatBox.children.length === 0) {
-        addMessage('Hello! I\'m your WEC-BEC (wèk bèk) AI tutor. Ask me anything or choose a lesson. 🚀', false);
+        addMessage('Hello! I\'m your WEC-BEC English teacher. Ask me anything or choose a lesson. 🚀', false, true);
     }
 
-    // Enter key to send
     if (msgInput) {
         msgInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
@@ -603,7 +570,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Clean up on page unload
 window.addEventListener('beforeunload', () => {
     stopAllAudio();
 });
