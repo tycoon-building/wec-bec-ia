@@ -75,24 +75,101 @@ class A1ConversationManager:
         self.user_sessions = {}
 
     def check_answer(self, user_answer, expected_answers):
-        user_answer_lower = user_answer.lower().strip()
+        user_answer = user_answer.lower().strip()
+
         for expected in expected_answers:
-            if expected.lower() in user_answer_lower:
+            expected = expected.lower().strip()
+
+            if expected == user_answer:
                 return True
+
+            if expected in user_answer:
+                return True
+
+            words = expected.split()
+
+            if len(words) > 1:
+                matches = sum(
+                    1 for word in words
+                    if word in user_answer
+                )
+
+                if matches >= max(1, len(words) // 2):
+                    return True
+
         return False
+
+    def is_greeting(self, text):
+        greetings = [
+            "hi",
+            "hello",
+            "hey",
+            "good morning",
+            "good afternoon",
+            "good evening"
+        ]
+
+        text = text.lower().strip()
+
+        return any(
+            greeting == text
+            for greeting in greetings
+        )
+
+    def create_session(self):
+        return {
+            "current_conversation_index": 0,
+            "current_step": 0,
+            "current_attempts": 0,
+            "waiting_for_answer": False,
+            "current_question": None
+        }
+
+    def reset_user(self, user_email):
+        self.user_sessions[user_email] = self.create_session()
+        return True
+
+    def start_conversation(self, user_email):
+        if user_email not in self.user_sessions:
+            self.user_sessions[user_email] = self.create_session()
+
+        session_data = self.user_sessions[user_email]
+
+        conv_index = session_data["current_conversation_index"]
+
+        if conv_index >= len(A1_CONVERSATIONS):
+            conv_index = 0
+
+        conversation = A1_CONVERSATIONS[conv_index]
+
+        exchange = conversation["exchanges"][0]
+
+        question = exchange["question"]
+
+        expected_answers = exchange.get("expected_answers", [])
+
+        example = (
+            f"\n\n💬 Example: {expected_answers[0]}"
+            if expected_answers
+            else ""
+        )
+
+        session_data["waiting_for_answer"] = True
+        session_data["current_question"] = question
+        session_data["current_step"] = 1
+
+        return {
+            "reply":
+                f"📚 {conversation.get('title','A1 Lesson')}\n\n"
+                f"{question}"
+                f"{example}"
+        }
 
     def get_next_question(self, user_email, user_answer=None):
         # Initialiser la session si nécessaire
         if user_email not in self.user_sessions:
             if A1_CONVERSATIONS:
-                self.user_sessions[user_email] = {
-                    "current_conversation_index": 0,
-                    "current_step": 0,
-                    "current_attempts": 0,
-                    "conversation_history": [],
-                    "waiting_for_answer": False,
-                    "current_question": None
-                }
+                self.user_sessions[user_email] = self.create_session()
             else:
                 return None
 
@@ -227,19 +304,6 @@ class A1ConversationManager:
             }
 
         return None
-
-    def reset_user(self, user_email):
-        if user_email in self.user_sessions:
-            self.user_sessions[user_email] = {
-                "current_conversation_index": 0,
-                "current_step": 0,
-                "current_attempts": 0,
-                "conversation_history": [],
-                "waiting_for_answer": False,
-                "current_question": None
-            }
-            return True
-        return False
 
     def get_hint(self, user_email):
         if user_email not in self.user_sessions:
@@ -384,15 +448,39 @@ def chat():
 
         if message.lower() == "reset":
             a1_manager.reset_user(user_email)
-            result = a1_manager.get_next_question(user_email)
-            return jsonify({"reply": result["reply"] if result else "Conversation reset! Type anything to start."})
+            result = a1_manager.start_conversation(user_email)
+            return jsonify({
+                "reply":
+                    "🔄 Conversation restarted.\n\n"
+                    + result["reply"]
+            })
 
-        # Normal A1 conversation
-        result = a1_manager.get_next_question(user_email, message)
-        if result:
-            return jsonify({"reply": result["reply"]})
-        else:
-            return jsonify({"reply": "Loading A1 conversations... Please wait."})
+        # Première ouverture du chat
+        if user_email not in a1_manager.user_sessions:
+            result = a1_manager.start_conversation(user_email)
+            return jsonify({
+                "reply": result["reply"]
+            })
+
+        # Si l'utilisateur dit juste bonjour
+        if a1_manager.is_greeting(message):
+            session_data = a1_manager.user_sessions.get(user_email)
+
+            if not session_data.get("waiting_for_answer"):
+                result = a1_manager.start_conversation(user_email)
+                return jsonify({
+                    "reply": result["reply"]
+                })
+
+        # Conversation normale
+        result = a1_manager.get_next_question(
+            user_email,
+            message
+        )
+
+        return jsonify({
+            "reply": result["reply"]
+        })
 
     # Autres niveaux : utiliser l'IA
     reply = ask_ai(message, student_level)
