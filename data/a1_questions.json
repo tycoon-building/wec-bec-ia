@@ -1,6 +1,451 @@
 {
   "conversations": [
     {
+      "title": "👋 Lesson 1: Greetings and Farewells",
+      "exchanges": [
+        {
+          "question": "How to greet somebody? (Good morning, Good afternoon, Good evening)",
+          "validation_type": "multi_choice",
+          "allow_correction": true,
+          "example_answer": "Good morning!",
+          "accepted_topics": ["greeting", "morning", "afternoon", "evening", "hello", "hi"],
+          "expected_answers": ["good morning", "good afternoon", "good evening"],
+          "good_reply": "Great! Now, how do you say Hi or Hello informally? 🖐️",
+          "wrong_reply": "Try again. Say: Good morning, Good afternoon, or Good evening."
+        },
+        {
+          "question": "How do you ask someone about their health?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "How are you?",
+          "accepted_topics": ["health", "feeling", "how", "are you"],
+          "expected_answers": ["how are you", "how is it", "how is life", "what's up", "how goes it", "how are you doing", "how is health", "what's news"],
+          "good_reply": "Perfect! Now tell me, how do you answer when you are fine? 😊",
+          "wrong_reply": "Try again. Say one of these: How are you? How is life? What's up?"
+        },
+        {
+          "question": "How do you say you are in good health?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am fine, thank you!",
+          "accepted_topics": ["fine", "good", "ok", "well", "great"],
+          "expected_answers": ["i am fine", "fine thanks", "just fine", "all is good", "i am quite fine", "everything is ok", "everything is fine", "everything is good", "everything is hunky dory"],
+          "good_reply": "Good! And how do you say you are not feeling well? 🤒",
+          "wrong_reply": "Try again. Say: I am fine, or All is good, or Fine thanks."
+        },
+        {
+          "question": "How do you say you are not in good health?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I'm not feeling well.",
+          "accepted_topics": ["sick", "not well", "soso", "bad", "poor"],
+          "expected_answers": ["i'm soso", "i am soso", "i'm not very well", "i am not very well", "i'm a little bit fine", "i don't feel fine", "i am not feeling well", "i'm not feeling well"],
+          "good_reply": "I hope you feel better soon! Now, how do you say goodbye? 👋",
+          "wrong_reply": "Try again. Say: I'm soso, or I'm not very well, or I don't feel fine."
+        },
+        {
+          "question": "How do you say goodbye?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Good bye! See you later!",
+          "accepted_topics": ["bye", "goodbye", "see you", "later", "farewell"],
+          "expected_answers": ["good bye", "see you", "see you soon", "so long", "see you later", "check you later", "see you tomorrow", "see you next time"],
+          "good_reply": "Excellent! You've mastered greetings and farewells. Let's continue! 🎉",
+          "wrong_reply": "Try again. Say: Good bye, See you later, or See you tomorrow."
+        }
+      ]
+    },
+    {
+      "title": "🎨 Lesson 2: Colors and Personal Questions",
+      "exchanges": [
+        {
+          "question": "What are the colours of the Congolese flag?",
+          "validation_type": "multi_choice",
+          "allow_correction": true,
+          "example_answer": "Green, yellow, and red.",
+          "accepted_topics": ["flag", "congo", "green", "yellow", "red", "colors"],
+          "expected_answers": ["green", "yellow", "red", "green yellow red", "green, yellow, red"],
+          "good_reply": "Correct! 🇨🇬 Now, what is your favorite or best colour? 🎨",
+          "wrong_reply": "Try again. The Congolese flag has three colours: green, yellow, and red."
+        },
+        {
+          "question": "What is your favorite or best colour?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My favorite colour is blue.",
+          "accepted_topics": ["favorite", "colour", "color", "like", "prefer"],
+          "expected_answers": ["my favourite colour is", "my favorite color is", "pink", "blue", "red", "green", "yellow", "black", "white"],
+          "good_reply": "Nice choice! 😊 Where are you going to?",
+          "wrong_reply": "Try again. Say: My favourite colour is [colour]."
+        },
+        {
+          "question": "Where are you going to?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am going to school.",
+          "accepted_topics": ["going", "to", "church", "school", "market", "home", "work"],
+          "expected_answers": ["i am going to", "i'm going to", "church", "school", "market", "home"],
+          "good_reply": "Okay! Are you going on foot? 🚶",
+          "wrong_reply": "Try again. Say: I am going to [place]."
+        },
+        {
+          "question": "Are you going on foot?",
+          "validation_type": "boolean",
+          "allow_correction": true,
+          "example_answer": "Yes, of course.",
+          "accepted_topics": ["yes", "no", "of course", "sure", "foot", "walk"],
+          "expected_answers": ["of course", "yes", "yeah", "no", "yes i am", "no i am not"],
+          "good_reply": "Why? 🤔",
+          "wrong_reply": "Try again. Say: Of course, or Yes, or No."
+        },
+        {
+          "question": "Why?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Because I have no money.",
+          "accepted_topics": ["because", "money", "no", "don't have", "can't afford"],
+          "expected_answers": ["because", "because i have no money", "no money", "i have no money"],
+          "good_reply": "I have some coins here for you. 🪙",
+          "wrong_reply": "Try again. Say: Because I have no money."
+        },
+        {
+          "question": "What do you say when someone gives you something?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Thank you very much!",
+          "accepted_topics": ["thank", "thanks", "grateful", "appreciate"],
+          "expected_answers": ["thanks a lot", "thank you", "thanks", "thank you very much"],
+          "good_reply": "You're welcome! I wish you all the best! 🌟",
+          "wrong_reply": "Try again. Say: Thanks a lot or Thank you very much."
+        },
+        {
+          "question": "What do you say back when someone wishes you all the best?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "You too, all the best!",
+          "accepted_topics": ["too", "same", "you too", "best"],
+          "expected_answers": ["all the best you too", "you too", "same to you", "thanks you too"],
+          "good_reply": "Take care! 🛡️",
+          "wrong_reply": "Try again. Say: All the best you too or You too."
+        },
+        {
+          "question": "How do you say 'prends soin de toi' in English?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Take care of yourself.",
+          "accepted_topics": ["take", "care", "yourself", "careful"],
+          "expected_answers": ["take care", "take care of yourself"],
+          "good_reply": "Ok let's keep in touch! 📞",
+          "wrong_reply": "Try again. Say: Take care."
+        }
+      ]
+    },
+    {
+      "title": "📝 Lesson 3: Introducing Yourself (Assessment)",
+      "exchanges": [
+        {
+          "question": "Can you introduce yourself?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My name is John. I am a student.",
+          "accepted_topics": ["name", "introduce", "myself", "i am", "my name"],
+          "expected_answers": ["my name is", "i am", "my surname is", "i'm"],
+          "good_reply": "Nice to meet you! What is your surname? 📛",
+          "wrong_reply": "Try again. Say: My name is [name] or I am [name]."
+        },
+        {
+          "question": "What is your surname?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My surname is Smith.",
+          "accepted_topics": ["surname", "last name", "family name"],
+          "expected_answers": ["my surname is", "my last name is"],
+          "good_reply": "Got it! Where do you live? 🏠",
+          "wrong_reply": "Try again. Say: My surname is [surname]."
+        },
+        {
+          "question": "Where do you live?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I live in London.",
+          "accepted_topics": ["live", "address", "city", "town", "house"],
+          "expected_answers": ["i live at", "i live in", "my address is"],
+          "good_reply": "What school do you attend? 🏫",
+          "wrong_reply": "Try again. Say: I live at [address] or I live in [city]."
+        },
+        {
+          "question": "What school do you attend?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I attend WEC-BEC school.",
+          "accepted_topics": ["school", "study", "attend", "university", "college"],
+          "expected_answers": ["i study at", "i attend", "i go to"],
+          "good_reply": "What is your level or grade? 📚",
+          "wrong_reply": "Try again. Say: I study at [school name] or I attend [university]."
+        },
+        {
+          "question": "What is your level?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am a beginner.",
+          "accepted_topics": ["level", "grade", "year", "beginner", "fresher"],
+          "expected_answers": ["i am in", "first level", "first grade", "first year", "fresher", "sophomore", "beginner"],
+          "good_reply": "How many are you in your family? 👨‍👩‍👧‍👦",
+          "wrong_reply": "Try again. Say: I am in first level or I am a fresher."
+        },
+        {
+          "question": "How many are you in your family?",
+          "validation_type": "numeric",
+          "allow_correction": true,
+          "example_answer": "We are five in my family.",
+          "accepted_topics": ["family", "members", "number", "people"],
+          "expected_answers": ["we are", "there are", "people", "family members"],
+          "good_reply": "How old are you? 🎂",
+          "wrong_reply": "Try again. Say: We are [number] in my family."
+        },
+        {
+          "question": "How old are you?",
+          "validation_type": "numeric",
+          "allow_correction": true,
+          "example_answer": "I am 20 years old.",
+          "accepted_topics": ["age", "years old", "old", "born"],
+          "expected_answers": ["i am", "i'm", "years old"],
+          "good_reply": "What is your nationality? 🌍",
+          "wrong_reply": "Try again. Say: I am [number] years old."
+        },
+        {
+          "question": "What is your nationality?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am Congolese.",
+          "accepted_topics": ["nationality", "country", "from", "citizen"],
+          "expected_answers": ["i am from", "i'm from", "congolese", "i am congolese"],
+          "good_reply": "When were you born? 📅",
+          "wrong_reply": "Try again. Say: I am from Congo or I am Congolese."
+        },
+        {
+          "question": "When were you born?",
+          "validation_type": "date",
+          "allow_correction": true,
+          "example_answer": "I was born in 2000.",
+          "accepted_topics": ["born", "birth", "year", "date"],
+          "expected_answers": ["i was born in", "born in"],
+          "good_reply": "What is your profession? 💼",
+          "wrong_reply": "Try again. Say: I was born in [year]."
+        },
+        {
+          "question": "What is your profession?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am a student.",
+          "accepted_topics": ["profession", "job", "work", "career"],
+          "expected_answers": ["i am a", "student", "teacher", "doctor"],
+          "good_reply": "Where do you learn English? 📖",
+          "wrong_reply": "Try again. Say: I am a student or I am a teacher."
+        },
+        {
+          "question": "Where do you learn English?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I learn English at WEC-BEC.",
+          "accepted_topics": ["learn", "study", "english", "center", "school"],
+          "expected_answers": ["i learn english at", "at", "wec-bec"],
+          "good_reply": "Are you a Christian? ✝️",
+          "wrong_reply": "Try again. Say: I learn English at [school]."
+        },
+        {
+          "question": "Are you a Christian?",
+          "validation_type": "boolean",
+          "allow_correction": true,
+          "example_answer": "Yes, I am a Christian.",
+          "accepted_topics": ["christian", "muslim", "religion", "faith", "believe"],
+          "expected_answers": ["yes", "no", "yes i am", "no i am not", "i am a christian", "i am a muslim"],
+          "good_reply": "Where do you pray? 🕌",
+          "wrong_reply": "Try again. Say: Yes, I am a Christian or No, I am a Muslim."
+        },
+        {
+          "question": "Where do you pray?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I pray at the church.",
+          "accepted_topics": ["pray", "church", "mosque", "temple", "worship"],
+          "expected_answers": ["i pray at", "church", "mosque", "catholic church"],
+          "good_reply": "Are you a beginner? 🆕",
+          "wrong_reply": "Try again. Say: I pray at church or I pray at mosque."
+        },
+        {
+          "question": "Are you a beginner?",
+          "validation_type": "boolean",
+          "allow_correction": true,
+          "example_answer": "Yes, I am a beginner.",
+          "accepted_topics": ["beginner", "newcomer", "level", "start"],
+          "expected_answers": ["i am a beginner", "i am a newcomer", "beginner", "newcomer"],
+          "good_reply": "How long have you been learning English? ⏳",
+          "wrong_reply": "Try again. Say: I am a beginner or I am a newcomer."
+        },
+        {
+          "question": "How long have you been learning English?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I have been learning English for one month.",
+          "accepted_topics": ["for", "since", "months", "weeks", "years", "time"],
+          "expected_answers": ["for", "one week", "one month", "one year", "since"],
+          "good_reply": "Why do you learn English? ❓",
+          "wrong_reply": "Try again. Say: I have been learning English for [time]."
+        },
+        {
+          "question": "Why do you learn English?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Because it is the most spoken language.",
+          "accepted_topics": ["because", "important", "spoken", "useful", "travel", "work"],
+          "expected_answers": ["because", "it is one of the most spoken languages", "most spoken languages"],
+          "good_reply": "What position are you in your family? 👑",
+          "wrong_reply": "Try again. Say: Because it is one of the most spoken languages in the world."
+        },
+        {
+          "question": "What position are you in your family?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I am the eldest.",
+          "accepted_topics": ["eldest", "youngest", "oldest", "position", "birth order"],
+          "expected_answers": ["i am the eldest", "eldest", "youngest", "i am the youngest"],
+          "good_reply": "That's all! Great job introducing yourself! 🎉",
+          "wrong_reply": "Try again. Say: I am the eldest or I am the youngest."
+        }
+      ]
+    },
+    {
+      "title": "🔢 Lesson 4: Numbers, Dates, and Days of the Week",
+      "exchanges": [
+        {
+          "question": "Can you count from 1 to 10 in English?",
+          "validation_type": "sequence",
+          "allow_correction": true,
+          "example_answer": "One, two, three, four, five, six, seven, eight, nine, ten.",
+          "accepted_topics": ["numbers", "count", "one", "two", "three"],
+          "expected_answers": ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"],
+          "good_reply": "Well done! Can you cite five cardinal numbers in English? 🔢",
+          "wrong_reply": "Try again. Say numbers from one to ten."
+        },
+        {
+          "question": "Can you cite five cardinal numbers?",
+          "validation_type": "sequence",
+          "allow_correction": true,
+          "example_answer": "One, two, three, four, five.",
+          "accepted_topics": ["numbers", "five", "count", "cardinal"],
+          "expected_answers": ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"],
+          "good_reply": "How much is it? 💰",
+          "wrong_reply": "Try again. Say any five numbers like one, two, three, four, five."
+        },
+        {
+          "question": "How much is it?",
+          "validation_type": "numeric",
+          "allow_correction": true,
+          "example_answer": "It is one hundred.",
+          "accepted_topics": ["cost", "price", "money", "amount"],
+          "expected_answers": ["it is", "one thousand", "1000"],
+          "good_reply": "What is your phone number? 📱",
+          "wrong_reply": "Try again. Say: It is [amount]."
+        },
+        {
+          "question": "What is your phone number?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "My phone number is 06 123 456 78.",
+          "accepted_topics": ["phone", "number", "contact", "mobile", "call"],
+          "expected_answers": ["my phone number is", "06"],
+          "good_reply": "What is the date today? 📆",
+          "wrong_reply": "Try again. Say: My phone number is [number]."
+        },
+        {
+          "question": "What is the date today?",
+          "validation_type": "date",
+          "allow_correction": true,
+          "example_answer": "Today is Monday, June 1st.",
+          "accepted_topics": ["date", "today", "day", "month"],
+          "expected_answers": ["today is", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "july", "august"],
+          "good_reply": "How many days are there in the week? 📅",
+          "wrong_reply": "Try again. Say: Today is Monday, July 3rd (or current date)."
+        },
+        {
+          "question": "How many days are there in the week?",
+          "validation_type": "numeric",
+          "allow_correction": true,
+          "example_answer": "There are seven days.",
+          "accepted_topics": ["week", "days", "seven", "number"],
+          "expected_answers": ["seven", "7", "there are seven days"],
+          "good_reply": "Can you name all the days of the week? 🗓️",
+          "wrong_reply": "Try again. Say: There are seven days in the week."
+        },
+        {
+          "question": "Can you name all the days of the week?",
+          "validation_type": "sequence",
+          "allow_correction": true,
+          "example_answer": "Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday.",
+          "accepted_topics": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+          "expected_answers": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+          "good_reply": "What is the first day of the week? 📍",
+          "wrong_reply": "Try again. Say all seven days of the week."
+        },
+        {
+          "question": "What is the first day of the week?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "Monday is the first day.",
+          "accepted_topics": ["first", "monday", "week", "start"],
+          "expected_answers": ["monday", "monday is the first day"],
+          "good_reply": "See you on Monday! 👋",
+          "wrong_reply": "Try again. Say: The first day of the week is Monday."
+        }
+      ]
+    },
+    {
+      "title": "📅 Lesson 5: Months of the Year and Travel",
+      "exchanges": [
+        {
+          "question": "How many months are there in the year?",
+          "validation_type": "numeric",
+          "allow_correction": true,
+          "example_answer": "There are twelve months.",
+          "accepted_topics": ["months", "year", "twelve", "12"],
+          "expected_answers": ["twelve", "12", "there are twelve months"],
+          "good_reply": "Name all the months of the year! 🗓️",
+          "wrong_reply": "Try again. Say: There are twelve months in the year."
+        },
+        {
+          "question": "Can you name all the months of the year?",
+          "validation_type": "sequence",
+          "allow_correction": true,
+          "example_answer": "January, February, March, April, May, June, July, August, September, October, November, December.",
+          "accepted_topics": ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"],
+          "expected_answers": ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"],
+          "good_reply": "When will you travel? ✈️",
+          "wrong_reply": "Try again. Say all twelve months of the year."
+        },
+        {
+          "question": "When will you travel?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "I will travel in December.",
+          "accepted_topics": ["travel", "go", "trip", "holiday", "vacation"],
+          "expected_answers": ["i will travel in", "january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"],
+          "good_reply": "What is the first month of the year? 🥇",
+          "wrong_reply": "Try again. Say: I will travel in [month]."
+        },
+        {
+          "question": "What is the first month of the year?",
+          "validation_type": "free",
+          "allow_correction": true,
+          "example_answer": "January is the first month.",
+          "accepted_topics": ["first", "january", "month", "start", "beginning"],
+          "expected_answers": ["january", "january is the first month"],
+          "good_reply": "Perfect! You've completed all lessons. Keep practicing! 🚀",
+          "wrong_reply": "Try again. Say: The first month of the year is January."
+        }
+      ]
+    },
+    {
       "title": "🤝 Lesson 6: Making Someone's Acquaintance",
       "exchanges": [
         {
