@@ -108,6 +108,9 @@
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         @media (max-width: 768px) { .app { height: 100vh; margin: 0; border-radius: 0; } .main { padding: 16px; } .msg { max-width: 95%; } .nav button { font-size: 11px; } }
         .loading { text-align: center; padding: 40px; color: #94a3b8; }
+        .menu-bar { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+        .menu-bar button { background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.3); padding: 8px 16px; border-radius: 40px; color: #60a5fa; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.3s; }
+        .menu-bar button:hover { background: #3b82f6; color: white; }
     </style>
 </head>
 <body>
@@ -116,7 +119,7 @@
     <div class="header">
         <div class="header-text">
             <h1>🎓 WEC-BEC English AI</h1>
-            <p><i class="fas fa-circle"></i> Connected as: {{ user }} · Level: {{ student_level }} · Your personal AI tutor</p>
+            <p><i class="fas fa-circle"></i> Connected as: {{ user }} · Level: {{ student_level }}</p>
         </div>
         <div class="streak-badge"><i class="fas fa-fire"></i> 7 day streak</div>
         <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Exit</a>
@@ -130,6 +133,11 @@
 
     <div class="main">
         <div id="section-chat" class="section active">
+            <div class="menu-bar">
+                <button onclick="showMenu()"><i class="fas fa-chart-line"></i> Menu</button>
+                <button onclick="getHint()"><i class="fas fa-lightbulb"></i> Hint</button>
+                <button onclick="resetChat()"><i class="fas fa-redo"></i> Reset</button>
+            </div>
             <div id="chat-box"></div>
             <div class="status" id="status">Ready 🎤</div>
             <div class="chat-input-area">
@@ -172,7 +180,6 @@ let voiceMode = false;
 let recognition = null;
 let speaking = false;
 let isListening = false;
-let currentUtterance = null;
 
 const statusText = document.getElementById('status');
 const micBtn = document.getElementById('micBtn');
@@ -208,19 +215,18 @@ function speak(text) {
     speech.onstart = () => { if (recognition && isListening) { recognition.stop(); isListening = false; } };
     speech.onend = () => {
         speaking = false;
-        currentUtterance = null;
         setStatus('Ready 🎤');
-        if (voiceMode) setTimeout(() => startListening(), 800);
+        if (voiceMode) setTimeout(() => startListening(), 500);
     };
     speech.onerror = () => {
         speaking = false;
-        setStatus('Speech error');
-        if (voiceMode) setTimeout(() => startListening(), 800);
+        setStatus('Ready');
+        if (voiceMode) setTimeout(() => startListening(), 500);
     };
     window.speechSynthesis.speak(speech);
 }
 
-// ========== SPEECH RECOGNITION (BONNE VERSION) ==========
+// ========== SPEECH RECOGNITION ==========
 function startListening() {
     if (speaking || isListening) return;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -229,16 +235,14 @@ function startListening() {
     recognition.lang = 'en-US';
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
     recognition.onstart = () => { isListening = true; setStatus('Listening... 🎤'); };
     recognition.onresult = async (e) => {
         const text = e.results[0][0].transcript;
         recognition.stop(); isListening = false;
-        document.getElementById('msg').value = text;
+        msgInput.value = text;
         await sendMessage(text);
     };
-    recognition.onerror = (e) => {
-        console.log(e.error);
+    recognition.onerror = () => {
         isListening = false;
         setStatus('Microphone error ❌');
         if (voiceMode) setTimeout(() => startListening(), 1500);
@@ -252,7 +256,7 @@ function startListening() {
 
 function startVoice() {
     voiceMode = true;
-    setStatus('Voice mode activated 🎤');
+    setStatus('Voice mode ON 🎤');
     startListening();
     if (micBtn) micBtn.classList.add('listening');
 }
@@ -262,7 +266,7 @@ function stopVoice() {
     speaking = false;
     isListening = false;
     if (recognition) recognition.stop();
-    speechSynthesis.cancel();
+    window.speechSynthesis.cancel();
     setStatus('Voice stopped ⛔');
     if (micBtn) micBtn.classList.remove('listening');
 }
@@ -280,7 +284,7 @@ function addMessage(text, isUser = false, autoSpeak = true) {
     div.className = `msg ${isUser ? 'user' : 'bot'}`;
     const icon = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
     div.innerHTML = `
-        ${icon} ${escapeHtml(text)}
+        ${icon} <span>${escapeHtml(text)}</span>
         ${!isUser ? `
         <div class="msg-actions">
             <button class="listen-btn" onclick="speak('${escapeHtml(text).replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
@@ -294,11 +298,11 @@ function addMessage(text, isUser = false, autoSpeak = true) {
     if (!isUser && autoSpeak) speak(text);
 }
 
-async function sendMessage(textFromVoice = null) {
-    const message = textFromVoice ?? msgInput.value.trim();
+async function sendMessage(voiceText = null) {
+    const message = voiceText ?? msgInput.value.trim();
     if (!message) return;
     addMessage(message, true, false);
-    if (textFromVoice === null) msgInput.value = '';
+    if (voiceText === null) msgInput.value = '';
     setStatus('Thinking... 🤖');
     try {
         const res = await fetch('/chat', {
@@ -320,6 +324,54 @@ async function sendMessage(textFromVoice = null) {
     }
 }
 
+async function showMenu() {
+    setStatus('Loading menu...');
+    try {
+        const res = await fetch('/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'menu' })
+        });
+        const data = await res.json();
+        if (data.reply) addMessage(data.reply, false, true);
+    } catch (err) {
+        addMessage('Error loading menu.', false, true);
+    }
+}
+
+async function getHint() {
+    setStatus('Getting hint...');
+    try {
+        const res = await fetch('/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'hint' })
+        });
+        const data = await res.json();
+        if (data.reply) addMessage(data.reply, false, true);
+    } catch (err) {
+        addMessage('Error getting hint.', false, true);
+    }
+}
+
+async function resetChat() {
+    setStatus('Resetting...');
+    try {
+        const res = await fetch('/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: 'reset' })
+        });
+        const data = await res.json();
+        chatBox.innerHTML = '';
+        if (data.reply) {
+            addMessage(data.reply, false, true);
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 // ========== LOAD COURSES FROM BACKEND ==========
 async function loadCourses() {
     try {
@@ -337,7 +389,7 @@ async function loadCourses() {
     }
 }
 
-// ========== LESSONS (COMPLETES DEPUIS courses.json) ==========
+// ========== LESSONS ==========
 function renderLessons() {
     const container = document.getElementById('lessons-container');
     if (!container) return;
@@ -351,8 +403,6 @@ function renderLessons() {
     coursesData.forEach((lesson, idx) => {
         const content = lesson.content || 'No content available.';
         const contentPreview = content.substring(0, 200);
-        const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
-
         const card = document.createElement('div');
         card.className = 'lesson-card';
         card.innerHTML = `
@@ -386,7 +436,7 @@ function playRandomPhrase(idx) {
     }
 }
 
-// ========== PRONUNCIATION (EXTRAIT DES LEÇONS) ==========
+// ========== PRONUNCIATION ==========
 function renderPronunciation() {
     const container = document.getElementById('pron-container');
     if (!container) return;
@@ -499,8 +549,7 @@ window.speechSynthesis.onvoiceschanged = () => { getHumanVoice(); };
 
 document.addEventListener('DOMContentLoaded', () => {
     loadCourses();
-    const userName = '{{ user }}';
-    chatBox.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Hello! I'm your WEC-BEC English teacher. Ask me anything or choose a lesson from the menu. 🚀</div>`;
+    chatBox.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Hello! I'm your WEC-BEC English teacher. Say 'hi' to start our conversation! 🚀</div>`;
 
     msgInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
@@ -509,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 window.addEventListener('beforeunload', () => {
     if (recognition) recognition.stop();
-    speechSynthesis.cancel();
+    window.speechSynthesis.cancel();
 });
 </script>
 

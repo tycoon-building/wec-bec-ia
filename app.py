@@ -35,102 +35,6 @@ STUDENT_LEVELS = {
 
 
 # =========================
-# 🤖 SYSTEM PROMPT FOR AI
-# =========================
-def get_system_prompt(student_level="A1", validation_type="free", allow_correction=True, accepted_topics=None):
-    base_prompt = (
-        "You are WEC-BEC English Teacher AI. "
-        "WEC-BEC means World English Club and Basic English Center. "
-        "You were created by Mister Tycoon. "
-        "You are a smart, friendly, patient, and professional female English teacher. "
-        "You teach English according to the student's CEFR level: A1, A2, B1, B2, C1, and C2. "
-        "\n\n"
-        "========================================\n"
-        "🔊 PRONUNCIATION RULE - VERY IMPORTANT:\n"
-        "The name WEC-BEC is pronounced 'wèk bèk'.\n"
-        "When you speak, YOU must pronounce WEC-BEC as 'wèk bèk'.\n"
-        "When a student says 'wèk bèk', understand that they are talking about WEC-BEC.\n"
-        "Do NOT display 'wèk bèk' in writing. Only use it for pronunciation.\n"
-        "========================================\n\n"
-        "For A1 students: "
-        "Use very easy English, short sentences, basic vocabulary, and slow explanations. "
-        "Focus on greetings, school, food, family, hobbies, colors, numbers, weather, travel, and daily life. "
-        "Do NOT repeat welcome messages. Just ask the next question directly.\n\n"
-        "For A2 students: "
-        "Use simple English with slightly longer conversations and simple grammar explanations. "
-        "\n\n"
-        "For B1 students: "
-        "Use intermediate English with more natural conversations and moderate vocabulary. "
-        "\n\n"
-        "For B2 students: "
-        "Use natural fluent English with richer vocabulary and more detailed explanations. "
-        "\n\n"
-        "For C1 and C2 students: "
-        "Use advanced fluent English, professional vocabulary, idioms, nuanced expressions, and native-level conversation. "
-        "\n\n"
-        "If the student speaks French, you may explain difficult words or grammar in French. "
-        "Always adapt your English difficulty to the student's level and answers. "
-        "Keep conversations natural, warm, human, and engaging. "
-        "Do not sound robotic. "
-        "Speak like a real modern English teacher. "
-        "Correct grammar politely and naturally without discouraging the student. "
-        "Encourage the student often. "
-        "Ask only ONE short question at a time. "
-        "Do not repeat the same question many times. "
-        "Avoid repetitive greetings. "
-        "Change topics naturally during the conversation. "
-        "If the student answers correctly, ask a DIFFERENT follow-up question. "
-        "If the student makes mistakes, gently correct them and continue the conversation naturally. "
-        "Be supportive, intelligent, dynamic, and motivating."
-    )
-
-    if student_level == "A1" and validation_type == "free":
-        free_instructions = (
-            "\n\n"
-            "📌 IMPORTANT: The student is answering an A1 conversation question with validation_type = 'free'.\n\n"
-            "Your job is:\n"
-            "1. Check if the answer is relevant to the question.\n"
-            "2. Correct grammar mistakes.\n"
-            "3. Correct spelling mistakes.\n"
-            "4. Show the corrected sentence.\n"
-            "5. Encourage the student.\n"
-            "6. Continue to the next question if the meaning is correct.\n\n"
-            "Do not reject a correct answer just because it is different from the example.\n"
-        )
-
-        if accepted_topics and len(accepted_topics) > 0:
-            topics_list = ", ".join(accepted_topics)
-            free_instructions += f"\nThe answer should be relevant to one of these topics: {topics_list}.\n"
-
-        if allow_correction:
-            free_instructions += "\nYou are ALLOWED to correct the student's grammar and spelling gently.\n"
-
-        base_prompt += free_instructions
-
-    elif student_level == "A1" and validation_type == "exact":
-        exact_instructions = (
-            "\n\n"
-            "📌 IMPORTANT: The student is answering an A1 conversation question with validation_type = 'exact'.\n\n"
-            "The answer must match one of the expected answers exactly.\n"
-            "If the answer is correct, say '✅ Correct!' and continue.\n"
-            "If the answer is wrong, provide the correct answer and ask the student to try again.\n"
-        )
-        base_prompt += exact_instructions
-
-    elif student_level == "A1" and validation_type == "translation":
-        translation_instructions = (
-            "\n\n"
-            "📌 IMPORTANT: The student is answering a translation question with validation_type = 'translation'.\n\n"
-            "The student must provide the correct translation.\n"
-            "If the translation is correct, say '✅ Good translation!' and continue.\n"
-            "If the translation is wrong, provide the correct translation and ask the student to try again.\n"
-        )
-        base_prompt += translation_instructions
-
-    return base_prompt
-
-
-# =========================
 # 📖 CHARGEMENT DES FICHIERS JSON
 # =========================
 def load_a1_questions():
@@ -164,39 +68,62 @@ COURSES_DATA = load_courses()
 
 
 # =========================
-# 🗣️ GESTIONNAIRE DE CONVERSATION A1
+# 🗣️ GESTIONNAIRE DE CONVERSATION A1 (STYLE PROFESSEUR)
 # =========================
 class A1ConversationManager:
     def __init__(self):
         self.user_sessions = {}
+        self.all_questions = self.extract_all_questions()
 
-    def check_answer(self, user_answer, expected_answers):
+    def extract_all_questions(self):
+        """Extrait toutes les questions du JSON avec leurs métadonnées"""
+        all_questions = []
+        for conv in A1_CONVERSATIONS:
+            title = conv.get('title', 'Lesson')
+            for exchange in conv.get('exchanges', []):
+                all_questions.append({
+                    'question': exchange.get('question', ''),
+                    'validation_type': exchange.get('validation_type', 'free'),
+                    'expected_answers': exchange.get('expected_answers', []),
+                    'accepted_topics': exchange.get('accepted_topics', []),
+                    'allow_correction': exchange.get('allow_correction', True),
+                    'good_reply': exchange.get('good_reply', 'Good job! 👍'),
+                    'wrong_reply': exchange.get('wrong_reply', 'Try again.'),
+                    'example_answer': exchange.get('example_answer', ''),
+                    'title': title
+                })
+        return all_questions
+
+    def get_random_question(self, exclude_question=None):
+        """Retourne une question aléatoire parmi toutes"""
+        available = [q for q in self.all_questions if q['question'] != exclude_question]
+        return random.choice(available) if available else random.choice(self.all_questions)
+
+    def check_answer(self, user_answer, expected_answers, validation_type="free", accepted_topics=None):
+        """Vérifie si la réponse est correcte"""
         user_answer = user_answer.lower().strip()
-        # Remplacer la prononciation par le texte correct
-        user_answer = user_answer.replace("wèk bèk", "wec bec").replace("wek bek", "wec bec")
+        user_answer = user_answer.replace("wèk bèk", "wec bec").replace("wek bek", "wec bec").replace("walk back", "wec bec")
 
-        for expected in expected_answers:
-            expected = expected.lower().strip()
-            if expected == user_answer:
-                return True
-            if expected in user_answer:
-                return True
-            words = expected.split()
-            if len(words) > 1:
-                matches = sum(1 for word in words if word in user_answer)
-                if matches >= max(1, len(words) // 2):
+        if validation_type == "exact" or validation_type == "translation":
+            for expected in expected_answers:
+                expected = expected.lower().strip()
+                if expected == user_answer:
                     return True
-        return False
-
-    def check_relevance(self, user_answer, accepted_topics):
-        if not accepted_topics or len(accepted_topics) == 0:
-            return True
-        user_answer_lower = user_answer.lower().strip()
-        user_answer_lower = user_answer_lower.replace("wèk bèk", "wec bec").replace("wek bek", "wec bec")
-        for topic in accepted_topics:
-            if topic.lower() in user_answer_lower:
+                if expected in user_answer:
+                    return True
+                words = expected.split()
+                if len(words) > 1:
+                    matches = sum(1 for word in words if word in user_answer)
+                    if matches >= max(1, len(words) // 2):
+                        return True
+            return False
+        else:
+            if not accepted_topics or len(accepted_topics) == 0:
                 return True
-        return False
+            for topic in accepted_topics:
+                if topic.lower() in user_answer:
+                    return True
+            return False
 
     def is_greeting(self, text):
         greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "bonjour"]
@@ -205,17 +132,17 @@ class A1ConversationManager:
 
     def create_session(self):
         return {
-            "current_conversation_index": 0,
-            "current_step": 0,
-            "current_attempts": 0,
-            "waiting_for_answer": False,
             "current_question": None,
             "current_validation_type": None,
-            "current_allow_correction": None,
-            "current_accepted_topics": None,
             "current_expected_answers": None,
+            "current_accepted_topics": None,
+            "current_allow_correction": None,
             "current_good_reply": None,
-            "current_wrong_reply": None
+            "current_wrong_reply": None,
+            "correct_count": 0,
+            "wrong_count": 0,
+            "total_questions": 0,
+            "detected_level": "A1"
         }
 
     def reset_user(self, user_email):
@@ -223,286 +150,124 @@ class A1ConversationManager:
         return True
 
     def start_conversation(self, user_email):
+        """Démarre la conversation avec une question aléatoire"""
         if user_email not in self.user_sessions:
             self.user_sessions[user_email] = self.create_session()
 
-        session_data = self.user_sessions[user_email]
-        conv_index = session_data["current_conversation_index"]
+        session = self.user_sessions[user_email]
+        question_data = self.get_random_question()
 
-        if conv_index >= len(A1_CONVERSATIONS):
-            conv_index = 0
-            session_data["current_conversation_index"] = 0
-
-        conversation = A1_CONVERSATIONS[conv_index]
-        exchange = conversation["exchanges"][0]
-
-        question = exchange["question"]
-        validation_type = exchange.get("validation_type", "free")
-        allow_correction = exchange.get("allow_correction", True)
-        accepted_topics = exchange.get("accepted_topics", [])
-        expected_answers = exchange.get("expected_answers", [])
-        good_reply = exchange.get("good_reply", "Good job! 👍")
-        wrong_reply = exchange.get("wrong_reply", "Try again!")
-
-        session_data["current_validation_type"] = validation_type
-        session_data["current_allow_correction"] = allow_correction
-        session_data["current_accepted_topics"] = accepted_topics
-        session_data["current_expected_answers"] = expected_answers
-        session_data["current_good_reply"] = good_reply
-        session_data["current_wrong_reply"] = wrong_reply
-
-        example = ""
-        if validation_type == "free" and "example_answer" in exchange:
-            example = f"\n\n💬 Example: {exchange['example_answer']}"
-        elif expected_answers and len(expected_answers) > 0:
-            example = f"\n\n💬 Example: {expected_answers[0]}"
-
-        session_data["waiting_for_answer"] = True
-        session_data["current_question"] = question
-        session_data["current_step"] = 1
-
-        title = conversation.get('title', 'A1 Lesson')
+        session["current_question"] = question_data['question']
+        session["current_validation_type"] = question_data['validation_type']
+        session["current_expected_answers"] = question_data['expected_answers']
+        session["current_accepted_topics"] = question_data['accepted_topics']
+        session["current_allow_correction"] = question_data['allow_correction']
+        session["current_good_reply"] = question_data['good_reply']
+        session["current_wrong_reply"] = question_data['wrong_reply']
 
         return {
-            "reply": f"📚 {title}\n\n{question}{example}",
-            "validation_type": validation_type,
-            "allow_correction": allow_correction,
-            "accepted_topics": accepted_topics,
-            "expected_answers": expected_answers,
-            "good_reply": good_reply,
-            "wrong_reply": wrong_reply
+            "reply": question_data['question'],
+            "question_data": question_data
         }
 
-    def get_next_question(self, user_email, user_answer=None):
+    def process_answer(self, user_email, user_answer):
+        """Traite la réponse et retourne la prochaine question"""
         if user_email not in self.user_sessions:
-            if A1_CONVERSATIONS:
-                self.user_sessions[user_email] = self.create_session()
-            else:
-                return None
+            return self.start_conversation(user_email)
 
-        session_data = self.user_sessions[user_email]
+        session = self.user_sessions[user_email]
+        session["total_questions"] += 1
 
-        if user_answer is not None:
-            if not session_data.get("waiting_for_answer", False):
-                return {
-                    "reply": "👋 Please answer the question I asked you.",
-                    "conversation_end": False,
-                    "repeat_question": True,
-                    "question_to_repeat": session_data.get("current_question", "")
-                }
+        current_q = session.get("current_question")
+        expected = session.get("current_expected_answers", [])
+        validation_type = session.get("current_validation_type", "free")
+        accepted_topics = session.get("current_accepted_topics", [])
+        allow_correction = session.get("current_allow_correction", True)
+        good_reply = session.get("current_good_reply", "Good job! 👍")
+        wrong_reply = session.get("current_wrong_reply", "Try again.")
 
-            validation_type = session_data.get("current_validation_type", "free")
-            allow_correction = session_data.get("current_allow_correction", True)
-            accepted_topics = session_data.get("current_accepted_topics", [])
-            expected_answers = session_data.get("current_expected_answers", [])
-            good_reply = session_data.get("current_good_reply", "Good job! 👍")
-            wrong_reply = session_data.get("current_wrong_reply", "Try again!")
+        # Vérifier si l'élève a un niveau avancé
+        advanced_keywords = [
+            "present perfect", "past perfect", "conditional", "subjunctive",
+            "could you explain", "difference between", "would have", "should have",
+            "passive voice", "relative clause", "phrasal verb", "idiom"
+        ]
+        is_advanced = any(keyword in user_answer.lower() for keyword in advanced_keywords)
 
-            is_correct = False
-            is_relevant = True
-
-            if validation_type == "exact" or validation_type == "translation":
-                is_correct = self.check_answer(user_answer, expected_answers)
-            else:
-                is_relevant = self.check_relevance(user_answer, accepted_topics)
-                is_correct = is_relevant
-
-            if not is_correct:
-                session_data["current_attempts"] = session_data.get("current_attempts", 0) + 1
-                session_data["waiting_for_answer"] = True
-
-                if session_data["current_attempts"] >= 2 and expected_answers:
-                    hint = f"\n\n💡 Hint: Try saying: {expected_answers[0]}"
-                    wrong_reply += hint
-
-                return {
-                    "reply": wrong_reply,
-                    "conversation_end": False,
-                    "repeat_question": True,
-                    "question_to_repeat": session_data.get("current_question", ""),
-                    "validation_type": validation_type,
-                    "allow_correction": allow_correction
-                }
-
-            session_data["current_attempts"] = 0
-            session_data["current_step"] += 1
-            current_step = session_data["current_step"]
-            current_conv_index = session_data["current_conversation_index"]
-
-            conversation = A1_CONVERSATIONS[current_conv_index]
-            exchanges = conversation.get("exchanges", [])
-
-            if current_step > len(exchanges):
-                session_data["current_conversation_index"] += 1
-                session_data["current_step"] = 0
-                session_data["current_attempts"] = 0
-                session_data["waiting_for_answer"] = False
-                session_data["current_question"] = None
-                session_data["current_validation_type"] = None
-                session_data["current_allow_correction"] = None
-                session_data["current_accepted_topics"] = None
-                session_data["current_expected_answers"] = None
-
-                if session_data["current_conversation_index"] < len(A1_CONVERSATIONS):
-                    next_conv = A1_CONVERSATIONS[session_data["current_conversation_index"]]
-                    next_exchange = next_conv.get("exchanges", [])[0]
-                    next_question = next_exchange.get("question", "")
-                    next_title = next_conv.get('title', 'New Conversation')
-                    next_validation_type = next_exchange.get("validation_type", "free")
-                    next_expected_answers = next_exchange.get("expected_answers", [])
-
-                    session_data["current_validation_type"] = next_validation_type
-                    session_data["current_allow_correction"] = next_exchange.get("allow_correction", True)
-                    session_data["current_accepted_topics"] = next_exchange.get("accepted_topics", [])
-                    session_data["current_expected_answers"] = next_expected_answers
-                    session_data["current_good_reply"] = next_exchange.get("good_reply", "Good job! 👍")
-                    session_data["current_wrong_reply"] = next_exchange.get("wrong_reply", "Try again!")
-
-                    example = ""
-                    if next_validation_type == "free" and "example_answer" in next_exchange:
-                        example = f"\n\n💬 Example: {next_exchange['example_answer']}"
-                    elif next_expected_answers and len(next_expected_answers) > 0:
-                        example = f"\n\n💬 Example: {next_expected_answers[0]}"
-
-                    session_data["waiting_for_answer"] = True
-                    session_data["current_question"] = next_question
-
-                    return {
-                        "reply": f"{good_reply}\n\n✨ Great job! Let's continue. ✨\n\n📚 {next_title}\n{next_question}{example}",
-                        "conversation_end": False,
-                        "repeat_question": False,
-                        "validation_type": next_validation_type,
-                        "allow_correction": next_exchange.get("allow_correction", True)
-                    }
-                else:
-                    session_data["waiting_for_answer"] = False
-                    return {
-                        "reply": f"{good_reply}\n\n🎉 Congratulations! You have completed all A1 conversations! 🎉",
-                        "conversation_end": True,
-                        "repeat_question": False
-                    }
-            else:
-                next_exchange = exchanges[current_step - 1]
-                next_question = next_exchange.get("question", "")
-                next_validation_type = next_exchange.get("validation_type", "free")
-                next_expected_answers = next_exchange.get("expected_answers", [])
-
-                session_data["current_validation_type"] = next_validation_type
-                session_data["current_allow_correction"] = next_exchange.get("allow_correction", True)
-                session_data["current_accepted_topics"] = next_exchange.get("accepted_topics", [])
-                session_data["current_expected_answers"] = next_expected_answers
-                session_data["current_good_reply"] = next_exchange.get("good_reply", "Good job! 👍")
-                session_data["current_wrong_reply"] = next_exchange.get("wrong_reply", "Try again!")
-
-                example = ""
-                if next_validation_type == "free" and "example_answer" in next_exchange:
-                    example = f"\n\n💬 Example: {next_exchange['example_answer']}"
-                elif next_expected_answers and len(next_expected_answers) > 0:
-                    example = f"\n\n💬 Example: {next_expected_answers[0]}"
-
-                session_data["waiting_for_answer"] = True
-                session_data["current_question"] = next_question
-
-                return {
-                    "reply": f"{good_reply}\n\n{next_question}{example}",
-                    "conversation_end": False,
-                    "repeat_question": False,
-                    "validation_type": next_validation_type,
-                    "allow_correction": next_exchange.get("allow_correction", True)
-                }
-
-        current_conv_index = session_data["current_conversation_index"]
-        current_step = session_data["current_step"]
-
-        if current_conv_index >= len(A1_CONVERSATIONS):
-            current_conv_index = 0
-            session_data["current_conversation_index"] = 0
-            session_data["current_step"] = 0
-            current_step = 0
-
-        conversation = A1_CONVERSATIONS[current_conv_index]
-        exchanges = conversation.get("exchanges", [])
-
-        if current_step < len(exchanges):
-            current_exchange = exchanges[current_step]
-            question = current_exchange.get("question", "")
-            validation_type = current_exchange.get("validation_type", "free")
-            expected_answers = current_exchange.get("expected_answers", [])
-            accepted_topics = current_exchange.get("accepted_topics", [])
-            allow_correction = current_exchange.get("allow_correction", True)
-
-            session_data["current_validation_type"] = validation_type
-            session_data["current_allow_correction"] = allow_correction
-            session_data["current_accepted_topics"] = accepted_topics
-            session_data["current_expected_answers"] = expected_answers
-            session_data["current_good_reply"] = current_exchange.get("good_reply", "Good job! 👍")
-            session_data["current_wrong_reply"] = current_exchange.get("wrong_reply", "Try again!")
-
-            example = ""
-            if validation_type == "free" and "example_answer" in current_exchange:
-                example = f"\n\n💬 Example: {current_exchange['example_answer']}"
-            elif expected_answers and len(expected_answers) > 0:
-                example = f"\n\n💬 Example: {expected_answers[0]}"
-
-            intro_title = conversation.get('title', 'A1 Conversation')
-            intro = f"📚 {intro_title}\n\n" if current_step == 0 else ""
-
-            session_data["waiting_for_answer"] = True
-            session_data["current_question"] = question
-            session_data["current_step"] = current_step + 1
-
+        if is_advanced and session["detected_level"] == "A1":
+            session["detected_level"] = "A2"
             return {
-                "reply": f"{intro}{question}{example}",
-                "conversation_end": False,
-                "repeat_question": False,
-                "validation_type": validation_type,
-                "allow_correction": allow_correction
+                "reply": f"Very good question! Your English seems quite strong.\n\nYou're ready for A2 level! Let's continue.",
+                "level_up": True,
+                "new_level": "A2"
             }
 
-        return None
+        is_correct = self.check_answer(user_answer, expected, validation_type, accepted_topics)
+
+        if is_correct:
+            session["correct_count"] += 1
+            # Choisir une nouvelle question aléatoire
+            new_question = self.get_random_question(current_q)
+            session["current_question"] = new_question['question']
+            session["current_validation_type"] = new_question['validation_type']
+            session["current_expected_answers"] = new_question['expected_answers']
+            session["current_accepted_topics"] = new_question['accepted_topics']
+            session["current_allow_correction"] = new_question['allow_correction']
+            session["current_good_reply"] = new_question['good_reply']
+            session["current_wrong_reply"] = new_question['wrong_reply']
+
+            score = (session["correct_count"] / session["total_questions"]) * 100 if session["total_questions"] > 0 else 0
+
+            # Si score élevé, féliciter
+            if score > 80 and session["total_questions"] >= 5:
+                return {
+                    "reply": f"{good_reply}\n\n{new_question['question']}",
+                    "next_question": new_question['question'],
+                    "correct": True,
+                    "score": round(score, 1)
+                }
+            else:
+                return {
+                    "reply": f"{good_reply}\n\n{new_question['question']}",
+                    "next_question": new_question['question'],
+                    "correct": True
+                }
+        else:
+            session["wrong_count"] += 1
+            if allow_correction and expected:
+                return {
+                    "reply": f"{wrong_reply}\n\n{current_q}",
+                    "repeat_question": True,
+                    "correct": False
+                }
+            return {
+                "reply": f"{wrong_reply}\n\n{current_q}",
+                "repeat_question": True,
+                "correct": False
+            }
 
     def get_hint(self, user_email):
         if user_email not in self.user_sessions:
-            return None
-        session_data = self.user_sessions[user_email]
-        expected_answers = session_data.get("current_expected_answers", [])
-        if expected_answers:
-            return f"💡 Hint: Try saying: {expected_answers[0]}"
-        return "💡 Hint: Listen carefully to the question and answer simply."
+            return "Say 'hi' to start a conversation!"
+        session = self.user_sessions[user_email]
+        expected = session.get("current_expected_answers", [])
+        if expected:
+            return f"💡 Hint: Try saying: {expected[0]}"
+        return "💡 Hint: Answer naturally in English."
 
     def get_progress(self, user_email):
         if user_email not in self.user_sessions:
             return None
-        session_data = self.user_sessions[user_email]
-        total_conversations = len(A1_CONVERSATIONS)
-        current_conv = session_data["current_conversation_index"]
-
-        if total_conversations > 0 and current_conv < len(A1_CONVERSATIONS):
-            progress_percent = (current_conv / total_conversations) * 100
-            current_exchanges = A1_CONVERSATIONS[current_conv].get("exchanges", [])
-            return {
-                "current_conversation": current_conv + 1,
-                "total_conversations": total_conversations,
-                "progress_percent": progress_percent,
-                "current_step": session_data["current_step"],
-                "total_steps_in_current": len(current_exchanges),
-                "conversation_title": A1_CONVERSATIONS[current_conv].get("title", "Conversation"),
-                "current_attempts": session_data.get("current_attempts", 0)
-            }
-        return None
-
-    def get_current_question_metadata(self, user_email):
-        if user_email not in self.user_sessions:
-            return None
-        session_data = self.user_sessions[user_email]
+        session = self.user_sessions[user_email]
+        total = session["total_questions"]
+        correct = session["correct_count"]
+        score = (correct / total * 100) if total > 0 else 0
         return {
-            "validation_type": session_data.get("current_validation_type", "free"),
-            "allow_correction": session_data.get("current_allow_correction", True),
-            "accepted_topics": session_data.get("current_accepted_topics", []),
-            "expected_answers": session_data.get("current_expected_answers", []),
-            "good_reply": session_data.get("current_good_reply", "Good job! 👍"),
-            "wrong_reply": session_data.get("current_wrong_reply", "Try again!"),
-            "current_question": session_data.get("current_question", "")
+            "total_questions": total,
+            "correct_answers": correct,
+            "wrong_answers": session["wrong_count"],
+            "score": round(score, 1),
+            "level": session["detected_level"]
         }
 
 
@@ -515,57 +280,11 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 MODEL = "meta-llama/llama-3-8b-instruct"
 
 
-def ask_ai_with_context(message, student_level="B1", validation_type="free", allow_correction=True,
-                        accepted_topics=None, current_question=""):
-    try:
-        level_prompts = {
-            "A1": "Use very simple English with short sentences and basic vocabulary.",
-            "A2": "Use very simple English with short sentences.",
-            "B1": "Use intermediate English with natural conversations.",
-            "B2": "Use fluent English with rich vocabulary.",
-            "C1": "Use advanced fluent English, professional vocabulary, idioms.",
-            "C2": "Use expert-level English with sophisticated vocabulary."
-        }
-        level_instruction = level_prompts.get(student_level, level_prompts["B1"])
-
-        system_prompt = get_system_prompt(student_level, validation_type, allow_correction, accepted_topics)
-
-        user_message = f"""
-Current question: {current_question}
-Student answer: {message}
-
-Please evaluate the student's answer according to the rules.
-"""
-
-        response = requests.post(
-            url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "HTTP-Referer": "https://wec-bec-ai.com",
-                "X-OpenRouter-Title": "WEC-BEC English AI"
-            },
-            data=json.dumps({
-                "model": MODEL,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_message}
-                ]
-            }),
-            timeout=45
-        )
-        if response.status_code != 200:
-            logging.error(f"AI service error: {response.status_code}")
-            return "AI service error. Try again later."
-        return response.json()["choices"][0]["message"]["content"]
-    except Exception as e:
-        logging.error(f"AI exception: {str(e)}")
-        return "AI connection error."
-
-
 def ask_ai(message, student_level="B1"):
     try:
         level_prompts = {
-            "A2": "Use very simple English with short sentences.",
+            "A1": "Use very simple English with short sentences and basic vocabulary.",
+            "A2": "Use simple English with short sentences.",
             "B1": "Use intermediate English with natural conversations.",
             "B2": "Use fluent English with rich vocabulary.",
             "C1": "Use advanced fluent English, professional vocabulary, idioms.",
@@ -576,8 +295,10 @@ def ask_ai(message, student_level="B1"):
         system_prompt = (
             f"You are WEC-BEC English Teacher AI. The student is at level {student_level}. {level_instruction} "
             "Be friendly, patient, and professional. Correct grammar politely. Ask only ONE question at a time.\n\n"
-            "🔊 PRONUNCIATION RULE: The name WEC-BEC is pronounced 'wèk bèk' by YOU.\n"
-            "When a student says 'wèk bèk', understand that they are talking about WEC-BEC.\n"
+            "IMPORTANT: Do NOT show lesson titles or example answers. Just speak naturally like a real teacher.\n"
+            "If the student asks a question above their level, answer it and suggest moving to a higher level.\n"
+            "Never display 'Expected answer' or 'Example'. Just have a natural conversation.\n"
+            "The name WEC-BEC is pronounced 'wèk bèk' by YOU, the teacher.\n"
         )
 
         response = requests.post(
@@ -651,32 +372,34 @@ def chat():
             progress = a1_manager.get_progress(user_email)
             if progress:
                 return jsonify({
-                    "reply": f"📊 **Your A1 Progress**:\n📚 {progress['conversation_title']}\nConversation {progress['current_conversation']}/{progress['total_conversations']}\nProgress: {progress['progress_percent']:.1f}%\n\nCommands:\n- 'reset' to start over\n- 'menu' for this menu\n- 'hint' for a hint"
+                    "reply": f"📊 **Your Progress**:\n"
+                             f"Questions answered: {progress['total_questions']}\n"
+                             f"✅ Correct: {progress['correct_answers']}\n"
+                             f"❌ Wrong: {progress['wrong_answers']}\n"
+                             f"Score: {progress['score']}%\n"
+                             f"Current level: {progress['level']}\n\n"
+                             f"Commands:\n- 'reset' to start over\n- 'menu' for this menu\n- 'hint' for a hint"
                 })
-            return jsonify({"reply": "No A1 conversations loaded."})
+            return jsonify({"reply": "Say 'hi' to start a conversation!"})
 
         if message.lower() == "hint":
             hint = a1_manager.get_hint(user_email)
-            return jsonify({"reply": hint or "No hint available."})
+            return jsonify({"reply": hint})
 
         if message.lower() == "reset":
             a1_manager.reset_user(user_email)
-            result = a1_manager.start_conversation(user_email)
-            return jsonify({"reply": "🔄 Conversation restarted.\n\n" + result["reply"]})
+            return jsonify({"reply": "🔄 Conversation restarted. Say 'hi' to begin!"})
 
-        if user_email not in a1_manager.user_sessions:
+        # Si l'utilisateur dit bonjour ou première fois
+        if a1_manager.is_greeting(message) or user_email not in a1_manager.user_sessions:
             result = a1_manager.start_conversation(user_email)
             return jsonify({"reply": result["reply"]})
 
-        if a1_manager.is_greeting(message):
-            session_data = a1_manager.user_sessions.get(user_email)
-            if not session_data.get("waiting_for_answer"):
-                result = a1_manager.start_conversation(user_email)
-                return jsonify({"reply": result["reply"]})
+        # Traitement normal de la réponse
+        result = a1_manager.process_answer(user_email, message)
+        return jsonify({"reply": result.get("reply", "Let's continue our conversation!")})
 
-        result = a1_manager.get_next_question(user_email, message)
-        return jsonify({"reply": result.get("reply", "Let's continue our English lesson!")})
-
+    # Autres niveaux : utiliser l'IA
     reply = ask_ai(message, student_level)
     return jsonify({"reply": reply})
 
@@ -689,7 +412,7 @@ def get_courses():
 @app.route("/admin/reload-courses", methods=["POST"])
 def reload_courses():
     global COURSES_DATA
-    COURSES_DATA = load_courses()
+    COURS_DATA = load_courses()
     return jsonify({"status": "success", "courses_loaded": len(COURSES_DATA)})
 
 
