@@ -68,35 +68,40 @@ COURSES_DATA = load_courses()
 
 
 # =========================
-# 🗣️ GESTIONNAIRE DE CONVERSATION A1 (STYLE PROFESSEUR NATUREL)
+# 🗣️ GESTIONNAIRE DE CONVERSATION A1 (PROFESSEUR CONVERSATIONNEL)
 # =========================
 class A1ConversationManager:
     def __init__(self):
         self.user_sessions = {}
         self.all_questions = self.extract_all_questions()
-        self.themes = {
-            "greetings": ["greet", "hello", "hi", "good morning", "good afternoon", "good evening", "goodbye",
-                          "farewell"],
-            "personal": ["name", "age", "live", "nationality", "from", "born", "profession", "job"],
-            "family": ["family", "brother", "sister", "parents", "position", "eldest", "youngest"],
-            "hobbies": ["free time", "hobby", "like", "dislike", "favorite", "weekend", "holiday"],
-            "education": ["school", "study", "learn", "english", "center", "university", "level", "grade"],
-            "travel": ["travel", "abroad", "country", "visit", "go to"],
-            "daily": ["morning", "night", "day", "week", "month", "time", "today", "yesterday"],
-            "numbers": ["number", "count", "how much", "phone", "price", "age"],
-            "congo": ["congo", "flag", "capital", "currency", "language", "brazzaville"]
-        }
+
+        # Ordre logique des thèmes pour progression naturelle
+        self.theme_sequence = [
+            "greetings",  # Saluer
+            "personal",  # Présentation (nom, âge, pays)
+            "family",  # Famille
+            "hobbies",  # Loisirs
+            "daily",  # Vie quotidienne
+            "education",  # Éducation
+            "numbers",  # Chiffres
+            "travel",  # Voyage
+            "congo",  # Culture Congo
+            "general"  # Général
+        ]
 
     def extract_all_questions(self):
         """Extrait toutes les questions du JSON avec leurs métadonnées"""
         all_questions = []
         for conv in A1_CONVERSATIONS:
-            theme = conv.get('title', 'General')
+            # Déterminer le thème à partir du titre
+            title = conv.get('title', 'General')
+            theme = self.get_theme_from_title(title)
+
             for exchange in conv.get('exchanges', []):
                 all_questions.append({
                     'question': exchange.get('question', ''),
                     'validation_type': exchange.get('validation_type', 'free'),
-                    'expected_answers': exchange.get('expected_answers', []),
+                    'expected_answers': [a.lower() for a in exchange.get('expected_answers', [])],
                     'accepted_topics': exchange.get('accepted_topics', []),
                     'allow_correction': exchange.get('allow_correction', True),
                     'good_reply': exchange.get('good_reply', 'Good job! 👍'),
@@ -106,111 +111,181 @@ class A1ConversationManager:
                 })
         return all_questions
 
-    def get_question_by_theme(self, theme_keyword, exclude_question=None):
-        """Retourne une question d'un thème spécifique"""
-        theme_topics = self.themes.get(theme_keyword, [])
-        available = []
-        for q in self.all_questions:
-            if q['question'] != exclude_question:
-                q_lower = q['question'].lower()
-                # Vérifier si la question correspond au thème
-                for topic in theme_topics:
-                    if topic in q_lower:
-                        available.append(q)
-                        break
-        if available:
-            return random.choice(available)
-        return self.get_random_question(exclude_question)
+    def get_theme_from_title(self, title):
+        """Détermine le thème à partir du titre de la leçon"""
+        title_lower = title.lower()
+        if "greeting" in title_lower or "farewell" in title_lower:
+            return "greetings"
+        if "color" in title_lower:
+            return "hobbies"
+        if "introduc" in title_lower or "yourself" in title_lower:
+            return "personal"
+        if "number" in title_lower or "cardinal" in title_lower:
+            return "numbers"
+        if "date" in title_lower or "day" in title_lower or "week" in title_lower or "month" in title_lower:
+            return "daily"
+        if "travel" in title_lower or "abroad" in title_lower:
+            return "travel"
+        if "family" in title_lower:
+            return "family"
+        if "education" in title_lower or "school" in title_lower or "university" in title_lower:
+            return "education"
+        if "congo" in title_lower or "africa" in title_lower:
+            return "congo"
+        if "hobby" in title_lower or "free time" in title_lower:
+            return "hobbies"
+        return "general"
 
-    def get_random_question(self, exclude_question=None):
-        """Retourne une question aléatoire parmi toutes"""
-        available = [q for q in self.all_questions if q['question'] != exclude_question]
-        return random.choice(available) if available else random.choice(self.all_questions)
+    def get_questions_by_theme(self, theme):
+        """Retourne toutes les questions d'un thème"""
+        return [q for q in self.all_questions if q['theme'] == theme]
 
-    def check_answer(self, user_answer, expected_answers, validation_type="free", accepted_topics=None):
-        """Vérifie si la réponse est correcte"""
+    def get_next_question_in_theme(self, theme, current_question=None):
+        """Retourne la prochaine question dans le même thème"""
+        theme_questions = self.get_questions_by_theme(theme)
+        if not theme_questions:
+            return None
+
+        if current_question:
+            # Trouver l'index de la question actuelle
+            for i, q in enumerate(theme_questions):
+                if q['question'] == current_question and i + 1 < len(theme_questions):
+                    return theme_questions[i + 1]
+
+        # Retourner une question aléatoire du thème
+        return random.choice(theme_questions)
+
+    def check_answer(self, user_answer, expected_answers, accepted_topics=None):
+        """Vérifie si la réponse est correcte (tolérante)"""
         user_answer = user_answer.lower().strip()
         user_answer = user_answer.replace("wèk bèk", "wec bec").replace("wek bek", "wec bec").replace("walk back",
                                                                                                       "wec bec")
 
-        # Réponses absurdes (trop courtes ou sans sens)
-        if len(user_answer) < 2 or user_answer in ["a", "b", "c", "d", "yes", "no", "ok"]:
-            # On accepte quand même mais on encourage plus
+        # Supprimer les questions que l'élève pourrait poser
+        if user_answer.endswith("?"):
+            return False, None  # C'est une question, pas une réponse
+
+        # Réponses très courtes mais valides
+        if user_answer in ["yes", "no", "ok", "yeah", "yep", "nope", "sure"]:
             return True, "short"
 
-        if validation_type == "exact" or validation_type == "translation":
-            for expected in expected_answers:
-                expected = expected.lower().strip()
-                if expected == user_answer or expected in user_answer:
-                    return True, "exact"
-                words = expected.split()
-                if len(words) > 1:
-                    matches = sum(1 for word in words if word in user_answer)
-                    if matches >= max(1, len(words) // 2):
-                        return True, "partial"
-            return False, None
-        else:
-            if not accepted_topics or len(accepted_topics) == 0:
-                return True, "free"
+        # Vérification par mots-clés (accepted_topics)
+        if accepted_topics and len(accepted_topics) > 0:
             for topic in accepted_topics:
                 if topic.lower() in user_answer:
                     return True, "topic_match"
-            return False, None
 
-    def detect_question_type(self, user_question):
-        """Détecte si l'élève pose une question à l'IA"""
+        # Vérification par réponses attendues
+        for expected in expected_answers:
+            expected_lower = expected.lower()
+            # Correspondance exacte
+            if user_answer == expected_lower:
+                return True, "exact"
+            # La réponse contient le mot attendu
+            if expected_lower in user_answer:
+                return True, "contains"
+            # L'attendu contient la réponse (réponse très courte)
+            if user_answer in expected_lower and len(user_answer) > 2:
+                return True, "partial"
+            # Correspondance partielle des mots
+            expected_words = expected_lower.split()
+            user_words = user_answer.split()
+            matches = sum(1 for w in expected_words if w in user_answer)
+            if len(expected_words) > 0 and matches >= len(expected_words) // 2:
+                return True, "partial_match"
+
+        return False, None
+
+    def extract_name_from_answer(self, user_answer):
+        """Extrait un nom potentiel de la réponse"""
+        user_answer = user_answer.lower()
+        if "my name is" in user_answer:
+            parts = user_answer.split("my name is")
+            if len(parts) > 1:
+                name = parts[1].strip().split()[0] if parts[1].strip() else None
+                if name and len(name) > 1:
+                    return name.capitalize()
+        if "i am" in user_answer and len(user_answer) < 30:
+            parts = user_answer.split("i am")
+            if len(parts) > 1:
+                name = parts[1].strip().split()[0] if parts[1].strip() else None
+                if name and len(name) > 1 and name not in ["fine", "good", "ok", "here", "student"]:
+                    return name.capitalize()
+        if "call me" in user_answer:
+            parts = user_answer.split("call me")
+            if len(parts) > 1:
+                name = parts[1].strip().split()[0] if parts[1].strip() else None
+                if name and len(name) > 1:
+                    return name.capitalize()
+        return None
+
+    def extract_age_from_answer(self, user_answer):
+        """Extrait un âge potentiel de la réponse"""
+        import re
+        numbers = re.findall(r'\d+', user_answer)
+        if numbers:
+            age = int(numbers[0])
+            if 1 <= age <= 120:
+                return age
+        return None
+
+    def is_question_to_teacher(self, user_answer):
+        """Détecte si l'élève pose une question au professeur"""
         question_words = ["what", "where", "when", "why", "how", "who", "which", "could you", "can you", "do you"]
-        return any(user_question.lower().startswith(qw) for qw in question_words) or user_question.endswith("?")
+        # Détecte aussi "and you?"
+        if " and you" in user_answer.lower() or " and you?" in user_answer.lower():
+            return True
+        return any(user_answer.lower().startswith(qw) for qw in question_words) or user_answer.strip().endswith("?")
 
-    def react_to_question(self, user_question):
-        """Répond quand l'élève pose une question à l'IA"""
+    def answer_student_question(self, user_question, student_name=None):
+        """Répond aux questions que l'élève pose au professeur"""
         q_lower = user_question.lower()
 
-        if "how are you" in q_lower or "how are you doing" in q_lower:
-            return "I'm doing great, thank you for asking! 😊 How about you?"
-        elif "where are you from" in q_lower or "your nationality" in q_lower:
-            return "I'm an AI, so I don't have a nationality. But I was created to help you learn English! 🌍"
-        elif "how old are you" in q_lower or "your age" in q_lower:
-            return "I'm an AI, so I don't age. But I'm here to help you whenever you need! 🎂"
-        elif "what is your name" in q_lower:
-            return "I'm your WEC-BEC English teacher! You can call me Teacher AI. 📚"
-        elif "do you like" in q_lower:
-            return "I love helping students learn English! It's my favorite thing to do. 💖"
-        elif "can you help me" in q_lower:
-            return "Of course! That's why I'm here. What would you like to practice? 🤝"
-        else:
-            return f"That's a great question! Let me answer: {self.get_helpful_answer(q_lower)}"
+        if "and you" in q_lower or "and you?" in q_lower:
+            # Extraire la question précédente pour répondre
+            return "I'm an AI teacher, so I don't have personal details. But I'm here to help you learn English! 😊"
 
-    def get_helpful_answer(self, question):
-        """Réponse générique pour les questions"""
-        if "english" in question:
-            return "English is a wonderful language to learn. Practice every day and you'll improve quickly!"
-        elif "learn" in question:
-            return "The best way to learn is to practice speaking, reading, and listening every day!"
-        else:
-            return "I'm here to help you practice English. Let's continue our conversation!"
+        if "how are you" in q_lower:
+            return "I'm doing great, thank you for asking! How are you today? 😊"
+
+        if "what is your name" in q_lower or "your name" in q_lower:
+            return "I'm your WEC-BEC English teacher! You can call me WEC-BEC AI. 😊"
+
+        if "where are you from" in q_lower:
+            return "I'm an AI, so I live in the cloud! But I was created to help students like you learn English. 🌍"
+
+        if "how old are you" in q_lower:
+            return "As an AI, I don't have an age. But I'm always here to help you learn! 🎂"
+
+        if "do you like" in q_lower:
+            return "I love helping students learn English! It's my favorite thing to do. 💖"
+
+        if "can you help me" in q_lower:
+            return "Of course! That's why I'm here. Let's continue practicing English together! 🤝"
+
+        return "That's a great question! Let me help you with that. Could you try answering my question first? 😊"
 
     def is_greeting(self, text):
-        greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "bonjour"]
+        greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "bonjour", "good day"]
         text = text.lower().strip()
         return any(greeting in text for greeting in greetings)
 
     def create_session(self):
         return {
             "current_question": None,
-            "current_validation_type": None,
-            "current_expected_answers": None,
-            "current_accepted_topics": None,
-            "current_allow_correction": None,
-            "current_good_reply": None,
-            "current_wrong_reply": None,
+            "current_expected_answers": [],
+            "current_accepted_topics": [],
             "current_theme": None,
+            "current_validation_type": "free",
             "correct_count": 0,
             "wrong_count": 0,
             "total_questions": 0,
             "detected_level": "A1",
-            "conversation_history": [],
-            "last_question": None
+            "student_name": None,
+            "student_age": None,
+            "current_theme_index": 0,
+            "questions_asked_in_theme": 0,
+            "conversation_context": []
         }
 
     def reset_user(self, user_email):
@@ -218,166 +293,158 @@ class A1ConversationManager:
         return True
 
     def start_conversation(self, user_email):
-        """Démarre la conversation avec une question simple"""
+        """Démarre la conversation de manière naturelle"""
         if user_email not in self.user_sessions:
             self.user_sessions[user_email] = self.create_session()
 
         session = self.user_sessions[user_email]
 
-        # Commencer par une question simple sur le nom
+        # Commencer par une question simple sur le prénom
+        theme_questions = self.get_questions_by_theme("personal")
         question_data = None
-        for q in self.all_questions:
-            if "name" in q['question'].lower() and "your name" in q['question'].lower():
+
+        for q in theme_questions:
+            if "your name" in q['question'].lower() and "name" in q['question'].lower():
                 question_data = q
                 break
 
+        if not question_data and theme_questions:
+            question_data = theme_questions[0]
+
         if not question_data:
-            question_data = self.get_question_by_theme("personal")
+            question_data = self.all_questions[0] if self.all_questions else None
 
-        session["current_question"] = question_data['question']
-        session["current_validation_type"] = question_data['validation_type']
-        session["current_expected_answers"] = question_data['expected_answers']
-        session["current_accepted_topics"] = question_data['accepted_topics']
-        session["current_allow_correction"] = question_data['allow_correction']
-        session["current_good_reply"] = question_data['good_reply']
-        session["current_wrong_reply"] = question_data['wrong_reply']
-        session["last_question"] = question_data['question']
-
-        # Message d'accueil naturel
-        welcome = "Hello! Nice to meet you. What's your name? 😊"
+        if question_data:
+            session["current_question"] = question_data['question']
+            session["current_expected_answers"] = question_data.get('expected_answers', [])
+            session["current_accepted_topics"] = question_data.get('accepted_topics', [])
+            session["current_validation_type"] = question_data.get('validation_type', 'free')
+            session["current_theme"] = question_data.get('theme', 'personal')
+            session["questions_asked_in_theme"] = 1
 
         return {
-            "reply": welcome,
-            "question_data": question_data
+            "reply": "Hello! Nice to meet you. What's your name? 😊",
+            "question": session.get("current_question")
         }
 
     def process_answer(self, user_email, user_answer):
-        """Traite la réponse et retourne la réponse de l'IA"""
+        """Traite la réponse de l'élève comme un vrai professeur"""
         if user_email not in self.user_sessions:
             return self.start_conversation(user_email)
 
         session = self.user_sessions[user_email]
-
-        # Si l'élève pose une question à l'IA
-        if self.detect_question_type(user_answer):
-            ai_reply = self.react_to_question(user_answer)
-            # Garder la même question en attente
-            return {
-                "reply": ai_reply,
-                "question_repeat": session.get("current_question")
-            }
-
-        session["total_questions"] += 1
-
         current_q = session.get("current_question")
         expected = session.get("current_expected_answers", [])
-        validation_type = session.get("current_validation_type", "free")
         accepted_topics = session.get("current_accepted_topics", [])
-        good_reply = session.get("current_good_reply", "Good job! 👍")
-        wrong_reply = session.get("current_wrong_reply", "Try again.")
+        current_theme = session.get("current_theme", "personal")
 
-        # Vérifier la réponse
-        is_correct, match_type = self.check_answer(user_answer, expected, validation_type, accepted_topics)
-
-        # Détection de niveau avancé
-        advanced_keywords = [
-            "present perfect", "past perfect", "conditional", "subjunctive",
-            "could you explain", "difference between", "would have", "should have"
-        ]
-        is_advanced = any(keyword in user_answer.lower() for keyword in advanced_keywords)
-
-        if is_advanced and session["detected_level"] == "A1":
-            session["detected_level"] = "A2"
+        # 1. Si l'élève pose une question, y répondre et répéter la question en attente
+        if self.is_question_to_teacher(user_answer):
+            ai_response = self.answer_student_question(user_answer, session.get("student_name"))
             return {
-                "reply": f"Wow! Your English is quite strong. You're asking advanced questions! 👏\n\nLet's continue practicing!",
-                "level_up": True
+                "reply": f"{ai_response}\n\n{current_q}",
+                "keep_question": True
             }
 
+        # 2. Vérifier la réponse
+        is_correct, match_type = self.check_answer(user_answer, expected, accepted_topics)
+
+        # 3. Extraire les informations utiles (nom, âge)
+        extracted_name = self.extract_name_from_answer(user_answer) if not session.get("student_name") else None
+        if extracted_name:
+            session["student_name"] = extracted_name
+
+        extracted_age = self.extract_age_from_answer(user_answer) if not session.get("student_age") else None
+        if extracted_age:
+            session["student_age"] = extracted_age
+
+        # 4. Si la réponse est correcte
         if is_correct:
             session["correct_count"] += 1
+            session["total_questions"] += 1
+            session["wrong_count"] = 0
+            session["questions_asked_in_theme"] += 1
 
-            # Choisir la prochaine question en fonction du thème actuel
-            current_theme = self.get_question_theme(current_q)
-
-            # 70% de chance de rester dans le même thème, 30% de changer
-            if random.random() < 0.7:
-                new_question = self.get_question_by_theme(current_theme, current_q)
+            # Construire une réponse de félicitations naturelle
+            if session.get("student_name") and "name" in current_q.lower():
+                name = session["student_name"]
+                natural_reply = f"Nice to meet you, {name}! 😊"
+            elif "age" in current_q.lower() and extracted_age:
+                natural_reply = f"Great! You are {extracted_age} years old! 🎂"
+            elif match_type == "short":
+                natural_reply = f"Good!"
             else:
-                # Changer de thème
-                themes_list = list(self.themes.keys())
-                current_theme_index = themes_list.index(current_theme) if current_theme in themes_list else 0
-                next_theme = themes_list[(current_theme_index + 1) % len(themes_list)]
-                new_question = self.get_question_by_theme(next_theme, current_q)
+                natural_reply = "Great job! 👍"
 
-            if not new_question:
-                new_question = self.get_random_question(current_q)
+            # Décider la prochaine question
+            # Rester dans le même thème pour 2-3 questions, puis changer
+            max_per_theme = 3
+            if session["questions_asked_in_theme"] >= max_per_theme:
+                # Passer au thème suivant
+                current_index = self.theme_sequence.index(current_theme) if current_theme in self.theme_sequence else 0
+                next_index = (current_index + 1) % len(self.theme_sequence)
+                next_theme = self.theme_sequence[next_index]
 
-            session["current_question"] = new_question['question']
-            session["current_validation_type"] = new_question['validation_type']
-            session["current_expected_answers"] = new_question['expected_answers']
-            session["current_accepted_topics"] = new_question['accepted_topics']
-            session["current_allow_correction"] = new_question['allow_correction']
-            session["current_good_reply"] = new_question['good_reply']
-            session["current_wrong_reply"] = new_question['wrong_reply']
-            session["last_question"] = new_question['question']
-
-            # Réponse naturelle avec transition
-            if match_type == "short":
-                natural_reply = f"Nice! {new_question['question']}"
-            elif "name" in current_q.lower() and user_answer.strip():
-                # Extraire le nom pour personnaliser
-                name = user_answer.replace("my name is", "").replace("i am", "").strip()
-                if len(name) > 0 and len(name) < 30:
-                    natural_reply = f"Nice to meet you, {name}! {new_question['question']}"
-                else:
-                    natural_reply = f"Nice to meet you! {new_question['question']}"
+                next_q_data = self.get_next_question_in_theme(next_theme)
+                session["current_theme"] = next_theme
+                session["questions_asked_in_theme"] = 1
             else:
-                natural_reply = f"{good_reply}\n\n{new_question['question']}"
+                # Rester dans le même thème
+                next_q_data = self.get_next_question_in_theme(current_theme, current_q)
+
+                # Si plus de questions dans ce thème, passer au suivant
+                if not next_q_data:
+                    current_index = self.theme_sequence.index(
+                        current_theme) if current_theme in self.theme_sequence else 0
+                    next_index = (current_index + 1) % len(self.theme_sequence)
+                    next_theme = self.theme_sequence[next_index]
+                    next_q_data = self.get_next_question_in_theme(next_theme)
+                    session["current_theme"] = next_theme
+                    session["questions_asked_in_theme"] = 1
+
+            # Fallback si aucune question trouvée
+            if not next_q_data:
+                next_q_data = random.choice(self.all_questions)
+
+            # Mettre à jour la session
+            session["current_question"] = next_q_data['question']
+            session["current_expected_answers"] = next_q_data.get('expected_answers', [])
+            session["current_accepted_topics"] = next_q_data.get('accepted_topics', [])
+            session["current_validation_type"] = next_q_data.get('validation_type', 'free')
 
             return {
-                "reply": natural_reply,
-                "next_question": new_question['question'],
-                "correct": True,
-                "score": round((session["correct_count"] / session["total_questions"]) * 100, 1) if session[
-                                                                                                        "total_questions"] > 0 else 0
+                "reply": f"{natural_reply}\n\n{next_q_data['question']}",
+                "next_question": next_q_data['question'],
+                "correct": True
             }
+
+        # 5. Si la réponse est incorrecte
         else:
             session["wrong_count"] += 1
-            # Ne pas répéter indéfiniment la même question
-            if session["wrong_count"] >= 2:
-                # Passer à une question plus simple
-                easier_question = self.get_question_by_theme("greetings", current_q)
-                if easier_question:
-                    session["current_question"] = easier_question['question']
-                    session["current_expected_answers"] = easier_question['expected_answers']
-                    session["current_accepted_topics"] = easier_question['accepted_topics']
-                    session["wrong_count"] = 0
-                    return {
-                        "reply": f"Let's try an easier question. {easier_question['question']}",
-                        "correct": False
-                    }
+            session["total_questions"] += 1
 
-            if expected:
-                hint = f" Try saying: '{expected[0]}'"
+            # Après 2 mauvaises réponses, donner un indice
+            if session["wrong_count"] >= 2 and expected:
+                hint = expected[0] if expected else "Try again"
                 return {
-                    "reply": f"{wrong_reply}{hint}\n\n{current_q}",
+                    "reply": f"Not quite. Try saying: \"{hint}\"\n\n{current_q}",
                     "repeat_question": True,
                     "correct": False
                 }
+
+            # Donner un indice plus doux
+            if expected:
+                return {
+                    "reply": f"Almost there! {current_q}",
+                    "repeat_question": True,
+                    "correct": False
+                }
+
             return {
-                "reply": f"{wrong_reply}\n\n{current_q}",
+                "reply": f"Let me repeat the question: {current_q}",
                 "repeat_question": True,
                 "correct": False
             }
-
-    def get_question_theme(self, question):
-        """Détermine le thème d'une question"""
-        q_lower = question.lower()
-        for theme, keywords in self.themes.items():
-            for keyword in keywords:
-                if keyword in q_lower:
-                    return theme
-        return "personal"
 
     def get_hint(self, user_email):
         if user_email not in self.user_sessions:
@@ -428,11 +495,11 @@ def ask_ai(message, student_level="B1"):
         system_prompt = (
             f"You are WEC-BEC English Teacher AI. The student is at level {student_level}. {level_instruction} "
             "Be friendly, patient, and professional. Correct grammar politely. Ask only ONE question at a time.\n\n"
-            "IMPORTANT: Behave like a real human teacher. If the student asks you a question, answer it naturally.\n"
-            "Never display 'Lesson X:' or 'Example:'. Just have a natural conversation.\n"
+            "IMPORTANT: Behave like a real human teacher.\n"
             "Respond to what the student says before asking the next question.\n"
             "If the student says 'and you?', answer the question yourself.\n"
             "Keep the conversation flowing naturally, like a real dialogue.\n"
+            "Never show lesson titles or expected answers. Just have a natural conversation.\n"
             "The name WEC-BEC is pronounced 'wèk bèk' by YOU, the teacher.\n"
         )
 
