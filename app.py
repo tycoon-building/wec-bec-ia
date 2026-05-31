@@ -68,28 +68,18 @@ COURSES_DATA = load_courses()
 
 
 # =========================
-# 🗣️ GESTIONNAIRE DE CONVERSATION A1 (AVEC MODE TEACHER)
+# 🗣️ GESTIONNAIRE DE CONVERSATION A1
 # =========================
 class A1ConversationManager:
     def __init__(self):
         self.user_sessions = {}
         self.all_questions = self.extract_all_questions()
 
-        # Ordre logique des thèmes pour progression naturelle
         self.theme_sequence = [
-            "greetings",  # Saluer
-            "personal",  # Présentation (nom, âge, pays)
-            "family",  # Famille
-            "hobbies",  # Loisirs
-            "daily",  # Vie quotidienne
-            "education",  # Éducation
-            "numbers",  # Chiffres
-            "travel",  # Voyage
-            "congo",  # Culture Congo
-            "general"  # Général
+            "greetings", "personal", "family", "hobbies",
+            "daily", "education", "numbers", "travel", "congo", "general"
         ]
 
-        # Mots-clés indiquant que l'élève a besoin d'aide
         self.help_keywords = [
             "help me", "explain", "teach me", "i don't know", "i forgot",
             "give me the answer", "name them for me", "what is the answer",
@@ -98,12 +88,10 @@ class A1ConversationManager:
         ]
 
     def extract_all_questions(self):
-        """Extrait toutes les questions du JSON avec leurs métadonnées"""
         all_questions = []
         for conv in A1_CONVERSATIONS:
             title = conv.get('title', 'General')
             theme = self.get_theme_from_title(title)
-
             for exchange in conv.get('exchanges', []):
                 all_questions.append({
                     'question': exchange.get('question', ''),
@@ -119,7 +107,6 @@ class A1ConversationManager:
         return all_questions
 
     def get_theme_from_title(self, title):
-        """Détermine le thème à partir du titre de la leçon"""
         title_lower = title.lower()
         if "greeting" in title_lower or "farewell" in title_lower:
             return "greetings"
@@ -144,43 +131,34 @@ class A1ConversationManager:
         return "general"
 
     def get_questions_by_theme(self, theme):
-        """Retourne toutes les questions d'un thème"""
         return [q for q in self.all_questions if q['theme'] == theme]
 
     def get_next_question_in_theme(self, theme, current_question=None):
-        """Retourne la prochaine question dans le même thème"""
         theme_questions = self.get_questions_by_theme(theme)
         if not theme_questions:
             return None
-
         if current_question:
             for i, q in enumerate(theme_questions):
                 if q['question'] == current_question and i + 1 < len(theme_questions):
                     return theme_questions[i + 1]
-
         return random.choice(theme_questions) if theme_questions else None
 
     def check_answer(self, user_answer, expected_answers, accepted_topics=None):
-        """Vérifie si la réponse est correcte (tolérante)"""
         user_answer = user_answer.lower().strip()
         user_answer = user_answer.replace("wèk bèk", "wec bec").replace("wek bek", "wec bec").replace("walk back",
                                                                                                       "wec bec")
 
-        # Si l'élève demande de l'aide, on ne valide pas comme réponse
         if self.needs_help(user_answer):
             return False, "need_help"
 
-        # Réponses très courtes mais valides
         if user_answer in ["yes", "no", "ok", "yeah", "yep", "nope", "sure"]:
             return True, "short"
 
-        # Vérification par mots-clés (accepted_topics)
         if accepted_topics and len(accepted_topics) > 0:
             for topic in accepted_topics:
                 if topic.lower() in user_answer:
                     return True, "topic_match"
 
-        # Vérification par réponses attendues
         for expected in expected_answers:
             expected_lower = expected.lower()
             if user_answer == expected_lower:
@@ -197,7 +175,6 @@ class A1ConversationManager:
         return False, None
 
     def needs_help(self, user_answer):
-        """Détecte si l'élève demande de l'aide"""
         user_lower = user_answer.lower()
         for keyword in self.help_keywords:
             if keyword in user_lower:
@@ -205,8 +182,6 @@ class A1ConversationManager:
         return False
 
     def provide_help(self, current_question, expected_answers):
-        """Fournit une explication pédagogique"""
-        # Extraire le type de question pour donner une aide adaptée
         q_lower = current_question.lower()
 
         if "month" in q_lower:
@@ -215,65 +190,55 @@ class A1ConversationManager:
         if "day" in q_lower and "week" in q_lower:
             return "Sure! The days of the week are:\n\n📆 Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday.\n\nNow, can you name the first day of the week?"
 
+        if "position" in q_lower and "family" in q_lower:
+            return "Your position in the family means if you are the eldest, the youngest, or somewhere in between.\n\nFor example: 'I am the eldest' or 'I am the youngest'.\n\nWhat position are you in your family?"
+
         if "color" in q_lower or "colour" in q_lower:
             return "Here are some colors in English:\n\n🎨 Red, Blue, Green, Yellow, Black, White, Pink, Purple, Orange, Brown.\n\nWhat is your favorite color?"
 
         if "number" in q_lower or "count" in q_lower:
             return "Let me help you with numbers:\n\n🔢 One (1), Two (2), Three (3), Four (4), Five (5), Six (6), Seven (7), Eight (8), Nine (9), Ten (10).\n\nCan you count from 1 to 5 for me?"
 
-        if "nationality" in q_lower or "country" in q_lower:
-            return "Nationality means which country you are from. For example:\n\n🌍 I am from Congo → I am Congolese.\nI am from France → I am French.\n\nWhat is your nationality?"
+        if "surname" in q_lower:
+            return "Your surname is your family name or last name.\n\nFor example: 'My surname is Smith' or 'My surname is Mbongo'.\n\nWhat is your surname?"
 
         if expected_answers:
             return f"Let me help you. For example, you can say: \"{expected_answers[0]}\"\n\nNow, can you try answering the question again?"
 
         return "Let me help you. Try to answer with a simple sentence. I know you can do it! 💪"
 
-    def extract_name_from_answer(self, user_answer):
-        """Extrait un nom potentiel de la réponse"""
-        user_answer = user_answer.lower()
-        if "my name is" in user_answer:
-            parts = user_answer.split("my name is")
-            if len(parts) > 1:
-                name = parts[1].strip().split()[0] if parts[1].strip() else None
-                if name and len(name) > 1:
-                    return name.capitalize()
-        if "i am" in user_answer and len(user_answer) < 30:
-            parts = user_answer.split("i am")
-            if len(parts) > 1:
-                name = parts[1].strip().split()[0] if parts[1].strip() else None
-                if name and len(name) > 1 and name not in ["fine", "good", "ok", "here", "student"]:
-                    return name.capitalize()
-        if "call me" in user_answer:
-            parts = user_answer.split("call me")
-            if len(parts) > 1:
-                name = parts[1].strip().split()[0] if parts[1].strip() else None
-                if name and len(name) > 1:
-                    return name.capitalize()
+    def answer_general_question(self, user_question):
+        """Répond aux questions générales d'anglais (ex: combien de jours dans la semaine)"""
+        q_lower = user_question.lower()
+
+        if "how many days" in q_lower and ("week" in q_lower or "week?" in q_lower):
+            return "Good question! There are seven days in a week:\n\n📆 Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, and Sunday."
+
+        if "how many months" in q_lower and ("year" in q_lower or "year?" in q_lower):
+            return "Great question! There are twelve months in a year:\n\n📅 January, February, March, April, May, June, July, August, September, October, November, December."
+
+        if "days of the week" in q_lower or "name the days" in q_lower:
+            return "The days of the week are:\n\n📆 Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday."
+
+        if "months of the year" in q_lower or "name the months" in q_lower:
+            return "The months of the year are:\n\n📅 January, February, March, April, May, June, July, August, September, October, November, December."
+
+        if "color" in q_lower or "colour" in q_lower:
+            return "Here are some colors in English:\n\n🎨 Red, Blue, Green, Yellow, Black, White, Pink, Purple, Orange, Brown."
+
+        if "number" in q_lower and ("one" in q_lower or "count" in q_lower):
+            return "Let me help you with numbers:\n\n🔢 One (1), Two (2), Three (3), Four (4), Five (5), Six (6), Seven (7), Eight (8), Nine (9), Ten (10)."
+
         return None
-
-    def extract_age_from_answer(self, user_answer):
-        """Extrait un âge potentiel de la réponse"""
-        import re
-        numbers = re.findall(r'\d+', user_answer)
-        if numbers:
-            age = int(numbers[0])
-            if 1 <= age <= 120:
-                return age
-        return None
-
-    def is_question_to_teacher(self, user_answer):
-        """Détecte si l'élève pose une question au professeur (hors demande d'aide)"""
-        if self.needs_help(user_answer):
-            return False  # Les demandes d'aide sont traitées séparément
-
-        question_words = ["what", "where", "when", "why", "how", "who", "which", "could you", "can you", "do you"]
-        if " and you" in user_answer.lower() or " and you?" in user_answer.lower():
-            return True
-        return any(user_answer.lower().startswith(qw) for qw in question_words) or user_answer.strip().endswith("?")
 
     def answer_student_question(self, user_question, student_name=None):
-        """Répond aux questions que l'élève pose au professeur"""
+        """Répond aux questions personnelles ou générales"""
+        # D'abord, vérifier si c'est une question générale d'anglais
+        general_answer = self.answer_general_question(user_question)
+        if general_answer:
+            return general_answer
+
+        # Sinon, répondre aux questions personnelles
         q_lower = user_question.lower()
 
         if "and you" in q_lower or "and you?" in q_lower:
@@ -294,15 +259,22 @@ class A1ConversationManager:
         if "do you like" in q_lower:
             return "I love helping students learn English! It's my favorite thing to do. 💖"
 
-        if "can you help me" in q_lower:
-            return "Of course! That's why I'm here. Let's practice together! 🤝"
-
-        return "That's a great question! Let me help you with that. Could you try answering my question first? 😊"
+        return None
 
     def is_greeting(self, text):
         greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "bonjour", "good day"]
         text = text.lower().strip()
         return any(greeting in text for greeting in greetings)
+
+    def is_general_english_question(self, user_answer):
+        """Détecte si l'élève pose une question générale sur l'anglais"""
+        q_lower = user_answer.lower()
+        general_patterns = [
+            "how many days", "how many months", "days of the week", "months of the year",
+            "name the days", "name the months", "what are the colors", "what are the colours",
+            "count from", "how to say", "what does", "mean in english"
+        ]
+        return any(pattern in q_lower for pattern in general_patterns)
 
     def create_session(self):
         return {
@@ -319,7 +291,7 @@ class A1ConversationManager:
             "student_age": None,
             "current_theme_index": 0,
             "questions_asked_in_theme": 0,
-            "help_mode": False  # Mode aide activé
+            "help_mode": False
         }
 
     def reset_user(self, user_email):
@@ -327,13 +299,11 @@ class A1ConversationManager:
         return True
 
     def start_conversation(self, user_email):
-        """Démarre la conversation de manière naturelle"""
         if user_email not in self.user_sessions:
             self.user_sessions[user_email] = self.create_session()
 
         session = self.user_sessions[user_email]
 
-        # Commencer par une question simple sur le prénom
         theme_questions = self.get_questions_by_theme("personal")
         question_data = None
 
@@ -363,7 +333,6 @@ class A1ConversationManager:
         }
 
     def process_answer(self, user_email, user_answer):
-        """Traite la réponse de l'élève comme un vrai professeur"""
         if user_email not in self.user_sessions:
             return self.start_conversation(user_email)
 
@@ -373,7 +342,7 @@ class A1ConversationManager:
         accepted_topics = session.get("current_accepted_topics", [])
         current_theme = session.get("current_theme", "personal")
 
-        # 1. D'abord, vérifier si l'élève demande de l'aide
+        # 1. Vérifier si l'élève demande de l'aide
         if self.needs_help(user_answer):
             help_message = self.provide_help(current_q, expected)
             session["help_mode"] = True
@@ -382,18 +351,28 @@ class A1ConversationManager:
                 "in_help_mode": True
             }
 
-        # 2. Si l'élève pose une question, y répondre et répéter la question
-        if self.is_question_to_teacher(user_answer):
-            ai_response = self.answer_student_question(user_answer, session.get("student_name"))
+        # 2. Vérifier si l'élève pose une question générale sur l'anglais
+        if self.is_general_english_question(user_answer):
+            general_answer = self.answer_general_question(user_answer)
+            if general_answer:
+                # Répondre à la question, puis revenir à la question en cours
+                return {
+                    "reply": f"{general_answer}\n\nNow, let's continue with my question:\n\n{current_q}",
+                    "keep_question": True
+                }
+
+        # 3. Vérifier si l'élève pose une question personnelle
+        personal_answer = self.answer_student_question(user_answer, session.get("student_name"))
+        if personal_answer:
             return {
-                "reply": f"{ai_response}\n\n{current_q}",
+                "reply": f"{personal_answer}\n\n{current_q}",
                 "keep_question": True
             }
 
-        # 3. Vérifier la réponse
+        # 4. Vérifier la réponse
         is_correct, match_type = self.check_answer(user_answer, expected, accepted_topics)
 
-        # 4. Extraire les informations utiles
+        # 5. Extraire les informations
         extracted_name = self.extract_name_from_answer(user_answer) if not session.get("student_name") else None
         if extracted_name:
             session["student_name"] = extracted_name
@@ -402,7 +381,7 @@ class A1ConversationManager:
         if extracted_age:
             session["student_age"] = extracted_age
 
-        # 5. Si la réponse est correcte
+        # 6. Si la réponse est correcte
         if is_correct:
             session["correct_count"] += 1
             session["total_questions"] += 1
@@ -410,18 +389,14 @@ class A1ConversationManager:
             session["questions_asked_in_theme"] += 1
             session["help_mode"] = False
 
-            # Construire une réponse de félicitations naturelle
             if session.get("student_name") and "name" in current_q.lower():
                 name = session["student_name"]
                 natural_reply = f"Nice to meet you, {name}! 😊"
             elif "age" in current_q.lower() and extracted_age:
                 natural_reply = f"Great! You are {extracted_age} years old! 🎂"
-            elif match_type == "short":
-                natural_reply = f"Good!"
             else:
                 natural_reply = "Great job! 👍"
 
-            # Décider la prochaine question
             max_per_theme = 3
             if session["questions_asked_in_theme"] >= max_per_theme:
                 current_index = self.theme_sequence.index(current_theme) if current_theme in self.theme_sequence else 0
@@ -461,15 +436,13 @@ class A1ConversationManager:
                     "completed": True
                 }
 
-        # 6. Si la réponse est incorrecte
+        # 7. Si la réponse est incorrecte
         else:
             session["wrong_count"] += 1
 
-            # Ne pas compter les demandes d'aide comme des erreurs
             if match_type != "need_help":
                 session["total_questions"] += 1
 
-            # Après 2 erreurs, proposer de l'aide
             if session["wrong_count"] >= 2 and not session["help_mode"]:
                 return {
                     "reply": f"You're having trouble with this question. Would you like me to help you? Just say 'help me' and I'll explain! 😊\n\n{current_q}",
@@ -477,7 +450,6 @@ class A1ConversationManager:
                     "correct": False
                 }
 
-            # Donner un indice simple
             if expected:
                 return {
                     "reply": f"Not quite. Try again! {current_q}",
@@ -490,6 +462,31 @@ class A1ConversationManager:
                 "repeat_question": True,
                 "correct": False
             }
+
+    def extract_name_from_answer(self, user_answer):
+        user_answer = user_answer.lower()
+        if "my name is" in user_answer:
+            parts = user_answer.split("my name is")
+            if len(parts) > 1:
+                name = parts[1].strip().split()[0] if parts[1].strip() else None
+                if name and len(name) > 1:
+                    return name.capitalize()
+        if "i am" in user_answer and len(user_answer) < 30:
+            parts = user_answer.split("i am")
+            if len(parts) > 1:
+                name = parts[1].strip().split()[0] if parts[1].strip() else None
+                if name and len(name) > 1 and name not in ["fine", "good", "ok", "here", "student"]:
+                    return name.capitalize()
+        return None
+
+    def extract_age_from_answer(self, user_answer):
+        import re
+        numbers = re.findall(r'\d+', user_answer)
+        if numbers:
+            age = int(numbers[0])
+            if 1 <= age <= 120:
+                return age
+        return None
 
     def get_hint(self, user_email):
         if user_email not in self.user_sessions:
@@ -541,8 +538,8 @@ def ask_ai(message, student_level="B1"):
             f"You are WEC-BEC English Teacher AI. The student is at level {student_level}. {level_instruction} "
             "Be friendly, patient, and professional. Correct grammar politely. Ask only ONE question at a time.\n\n"
             "IMPORTANT: Behave like a real human teacher.\n"
+            "If the student asks a general English question (like 'how many days in a week'), answer it directly, then continue with your question.\n"
             "If the student asks for help (help me, explain, I don't know, etc.), provide a clear explanation or example.\n"
-            "Then ask an easier question to check understanding.\n"
             "Respond to what the student says before asking the next question.\n"
             "If the student says 'and you?', answer the question yourself.\n"
             "Keep the conversation flowing naturally, like a real dialogue.\n"
