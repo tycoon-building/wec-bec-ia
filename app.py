@@ -47,15 +47,15 @@ def get_system_prompt(student_level="A1", validation_type="free", allow_correcti
         "\n\n"
         "========================================\n"
         "🔊 PRONUNCIATION RULE - VERY IMPORTANT:\n"
-        "The name WEC-BEC is pronounced 'wèk bèk' by YOU, the teacher.\n"
-        "When you say or write WEC-BEC, YOU must pronounce it as 'wèk bèk'.\n"
-        "Do NOT ask the student to pronounce it. The student already knows.\n"
-        "Example: 'Welcome to WEC-BEC! (wèk bèk)'\n"
+        "The name WEC-BEC is pronounced 'wèk bèk'.\n"
+        "When you speak, YOU must pronounce WEC-BEC as 'wèk bèk'.\n"
+        "When a student says 'wèk bèk', understand that they are talking about WEC-BEC.\n"
+        "Do NOT display 'wèk bèk' in writing. Only use it for pronunciation.\n"
         "========================================\n\n"
         "For A1 students: "
         "Use very easy English, short sentences, basic vocabulary, and slow explanations. "
         "Focus on greetings, school, food, family, hobbies, colors, numbers, weather, travel, and daily life. "
-        "Do NOT repeat 'Welcome to WEC-BEC' at every question. Only say it once at the beginning.\n\n"
+        "Do NOT repeat welcome messages. Just ask the next question directly.\n\n"
         "For A2 students: "
         "Use simple English with slightly longer conversations and simple grammar explanations. "
         "\n\n"
@@ -77,17 +77,13 @@ def get_system_prompt(student_level="A1", validation_type="free", allow_correcti
         "Encourage the student often. "
         "Ask only ONE short question at a time. "
         "Do not repeat the same question many times. "
-        "Avoid repetitive greetings like 'How are you today?' unless necessary. "
+        "Avoid repetitive greetings. "
         "Change topics naturally during the conversation. "
         "If the student answers correctly, ask a DIFFERENT follow-up question. "
         "If the student makes mistakes, gently correct them and continue the conversation naturally. "
-        "For beginner students, keep answers short and easy to understand. "
-        "For advanced students, use more detailed and intelligent conversations. "
-        "Help students improve speaking, listening, vocabulary, pronunciation, grammar, confidence, and fluency. "
         "Be supportive, intelligent, dynamic, and motivating."
     )
 
-    # Ajouter les instructions spécifiques pour les questions A1 avec validation_type = "free"
     if student_level == "A1" and validation_type == "free":
         free_instructions = (
             "\n\n"
@@ -176,46 +172,34 @@ class A1ConversationManager:
 
     def check_answer(self, user_answer, expected_answers):
         user_answer = user_answer.lower().strip()
+        # Remplacer la prononciation par le texte correct
+        user_answer = user_answer.replace("wèk bèk", "wec bec").replace("wek bek", "wec bec")
 
         for expected in expected_answers:
             expected = expected.lower().strip()
-
             if expected == user_answer:
                 return True
-
             if expected in user_answer:
                 return True
-
             words = expected.split()
-
             if len(words) > 1:
-                matches = sum(
-                    1 for word in words
-                    if word in user_answer
-                )
-
+                matches = sum(1 for word in words if word in user_answer)
                 if matches >= max(1, len(words) // 2):
                     return True
-
         return False
 
     def check_relevance(self, user_answer, accepted_topics):
         if not accepted_topics or len(accepted_topics) == 0:
             return True
-
         user_answer_lower = user_answer.lower().strip()
-
+        user_answer_lower = user_answer_lower.replace("wèk bèk", "wec bec").replace("wek bek", "wec bec")
         for topic in accepted_topics:
             if topic.lower() in user_answer_lower:
                 return True
-
         return False
 
     def is_greeting(self, text):
-        greetings = [
-            "hi", "hello", "hey", "good morning",
-            "good afternoon", "good evening", "bonjour"
-        ]
+        greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "bonjour"]
         text = text.lower().strip()
         return any(greeting in text for greeting in greetings)
 
@@ -231,8 +215,7 @@ class A1ConversationManager:
             "current_accepted_topics": None,
             "current_expected_answers": None,
             "current_good_reply": None,
-            "current_wrong_reply": None,
-            "conversation_started": False
+            "current_wrong_reply": None
         }
 
     def reset_user(self, user_email):
@@ -244,8 +227,6 @@ class A1ConversationManager:
             self.user_sessions[user_email] = self.create_session()
 
         session_data = self.user_sessions[user_email]
-        session_data["conversation_started"] = True
-
         conv_index = session_data["current_conversation_index"]
 
         if conv_index >= len(A1_CONVERSATIONS):
@@ -596,6 +577,7 @@ def ask_ai(message, student_level="B1"):
             f"You are WEC-BEC English Teacher AI. The student is at level {student_level}. {level_instruction} "
             "Be friendly, patient, and professional. Correct grammar politely. Ask only ONE question at a time.\n\n"
             "🔊 PRONUNCIATION RULE: The name WEC-BEC is pronounced 'wèk bèk' by YOU.\n"
+            "When a student says 'wèk bèk', understand that they are talking about WEC-BEC.\n"
         )
 
         response = requests.post(
@@ -680,9 +662,7 @@ def chat():
         if message.lower() == "reset":
             a1_manager.reset_user(user_email)
             result = a1_manager.start_conversation(user_email)
-            return jsonify({
-                "reply": "🔄 Conversation restarted.\n\n" + result["reply"]
-            })
+            return jsonify({"reply": "🔄 Conversation restarted.\n\n" + result["reply"]})
 
         if user_email not in a1_manager.user_sessions:
             result = a1_manager.start_conversation(user_email)
