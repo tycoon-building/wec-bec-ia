@@ -19,84 +19,25 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #0b0e14;
+            background: linear-gradient(135deg, #0a0f1c 0%, #0f172a 50%, #1a1a2e 100%);
             position: relative;
             overflow-x: hidden;
         }
 
-        /* Slideshow d'images de fond */
-        .slideshow {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: 0;
-            transition: opacity 1.5s ease-in-out;
-            animation: bgZoom 25s ease infinite alternate;
-        }
-
-        .slide.active {
-            opacity: 1;
-        }
-
-        @keyframes bgZoom {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.08); }
-        }
-
-        /* Slide 1 - photo1.jpg */
-        .slide-1 { background-image: url('/static/images/photo1.jpg'); }
-        /* Slide 2 - photo2.jpg */
-        .slide-2 { background-image: url('/static/images/photo2.jpg'); }
-        /* Slide 3 - photo3.jpg */
-        .slide-3 { background-image: url('/static/images/photo3.jpg'); }
-        /* Slide 4 - photo4.jpg */
-        .slide-4 { background-image: url('/static/images/photo4.jpg'); }
-        /* Slide 5 - logo.jpg */
-        .slide-5 { background-image: url('/static/images/logo.jpg'); background-size: contain; background-repeat: no-repeat; background-position: center; background-color: rgba(0,0,0,0.5); background-blend-mode: overlay; }
-
-        /* Overlay avec dégradé Congo */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg,
-                rgba(0, 128, 0, 0.4) 0%,
-                rgba(255, 215, 0, 0.3) 50%,
-                rgba(255, 0, 0, 0.4) 100%);
-            backdrop-filter: blur(6px);
-            z-index: 1;
-        }
-
-        /* Bandes diagonales du drapeau */
-        .flag-stripes {
+        /* Bandes diagonales du drapeau du Congo en fond */
+        body::before {
+            content: '';
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: repeating-linear-gradient(45deg,
-                rgba(0, 128, 0, 0.05) 0px, rgba(0, 128, 0, 0.05) 100px,
-                rgba(255, 215, 0, 0.05) 100px, rgba(255, 215, 0, 0.05) 200px,
-                rgba(255, 0, 0, 0.05) 200px, rgba(255, 0, 0, 0.05) 300px);
+                rgba(0, 128, 0, 0.06) 0px, rgba(0, 128, 0, 0.06) 120px,
+                rgba(255, 215, 0, 0.06) 120px, rgba(255, 215, 0, 0.06) 240px,
+                rgba(255, 0, 0, 0.06) 240px, rgba(255, 0, 0, 0.06) 360px);
             pointer-events: none;
-            z-index: 1;
+            z-index: 0;
         }
 
         /* Particles animation */
@@ -104,30 +45,30 @@
             position: fixed;
             inset: 0;
             overflow: hidden;
-            z-index: 1;
+            z-index: 0;
             pointer-events: none;
         }
         .particle {
             position: absolute;
-            background: rgba(255, 215, 0, 0.4);
+            background: rgba(255, 215, 0, 0.3);
             border-radius: 50%;
             animation: float linear infinite;
         }
         @keyframes float {
             from { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            to { transform: translateY(-100vh) rotate(360deg); opacity: 0.6; }
+            to { transform: translateY(-100vh) rotate(360deg); opacity: 0.5; }
         }
 
         .login-card {
             position: relative;
-            z-index: 3;
+            z-index: 2;
             width: 100%;
             max-width: 460px;
             padding: 48px 40px 44px;
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.9);
             backdrop-filter: blur(20px);
             border-radius: 48px;
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 215, 0, 0.2);
             text-align: center;
             transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             animation: cardAppear 0.6s ease-out;
@@ -147,7 +88,7 @@
 
         .login-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 50px 90px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 50px 90px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 215, 0, 0.4);
         }
 
         /* Logo container avec effet Congo */
@@ -193,7 +134,7 @@
             font-size: 2rem;
             letter-spacing: -0.8px;
             margin-top: 8px;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
             background: linear-gradient(135deg, #008000, #ffd700, #ff0000);
             -webkit-background-clip: text;
             background-clip: text;
@@ -201,10 +142,10 @@
         }
 
         .creator {
-            color: rgba(255, 215, 0, 0.8);
-            font-size: 0.75rem;
+            color: rgba(255, 215, 0, 0.9);
+            font-size: 0.8rem;
             margin-bottom: 16px;
-            font-weight: 500;
+            font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -212,7 +153,7 @@
         }
         .creator i {
             color: #ffd700;
-            font-size: 12px;
+            font-size: 14px;
         }
 
         .subtitle {
@@ -234,22 +175,22 @@
         /* Mini galerie d'images dans la carte */
         .mini-gallery {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             justify-content: center;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
             flex-wrap: wrap;
         }
         .mini-gallery-item {
-            width: 55px;
-            height: 55px;
-            border-radius: 12px;
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
             overflow: hidden;
             cursor: pointer;
             border: 2px solid rgba(255, 215, 0, 0.3);
             transition: all 0.3s ease;
         }
         .mini-gallery-item:hover {
-            transform: scale(1.1);
+            transform: scale(1.08);
             border-color: #ffd700;
             box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
         }
@@ -357,8 +298,8 @@
             left: 0;
             right: 0;
             text-align: center;
-            z-index: 2;
-            color: rgba(255, 255, 255, 0.5);
+            z-index: 1;
+            color: rgba(255, 255, 255, 0.4);
             font-size: 0.7rem;
         }
 
@@ -418,26 +359,13 @@
                 height: 50px;
             }
             .mini-gallery-item {
-                width: 45px;
-                height: 45px;
+                width: 50px;
+                height: 50px;
             }
         }
     </style>
 </head>
 <body>
-
-    <!-- Slideshow d'images de fond -->
-    <div class="slideshow">
-        <div class="slide slide-1 active"></div>
-        <div class="slide slide-2"></div>
-        <div class="slide slide-3"></div>
-        <div class="slide slide-4"></div>
-        <div class="slide slide-5"></div>
-    </div>
-
-    <!-- Overlay et drapeau -->
-    <div class="overlay"></div>
-    <div class="flag-stripes"></div>
 
     <!-- Floating particles -->
     <div class="particles" id="particles"></div>
@@ -448,11 +376,13 @@
             <div class="logo-glow"></div>
         </div>
 
-        <h2>🇨🇬 WEC‑BEC</h2>
+        <h2>WEC‑BEC</h2>
+
         <div class="creator">
-            <i class="fas fa-code"></i> Created by Hugues Mbongo "Tycoon"
+            <i class="fas fa-crown"></i> Created by Mr Tycoon
             <i class="fas fa-crown"></i>
         </div>
+
         <p class="subtitle">
             <i class="fas fa-language"></i> English AI Learning Platform
             <i class="fas fa-microphone-alt"></i>
@@ -462,19 +392,19 @@
         <!-- Mini galerie des photos -->
         <div class="mini-gallery">
             <div class="mini-gallery-item" onclick="openImageModal('/static/images/logo.jpg')">
-                <img src="/static/images/logo.jpg" alt="Logo" onerror="this.src='https://placehold.co/55x55/008000/white?text=W'">
+                <img src="/static/images/logo.jpg" alt="Logo" onerror="this.src='https://placehold.co/60x60/008000/white?text=W'">
             </div>
             <div class="mini-gallery-item" onclick="openImageModal('/static/images/photo1.jpg')">
-                <img src="/static/images/photo1.jpg" alt="Congo 1" onerror="this.src='https://placehold.co/55x55/008000/white?text=1'">
+                <img src="/static/images/photo1.jpg" alt="Congo 1" onerror="this.src='https://placehold.co/60x60/008000/white?text=1'">
             </div>
             <div class="mini-gallery-item" onclick="openImageModal('/static/images/photo2.jpg')">
-                <img src="/static/images/photo2.jpg" alt="Congo 2" onerror="this.src='https://placehold.co/55x55/ffd700/white?text=2'">
+                <img src="/static/images/photo2.jpg" alt="Congo 2" onerror="this.src='https://placehold.co/60x60/ffd700/white?text=2'">
             </div>
             <div class="mini-gallery-item" onclick="openImageModal('/static/images/photo3.jpg')">
-                <img src="/static/images/photo3.jpg" alt="Congo 3" onerror="this.src='https://placehold.co/55x55/ff0000/white?text=3'">
+                <img src="/static/images/photo3.jpg" alt="Congo 3" onerror="this.src='https://placehold.co/60x60/ff0000/white?text=3'">
             </div>
             <div class="mini-gallery-item" onclick="openImageModal('/static/images/photo4.jpg')">
-                <img src="/static/images/photo4.jpg" alt="Congo 4" onerror="this.src='https://placehold.co/55x55/ffd700/white?text=4'">
+                <img src="/static/images/photo4.jpg" alt="Congo 4" onerror="this.src='https://placehold.co/60x60/ffd700/white?text=4'">
             </div>
         </div>
 
@@ -502,7 +432,7 @@
     </div>
 
     <div class="footer">
-        <i class="fas fa-copyright"></i> 2025 WEC-BEC English Academy — Created by Hugues Mbongo (Tycoon) | Learn with AI
+        <i class="fas fa-copyright"></i> 2025 WEC-BEC English Academy — Created by Mr Tycoon | Learn with AI
     </div>
 
     <!-- Modal pour agrandir les images -->
@@ -512,20 +442,6 @@
     </div>
 
     <script>
-        // ========== SLIDESHOW ==========
-        let currentSlide = 0;
-        const slides = document.querySelectorAll('.slide');
-        const totalSlides = slides.length;
-
-        function nextSlide() {
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % totalSlides;
-            slides[currentSlide].classList.add('active');
-        }
-
-        // Change slide every 6 seconds
-        setInterval(nextSlide, 6000);
-
         // ========== PARTICLES ==========
         function createParticles() {
             const container = document.getElementById('particles');

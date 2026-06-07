@@ -409,7 +409,15 @@
         .lesson-card:hover { transform: translateY(-3px); border-color: #ffd700; box-shadow: 0 10px 30px rgba(255,215,0,0.1); }
         .lesson-card h3 { font-size: 20px; font-weight: 700; color: white; margin-bottom: 4px; }
         .lesson-card .meta { font-size: 12px; color: #ffd700; margin-bottom: 12px; }
-        .lesson-card .content { font-size: 14px; line-height: 1.6; color: #cbd5e1; margin-bottom: 14px; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+        .lesson-card .content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 14px;
+            white-space: pre-wrap;
+            max-height: none;
+            overflow-y: visible;
+        }
 
         .audio-bar {
             display: flex;
@@ -491,7 +499,7 @@
             <img src="/static/images/logo.jpg" alt="WEC-BEC Logo" onerror="this.src='https://placehold.co/55x55/008000/white?text=WEC'">
         </div>
         <div class="header-text">
-            <h1>🇨🇬 WEC-BEC English AI</h1>
+            <h1>WEC-BEC English AI</h1>
             <p><i class="fas fa-circle"></i> Connected as: {{ user }} · Level: {{ student_level }} · Your personal AI tutor</p>
         </div>
         <div class="streak-badge"><i class="fas fa-fire"></i> 7 day streak</div>
@@ -520,6 +528,9 @@
                     </div>
                     <div class="gallery-item" onclick="openGalleryModal('/static/images/photo3.jpg')">
                         <img src="/static/images/photo3.jpg" alt="Congo Nature" onerror="this.src='https://placehold.co/180x140/ff0000/white?text=Photo+3'">
+                    </div>
+                    <div class="gallery-item" onclick="openGalleryModal('/static/images/photo4.jpg')">
+                        <img src="/static/images/photo4.jpg" alt="Congo Nature" onerror="this.src='https://placehold.co/180x140/ff0000/white?text=Photo+4'">
                     </div>
                     <div class="gallery-item" onclick="openGalleryModal('/static/images/logo.jpg')">
                         <img src="/static/images/logo.jpg" alt="WEC-BEC" onerror="this.src='https://placehold.co/180x140/008000/white?text=WEC-BEC'">
@@ -811,7 +822,7 @@ async function loadCourses() {
     }
 }
 
-// ========== LESSONS ==========
+// ========== LESSONS - AFFICHAGE COMPLET ==========
 function renderLessons() {
     const container = document.getElementById('lessons-container');
     if (!container) return;
@@ -823,14 +834,13 @@ function renderLessons() {
     }
 
     coursesData.forEach((lesson, idx) => {
-        const content = lesson.content || 'No content available.';
-        const contentPreview = content.substring(0, 200);
+        const fullContent = lesson.content || 'No content available.';
         const card = document.createElement('div');
         card.className = 'lesson-card';
         card.innerHTML = `
             <h3>${escapeHtml(lesson.title)}</h3>
             <div class="meta">Lesson ${idx+1} of ${coursesData.length}</div>
-            <div class="content">${escapeHtml(contentPreview)}${content.length > 200 ? '...' : ''}</div>
+            <div class="content" style="max-height: none; overflow-y: visible;">${escapeHtml(fullContent).replace(/\n/g, '<br>')}</div>
             <div class="audio-bar">
                 <button onclick="playFullLesson(${idx})"><i class="fas fa-headphones"></i> Listen to Full Lesson</button>
                 <button class="secondary" onclick="playRandomPhrase(${idx})"><i class="fas fa-redo-alt"></i> Repeat random phrase</button>
@@ -854,7 +864,7 @@ function playRandomPhrase(idx) {
         const phrase = sentences[Math.floor(Math.random() * sentences.length)].trim() + '.';
         speak(phrase);
     } else {
-        speak(lesson.content.substring(0, 200));
+        speak(lesson.content.substring(0, 500));
     }
 }
 
