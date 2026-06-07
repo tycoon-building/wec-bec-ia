@@ -20,41 +20,96 @@
             align-items: center;
             justify-content: center;
             background: #0b0e14;
-            background-image: url('static/images/photo1.jpg');
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Slideshow d'images de fond */
+        .slideshow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            position: relative;
-            animation: bgZoom 20s ease infinite alternate;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            animation: bgZoom 25s ease infinite alternate;
+        }
+
+        .slide.active {
+            opacity: 1;
         }
 
         @keyframes bgZoom {
-            0% { background-size: 100% auto; }
-            100% { background-size: 110% auto; }
+            0% { transform: scale(1); }
+            100% { transform: scale(1.08); }
         }
 
-        body::before {
-            content: '';
-            position: absolute;
-            inset: 0;
+        /* Slide 1 - photo1.jpg */
+        .slide-1 { background-image: url('/static/images/photo1.jpg'); }
+        /* Slide 2 - photo2.jpg */
+        .slide-2 { background-image: url('/static/images/photo2.jpg'); }
+        /* Slide 3 - photo3.jpg */
+        .slide-3 { background-image: url('/static/images/photo3.jpg'); }
+        /* Slide 4 - photo4.jpg */
+        .slide-4 { background-image: url('/static/images/photo4.jpg'); }
+        /* Slide 5 - logo.jpg */
+        .slide-5 { background-image: url('/static/images/logo.jpg'); background-size: contain; background-repeat: no-repeat; background-position: center; background-color: rgba(0,0,0,0.5); background-blend-mode: overlay; }
+
+        /* Overlay avec dégradé Congo */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(135deg,
-                rgba(0, 0, 0, 0.65) 0%,
-                rgba(0, 0, 0, 0.5) 50%,
-                rgba(0, 0, 0, 0.65) 100%);
-            backdrop-filter: blur(8px);
-            z-index: 0;
+                rgba(0, 128, 0, 0.4) 0%,
+                rgba(255, 215, 0, 0.3) 50%,
+                rgba(255, 0, 0, 0.4) 100%);
+            backdrop-filter: blur(6px);
+            z-index: 1;
+        }
+
+        /* Bandes diagonales du drapeau */
+        .flag-stripes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(45deg,
+                rgba(0, 128, 0, 0.05) 0px, rgba(0, 128, 0, 0.05) 100px,
+                rgba(255, 215, 0, 0.05) 100px, rgba(255, 215, 0, 0.05) 200px,
+                rgba(255, 0, 0, 0.05) 200px, rgba(255, 0, 0, 0.05) 300px);
+            pointer-events: none;
+            z-index: 1;
         }
 
         /* Particles animation */
         .particles {
-            position: absolute;
+            position: fixed;
             inset: 0;
             overflow: hidden;
-            z-index: 0;
+            z-index: 1;
+            pointer-events: none;
         }
         .particle {
             position: absolute;
-            background: rgba(108, 99, 255, 0.3);
+            background: rgba(255, 215, 0, 0.4);
             border-radius: 50%;
             animation: float linear infinite;
         }
@@ -65,17 +120,18 @@
 
         .login-card {
             position: relative;
-            z-index: 2;
+            z-index: 3;
             width: 100%;
-            max-width: 440px;
+            max-width: 460px;
             padding: 48px 40px 44px;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(20px);
             border-radius: 48px;
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 215, 0, 0.3);
             text-align: center;
             transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             animation: cardAppear 0.6s ease-out;
+            border: 1px solid rgba(255, 215, 0, 0.2);
         }
 
         @keyframes cardAppear {
@@ -91,10 +147,10 @@
 
         .login-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 50px 90px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(108, 99, 255, 0.3);
+            box-shadow: 0 50px 90px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 215, 0, 0.5);
         }
 
-        /* Logo container with glow */
+        /* Logo container avec effet Congo */
         .logo-container {
             position: relative;
             display: inline-block;
@@ -107,10 +163,12 @@
             object-fit: cover;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid rgba(255, 215, 0, 0.5);
         }
         .logo:hover {
             transform: scale(1.05);
-            box-shadow: 0 20px 45px rgba(108, 99, 255, 0.4);
+            box-shadow: 0 20px 45px rgba(255, 215, 0, 0.4);
+            border-color: #ffd700;
         }
         .logo-glow {
             position: absolute;
@@ -120,7 +178,7 @@
             width: 130px;
             height: 130px;
             border-radius: 35px;
-            background: radial-gradient(circle, rgba(108,99,255,0.3) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, transparent 70%);
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
@@ -131,30 +189,74 @@
 
         h2 {
             color: #ffffff;
-            font-weight: 700;
-            font-size: 1.9rem;
+            font-weight: 800;
+            font-size: 2rem;
             letter-spacing: -0.8px;
             margin-top: 8px;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #ffffff, #c7d2fe);
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #008000, #ffd700, #ff0000);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
 
-        .subtitle {
-            color: rgba(255, 255, 255, 0.65);
-            font-size: 0.9rem;
-            margin-bottom: 36px;
-            font-weight: 400;
+        .creator {
+            color: rgba(255, 215, 0, 0.8);
+            font-size: 0.75rem;
+            margin-bottom: 16px;
+            font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
         }
+        .creator i {
+            color: #ffd700;
+            font-size: 12px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            margin-bottom: 32px;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
         .subtitle i {
-            color: #6c63ff;
+            color: #ffd700;
             font-size: 14px;
+        }
+
+        /* Mini galerie d'images dans la carte */
+        .mini-gallery {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .mini-gallery-item {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        .mini-gallery-item:hover {
+            transform: scale(1.1);
+            border-color: #ffd700;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+        .mini-gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .input-group {
@@ -165,9 +267,9 @@
 
         .input-group label {
             display: block;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.8);
             font-size: 0.8rem;
-            font-weight: 500;
+            font-weight: 600;
             margin-bottom: 6px;
             margin-left: 8px;
         }
@@ -176,8 +278,8 @@
             width: 100%;
             height: 54px;
             padding: 0 18px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
             border-radius: 18px;
             color: #ffffff;
             font-size: 1rem;
@@ -188,22 +290,21 @@
         }
 
         .input-group input::placeholder {
-            color: rgba(255, 255, 255, 0.35);
+            color: rgba(255, 255, 255, 0.4);
             font-weight: 400;
         }
 
         .input-group input:focus {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: #6c63ff;
-            box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #ffd700;
+            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.2);
         }
 
-        /* Icon inside input */
         .input-group i {
             position: absolute;
             right: 18px;
             bottom: 18px;
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 215, 0, 0.6);
             font-size: 18px;
             pointer-events: none;
         }
@@ -213,14 +314,14 @@
             height: 54px;
             border: none;
             border-radius: 30px;
-            background: linear-gradient(135deg, #6c63ff, #a855f7);
-            color: #ffffff;
-            font-weight: 700;
+            background: linear-gradient(135deg, #008000, #ffd700, #ff0000);
+            color: #1a1a2e;
+            font-weight: 800;
             font-size: 1rem;
             letter-spacing: 0.5px;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 24px rgba(108, 99, 255, 0.35);
+            box-shadow: 0 8px 24px rgba(0, 128, 0, 0.35);
             margin-top: 12px;
             display: flex;
             align-items: center;
@@ -231,8 +332,8 @@
 
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(108, 99, 255, 0.55);
-            background: linear-gradient(135deg, #7c73ff, #b865ff);
+            box-shadow: 0 12px 32px rgba(255, 215, 0, 0.55);
+            filter: brightness(1.05);
         }
 
         .btn-login:active {
@@ -250,16 +351,53 @@
             text-align: left;
         }
 
-        /* Footer */
         .footer {
-            position: absolute;
+            position: fixed;
             bottom: 20px;
             left: 0;
             right: 0;
             text-align: center;
-            z-index: 1;
-            color: rgba(255, 255, 255, 0.4);
+            z-index: 2;
+            color: rgba(255, 255, 255, 0.5);
             font-size: 0.7rem;
+        }
+
+        /* Modal pour agrandir les images */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .image-modal.active {
+            display: flex;
+        }
+        .image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 16px;
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 40px;
+            color: #ffd700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .close-modal:hover {
+            transform: scale(1.1);
+            color: #ff0000;
         }
 
         @media (max-width: 480px) {
@@ -279,31 +417,66 @@
             .btn-login {
                 height: 50px;
             }
-        }
-
-        @media (max-width: 380px) {
-            .login-card {
-                padding: 24px 20px 28px;
+            .mini-gallery-item {
+                width: 45px;
+                height: 45px;
             }
         }
     </style>
 </head>
 <body>
 
+    <!-- Slideshow d'images de fond -->
+    <div class="slideshow">
+        <div class="slide slide-1 active"></div>
+        <div class="slide slide-2"></div>
+        <div class="slide slide-3"></div>
+        <div class="slide slide-4"></div>
+        <div class="slide slide-5"></div>
+    </div>
+
+    <!-- Overlay et drapeau -->
+    <div class="overlay"></div>
+    <div class="flag-stripes"></div>
+
     <!-- Floating particles -->
     <div class="particles" id="particles"></div>
 
     <div class="login-card">
         <div class="logo-container">
-            <img src="static/images/logo.jpg" alt="WEC-BEC Logo" class="logo">
+            <img src="/static/images/logo.jpg" alt="WEC-BEC Logo" class="logo" onerror="this.src='https://placehold.co/110x110/008000/white?text=WEC'">
             <div class="logo-glow"></div>
         </div>
 
-        <h2>🎓 WEC‑BEC</h2>
+        <h2>🇨🇬 WEC‑BEC</h2>
+        <div class="creator">
+            <i class="fas fa-code"></i> Created by Hugues Mbongo "Tycoon"
+            <i class="fas fa-crown"></i>
+        </div>
         <p class="subtitle">
             <i class="fas fa-language"></i> English AI Learning Platform
             <i class="fas fa-microphone-alt"></i>
+            <i class="fas fa-robot"></i>
         </p>
+
+        <!-- Mini galerie des photos -->
+        <div class="mini-gallery">
+            <div class="mini-gallery-item" onclick="openImageModal('/static/images/logo.jpg')">
+                <img src="/static/images/logo.jpg" alt="Logo" onerror="this.src='https://placehold.co/55x55/008000/white?text=W'">
+            </div>
+            <div class="mini-gallery-item" onclick="openImageModal('/static/images/photo1.jpg')">
+                <img src="/static/images/photo1.jpg" alt="Congo 1" onerror="this.src='https://placehold.co/55x55/008000/white?text=1'">
+            </div>
+            <div class="mini-gallery-item" onclick="openImageModal('/static/images/photo2.jpg')">
+                <img src="/static/images/photo2.jpg" alt="Congo 2" onerror="this.src='https://placehold.co/55x55/ffd700/white?text=2'">
+            </div>
+            <div class="mini-gallery-item" onclick="openImageModal('/static/images/photo3.jpg')">
+                <img src="/static/images/photo3.jpg" alt="Congo 3" onerror="this.src='https://placehold.co/55x55/ff0000/white?text=3'">
+            </div>
+            <div class="mini-gallery-item" onclick="openImageModal('/static/images/photo4.jpg')">
+                <img src="/static/images/photo4.jpg" alt="Congo 4" onerror="this.src='https://placehold.co/55x55/ffd700/white?text=4'">
+            </div>
+        </div>
 
         {% if error %}
         <div class="error-message">
@@ -314,7 +487,7 @@
         <form method="POST">
             <div class="input-group">
                 <label><i class="fas fa-envelope"></i> Email</label>
-                <input type="email" name="email" placeholder="Votre email" required autocomplete="email">
+                <input type="email" name="email" placeholder="student1@gmail.com" required autocomplete="email">
                 <i class="fas fa-user"></i>
             </div>
             <div class="input-group">
@@ -329,29 +502,69 @@
     </div>
 
     <div class="footer">
-        <i class="fas fa-copyright"></i> 2025 WEC-BEC English Academy — Learn with AI
+        <i class="fas fa-copyright"></i> 2025 WEC-BEC English Academy — Created by Hugues Mbongo (Tycoon) | Learn with AI
+    </div>
+
+    <!-- Modal pour agrandir les images -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="close-modal">&times;</span>
+        <img id="modalImage" src="" alt="Agrandissement">
     </div>
 
     <script>
-        // Create floating particles for visual effect
+        // ========== SLIDESHOW ==========
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function nextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % totalSlides;
+            slides[currentSlide].classList.add('active');
+        }
+
+        // Change slide every 6 seconds
+        setInterval(nextSlide, 6000);
+
+        // ========== PARTICLES ==========
         function createParticles() {
             const container = document.getElementById('particles');
             if (!container) return;
-            const particleCount = window.innerWidth < 768 ? 30 : 60;
+            const particleCount = window.innerWidth < 768 ? 40 : 80;
 
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
                 particle.classList.add('particle');
-                const size = Math.random() * 6 + 2;
+                const size = Math.random() * 5 + 2;
                 particle.style.width = size + 'px';
                 particle.style.height = size + 'px';
                 particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDuration = Math.random() * 15 + 8 + 's';
+                particle.style.animationDuration = Math.random() * 15 + 10 + 's';
                 particle.style.animationDelay = Math.random() * 10 + 's';
-                particle.style.background = `rgba(${100 + Math.random() * 100}, ${80 + Math.random() * 80}, 255, ${0.1 + Math.random() * 0.3})`;
+                particle.style.background = `rgba(255, 215, 0, ${0.15 + Math.random() * 0.3})`;
                 container.appendChild(particle);
             }
         }
+
+        // ========== MODAL IMAGE ==========
+        function openImageModal(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.classList.add('active');
+            modalImg.src = imageSrc;
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('active');
+        }
+
+        // Fermer avec la touche Echap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeImageModal();
+            }
+        });
 
         window.addEventListener('load', () => {
             createParticles();
