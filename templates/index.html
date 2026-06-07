@@ -18,7 +18,6 @@
             position: relative;
         }
 
-        /* Drapeau du Congo en arrière-plan décoratif */
         body::before {
             content: '';
             position: fixed;
@@ -34,7 +33,6 @@
             z-index: 0;
         }
 
-        /* Bandes diagonales du drapeau */
         body::after {
             content: '';
             position: fixed;
@@ -69,7 +67,6 @@
             box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
         }
 
-        /* Header avec dégradé aux couleurs du Congo */
         .header {
             background: linear-gradient(135deg,
                 rgba(0, 128, 0, 0.95) 0%,
@@ -173,7 +170,6 @@
         }
         .logout-btn:hover { background: #ef4444; color: white; transform: translateY(-2px); box-shadow: 0 5px 20px rgba(239,68,68,0.4); }
 
-        /* Navigation avec couleurs Congo */
         .nav {
             display: flex;
             background: rgba(0, 0, 0, 0.5);
@@ -222,7 +218,6 @@
         .section.active { display: block; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Gallery Section - Images à la une */
         .gallery-section {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 24px;
@@ -276,7 +271,6 @@
             object-fit: cover;
         }
 
-        /* Gallery modal pour agrandir les images */
         .gallery-modal {
             display: none;
             position: fixed;
@@ -476,7 +470,6 @@
         .menu-bar button { background: rgba(0, 128, 0, 0.3); border: 1px solid rgba(255, 215, 0, 0.5); padding: 8px 16px; border-radius: 40px; color: #ffd700; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.3s; }
         .menu-bar button:hover { background: #ffd700; color: #1a1a2e; }
 
-        /* Floating decoration */
         .floating-flag {
             position: fixed;
             bottom: 20px;
@@ -502,7 +495,7 @@
             <h1>WEC-BEC English AI</h1>
             <p><i class="fas fa-circle"></i> Connected as: {{ user }} · Level: {{ student_level }} · Your personal AI tutor</p>
         </div>
-        <div class="streak-badge"><i class="fas fa-fire"></i> 7 day streak</div>
+        <div class="streak-badge"><i class="fas fa-crown"></i> Born to lead</div>
         <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Exit</a>
     </div>
 
@@ -514,7 +507,6 @@
 
     <div class="main">
         <div id="section-chat" class="section active">
-            <!-- Galerie d'images à la une -->
             <div class="gallery-section">
                 <div class="gallery-title">
                     <i class="fas fa-images"></i> 🇨🇬 Discover Congo
@@ -561,7 +553,7 @@
 
         <div id="section-pronunciation" class="section">
             <h2 class="section-title"><i class="fas fa-microphone-alt"></i> Pronunciation Coach</h2>
-            <p class="section-subtitle">Listen to phrases from our lessons, then record yourself. Get instant feedback.</p>
+            <p class="section-subtitle">Practice self-introduction phrases. Listen, record, and compare your pronunciation.</p>
             <div id="pron-container"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Loading pronunciation exercises...</div></div>
         </div>
     </div>
@@ -589,7 +581,6 @@ function closeGalleryModal() {
     modal.classList.remove('active');
 }
 
-// Fermer avec la touche Echap
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeGalleryModal();
@@ -822,7 +813,7 @@ async function loadCourses() {
     }
 }
 
-// ========== LESSONS - AFFICHAGE COMPLET ==========
+// ========== LESSONS ==========
 function renderLessons() {
     const container = document.getElementById('lessons-container');
     if (!container) return;
@@ -868,50 +859,47 @@ function playRandomPhrase(idx) {
     }
 }
 
-// ========== PRONUNCIATION ==========
+// ========== PRONUNCIATION - UTILISE LA LEÇON 7 ==========
 function renderPronunciation() {
     const container = document.getElementById('pron-container');
     if (!container) return;
     container.innerHTML = '';
 
-    if (!coursesData || coursesData.length === 0) {
-        container.innerHTML = '<div class="pron-card"><p>🎙️ No lessons loaded yet.</p></div>';
-        return;
-    }
+    // Phrases spécifiques de la Lesson 7: Self Introduction (Presentation)
+    const lesson7Phrases = [
+        "Hi everybody!",
+        "Let me introduce myself",
+        "My Surname is Mbongo and my Firstname is Tycoon",
+        "I live at number 20, Mapémé Street Nkombo quarter, Djiri area",
+        "I study at Marien Ngouabi University",
+        "I attend Marien Ngouabi University",
+        "I am in the first level",
+        "I am a fresher",
+        "I am a Christian",
+        "I pray at Catholic Church",
+        "We are 7 in our family",
+        "I am 20 years old",
+        "I am Congolese",
+        "I was born in 2002 in Oyo",
+        "I learn English at WEC-BEC",
+        "I am one of the students of O.I",
+        "I am a newcomer",
+        "I am still a beginner",
+        "I have been learning English for one week",
+        "I learn English because it is one of the most spoken languages in the world"
+    ];
 
-    const phrasesToPractice = [];
-
-    for (let i = 0; i < coursesData.length && phrasesToPractice.length < 25; i++) {
-        const lesson = coursesData[i];
-        let content = lesson.content || '';
-        let sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 15 && s.trim().length < 100);
-
-        for (let j = 0; j < sentences.length && phrasesToPractice.length < 25; j++) {
-            phrasesToPractice.push({
-                phrase: sentences[j].trim() + '.',
-                title: lesson.title
-            });
-        }
-    }
-
-    if (phrasesToPractice.length === 0 && coursesData.length > 0) {
-        phrasesToPractice.push({
-            phrase: "Hello, how are you today?",
-            title: "Basic Greetings"
-        });
-    }
-
-    phrasesToPractice.forEach((item, idx) => {
+    lesson7Phrases.forEach((phrase, idx) => {
         const card = document.createElement('div');
         card.className = 'pron-card';
         card.innerHTML = `
-            <h3>📖 From: ${escapeHtml(item.title)}</h3>
-            <div class="phrase">"${escapeHtml(item.phrase)}"</div>
+            <h3>📖 Lesson 7: Self Introduction</h3>
+            <div class="phrase">"${escapeHtml(phrase)}"</div>
             <div class="actions">
-                <button class="btn-listen" onclick="listenPhrase('${escapeHtml(item.phrase).replace(/'/g, "\\'")}')">
+                <button class="btn-listen" onclick="listenPhrase('${escapeHtml(phrase).replace(/'/g, "\\'")}')">
                     <i class="fas fa-play"></i> Listen
                 </button>
-                <button class="btn-record" onclick="recordPhrase('${escapeHtml(item.phrase).replace(/'/g, "\\'")}', ${idx})">
+                <button class="btn-record" onclick="recordPhrase('${escapeHtml(phrase).replace(/'/g, "\\'")}', ${idx})">
                     <i class="fas fa-microphone"></i> Record & Compare
                 </button>
             </div>
