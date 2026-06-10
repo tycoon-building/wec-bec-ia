@@ -1,15 +1,20 @@
 from flask import Flask, request, jsonify, render_template, redirect, session
+from flask_socketio import SocketIO, emit
 import requests
 import json
 import logging
 import random
-from datetime import timedelta
+import base64
+import tempfile
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
+from faster_whisper import WhisperModel
 
 load_dotenv()
 
 app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # =========================
 # 🔐 SECURITY CONFIG
@@ -32,6 +37,31 @@ STUDENT_LEVELS = {
     "student1@gmail.com": "A1",
     "admin@wec-bec.com": "C1"
 }
+
+# =========================
+# 🎤 FASTER-WHISPER CONFIG
+# =========================
+# Modèle: tiny, base, small, medium, large
+# tiny = plus rapide mais moins précis
+# small = bon équilibre
+# medium/large = plus précis mais plus lent
+WHISPER_MODEL_SIZE = "base"  # ou "small", "medium" selon vos besoins
+
+# Utiliser CPU ou CUDA (GPU)
+WHISPER_DEVICE = "cpu"  # ou "cuda" si vous avez GPU
+WHISPER_COMPUTE_TYPE = "int8"  # int8 pour accélération
+
+print("Loading Whisper model...")
+try:
+    whisper_model = WhisperModel(
+        WHISPER_MODEL_SIZE,
+        device=WHISPER_DEVICE,
+        compute_type=WHISPER_COMPUTE_TYPE
+    )
+    print(f"✅ Whisper model '{WHISPER_MODEL_SIZE}' loaded successfully!")
+except Exception as e:
+    print(f"⚠️ Error loading Whisper: {e}")
+    whisper_model = None
 
 
 # =========================
@@ -68,6 +98,45 @@ COURSES_DATA = load_courses()
 
 
 # =========================
+# 🎤 FONCTIONS DE RECONNAISSANCE VOCALE
+# =========================
+def transcribe_audio_with_whisper(audio_data):
+    """Transcrit un fichier audio avec faster-whisper"""
+    if whisper_model is None:
+        return None, "Whisper model not loaded"
+
+    try:
+        # Créer un fichier temporaire pour l'audio
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp_file:
+            tmp_file.write(audio_data)
+            tmp_path = tmp_file.name
+
+        # Transcrire avec Whisper
+        segments, info = whisper_model.transcribe(
+            tmp_path,
+            beam_size=5,
+            language="en",  # Forcer l'anglais pour meilleure précision
+            vad_filter=True,  # Filtre pour supprimer le silence
+            vad_parameters=dict(min_silence_duration_ms=500)
+        )
+
+        # Récupérer le texte complet
+        transcribed_text = " ".join([segment.text for segment in segments])
+
+        # Nettoyer le fichier temporaire
+        os.unlink(tmp_path)
+
+        if transcribed_text:
+            return transcribed_text, None
+        else:
+            return None, "No speech detected"
+
+    except Exception as e:
+        logging.error(f"Whisper transcription error: {str(e)}")
+        return None, str(e)
+
+
+# =========================
 # 🗣️ GESTIONNAIRE DE CONVERSATION A1
 # =========================
 class A1ConversationManager:
@@ -99,7 +168,7 @@ class A1ConversationManager:
                     'expected_answers': [a.lower() for a in exchange.get('expected_answers', [])],
                     'accepted_topics': exchange.get('accepted_topics', []),
                     'allow_correction': exchange.get('allow_correction', True),
-                    'good_reply': exchange.get('good_reply', 'Good job! '),
+                    'good_reply': exchange.get('good_reply', 'Good job!'),
                     'wrong_reply': exchange.get('wrong_reply', 'Try again.'),
                     'example_answer': exchange.get('example_answer', ''),
                     'theme': theme
@@ -145,7 +214,8 @@ class A1ConversationManager:
 
     def check_answer(self, user_answer, expected_answers, accepted_topics=None):
         user_answer = user_answer.lower().strip()
-        user_answer = user_answer.replace("wèk bèk", "wec bec").replace("wek bek", "wec bec").replace("walk back", "wec bec")
+        user_answer = user_answer.replace("wèk bèk", "wec bec").replace("wek bek", "wec bec").replace("walk back",
+                                                                                                      "wec bec")
 
         if self.needs_help(user_answer):
             return False, "need_help"
@@ -184,56 +254,17 @@ class A1ConversationManager:
         q_lower = current_question.lower()
 
         if "month" in q_lower:
-            return "Of course! The 12 months of the year are: January, February, March, April, May, June, July, August, September, October, November, December. Now, can you tell me three months of the year?"
+            return "Of course! The 12 months are: January, February, March, April, May, June, July, August, September, October, November, December. Now, can you tell me three months of the year?"
 
         if "day" in q_lower and "week" in q_lower:
-            return "Sure! The days of the week are: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday. Now, can you name the first day of the week?"
-
-        if "position" in q_lower and "family" in q_lower:
-            return "Your position in the family means if you are the eldest, the youngest, or somewhere in between. For example: 'I am the eldest' or 'I am the youngest'. What position are you in your family?"
-
-        if "color" in q_lower or "colour" in q_lower:
-            return "Here are some colors in English: Red, Blue, Green, Yellow, Black, White, Pink, Purple, Orange, Brown. What is your favorite color?"
-
-        if "number" in q_lower or "count" in q_lower:
-            return "Let me help you with numbers: One (1), Two (2), Three (3), Four (4), Five (5), Six (6), Seven (7), Eight (8), Nine (9), Ten (10). Can you count from 1 to 5 for me?"
-
-        if "surname" in q_lower:
-            return "Your surname is your family name or last name. For example: 'My surname is Smith'. What is your surname?"
+            return "Sure! The days are: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday. Now, can you name the first day of the week?"
 
         if expected_answers:
-            return f"Let me help you. For example, you can say: '{expected_answers[0]}'. Now, can you try answering the question again?"
+            return f"Let me help you. For example: '{expected_answers[0]}'. Now, can you try again?"
 
-        return "Let me help you. Try to answer with a simple sentence. I know you can do it! "
-
-    def answer_general_question(self, user_question):
-        q_lower = user_question.lower()
-
-        if "how many days" in q_lower and ("week" in q_lower or "week?" in q_lower):
-            return "Good question! There are seven days in a week: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, and Sunday."
-
-        if "how many months" in q_lower and ("year" in q_lower or "year?" in q_lower):
-            return "Great question! There are twelve months in a year: January, February, March, April, May, June, July, August, September, October, November, December."
-
-        if "days of the week" in q_lower or "name the days" in q_lower:
-            return "The days of the week are: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday."
-
-        if "months of the year" in q_lower or "name the months" in q_lower:
-            return "The months of the year are: January, February, March, April, May, June, July, August, September, October, November, December."
-
-        if "color" in q_lower or "colour" in q_lower:
-            return "Here are some colors in English: Red, Blue, Green, Yellow, Black, White, Pink, Purple, Orange, Brown."
-
-        if "number" in q_lower and ("one" in q_lower or "count" in q_lower):
-            return "Let me help you with numbers: One (1), Two (2), Three (3), Four (4), Five (5), Six (6), Seven (7), Eight (8), Nine (9), Ten (10)."
-
-        return None
+        return "Let me help you. Try to answer with a simple sentence. I know you can do it!"
 
     def answer_student_question(self, user_question, student_name=None):
-        general_answer = self.answer_general_question(user_question)
-        if general_answer:
-            return general_answer
-
         q_lower = user_question.lower()
 
         if "and you" in q_lower or "and you?" in q_lower:
@@ -243,16 +274,7 @@ class A1ConversationManager:
             return "I'm doing great, thank you for asking! How are you today?"
 
         if "what is your name" in q_lower or "your name" in q_lower:
-            return "I'm your WEC-BEC English teacher! You can call me WEC-BEC AI."
-
-        if "where are you from" in q_lower:
-            return "I'm an AI, so I live in the cloud! But I was created to help students like you learn English."
-
-        if "how old are you" in q_lower:
-            return "As an AI, I don't have an age. But I'm always here to help you learn!"
-
-        if "do you like" in q_lower:
-            return "I love helping students learn English! It's my favorite thing to do."
+            return "I'm your WEC-BEC English teacher! You can call me Teacher AI."
 
         return None
 
@@ -260,15 +282,6 @@ class A1ConversationManager:
         greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "bonjour", "good day"]
         text = text.lower().strip()
         return any(greeting in text for greeting in greetings)
-
-    def is_general_english_question(self, user_answer):
-        q_lower = user_answer.lower()
-        general_patterns = [
-            "how many days", "how many months", "days of the week", "months of the year",
-            "name the days", "name the months", "what are the colors", "what are the colours",
-            "count from", "how to say", "what does", "mean in english"
-        ]
-        return any(pattern in q_lower for pattern in general_patterns)
 
     def create_session(self):
         return {
@@ -321,9 +334,7 @@ class A1ConversationManager:
             session["questions_asked_in_theme"] = 1
             session["help_mode"] = False
 
-        return {
-            "reply": "Hello! Nice to meet you. What's your name? "
-        }
+        return {"reply": "Hello! Nice to meet you. What's your name?"}
 
     def process_answer(self, user_email, user_answer):
         if user_email not in self.user_sessions:
@@ -341,12 +352,6 @@ class A1ConversationManager:
             session["help_mode"] = True
             return {"reply": help_message}
 
-        # Vérifier si l'élève pose une question générale
-        if self.is_general_english_question(user_answer):
-            general_answer = self.answer_general_question(user_answer)
-            if general_answer:
-                return {"reply": f"{general_answer}\n\nNow, let's continue: {current_q}"}
-
         # Vérifier si l'élève pose une question personnelle
         personal_answer = self.answer_student_question(user_answer, session.get("student_name"))
         if personal_answer:
@@ -355,14 +360,10 @@ class A1ConversationManager:
         # Vérifier la réponse
         is_correct, match_type = self.check_answer(user_answer, expected, accepted_topics)
 
-        # Extraire les informations
+        # Extraire le nom
         extracted_name = self.extract_name_from_answer(user_answer) if not session.get("student_name") else None
         if extracted_name:
             session["student_name"] = extracted_name
-
-        extracted_age = self.extract_age_from_answer(user_answer) if not session.get("student_age") else None
-        if extracted_age:
-            session["student_age"] = extracted_age
 
         # Si la réponse est correcte
         if is_correct:
@@ -375,8 +376,6 @@ class A1ConversationManager:
             if session.get("student_name") and "name" in str(current_q).lower():
                 name = session["student_name"]
                 natural_reply = f"Nice to meet you, {name}!"
-            elif "age" in str(current_q).lower() and extracted_age:
-                natural_reply = f"Great! You are {extracted_age} years old!"
             else:
                 natural_reply = "Great job!"
 
@@ -391,7 +390,8 @@ class A1ConversationManager:
             else:
                 next_q_data = self.get_next_question_in_theme(current_theme, current_q)
                 if not next_q_data:
-                    current_index = self.theme_sequence.index(current_theme) if current_theme in self.theme_sequence else 0
+                    current_index = self.theme_sequence.index(
+                        current_theme) if current_theme in self.theme_sequence else 0
                     next_index = (current_index + 1) % len(self.theme_sequence)
                     next_theme = self.theme_sequence[next_index]
                     next_q_data = self.get_next_question_in_theme(next_theme)
@@ -409,7 +409,7 @@ class A1ConversationManager:
 
                 return {"reply": f"{natural_reply}\n\n{next_q_data['question']}"}
             else:
-                return {"reply": f"{natural_reply}\n\nYou've completed all lessons! 🎉"}
+                return {"reply": f"{natural_reply}\n\nYou've completed all lessons!"}
 
         # Si la réponse est incorrecte
         else:
@@ -434,21 +434,6 @@ class A1ConversationManager:
                 name = parts[1].strip().split()[0] if parts[1].strip() else None
                 if name and len(name) > 1:
                     return name.capitalize()
-        if "i am" in user_answer and len(user_answer) < 30:
-            parts = user_answer.split("i am")
-            if len(parts) > 1:
-                name = parts[1].strip().split()[0] if parts[1].strip() else None
-                if name and len(name) > 1 and name not in ["fine", "good", "ok", "here", "student"]:
-                    return name.capitalize()
-        return None
-
-    def extract_age_from_answer(self, user_answer):
-        import re
-        numbers = re.findall(r'\d+', user_answer)
-        if numbers:
-            age = int(numbers[0])
-            if 1 <= age <= 120:
-                return age
         return None
 
     def get_hint(self, user_email):
@@ -500,10 +485,9 @@ def ask_ai(message, student_level="B1"):
         system_prompt = (
             f"You are WEC-BEC English Teacher AI. The student is at level {student_level}. {level_instruction} "
             "Be friendly, patient, and professional. Correct grammar politely. Ask only ONE question at a time.\n\n"
-            "IMPORTANT: Behave like a real human teacher.\n"
-            "If the student asks a general English question, answer it directly, then continue with your question.\n"
+            "Behave like a real human teacher.\n"
             "If the student asks for help, provide a clear explanation or example.\n"
-            "Keep the conversation flowing naturally, like a real dialogue.\n"
+            "Keep the conversation flowing naturally.\n"
             "Never show lesson titles or expected answers. Just have a natural conversation.\n"
         )
 
@@ -533,6 +517,40 @@ def ask_ai(message, student_level="B1"):
 
 
 # =========================
+# 🎤 WEBSOCKET POUR AUDIO EN TEMPS RÉEL
+# =========================
+@socketio.on('audio_chunk')
+def handle_audio_chunk(data):
+    """Reçoit un chunk audio du client et le transcrit"""
+    try:
+        audio_base64 = data.get('audio', '')
+        if not audio_base64:
+            emit('transcription', {'text': '', 'error': 'No audio data'})
+            return
+
+        # Décoder le base64
+        audio_bytes = base64.b64decode(audio_base64)
+
+        # Transcrire avec Whisper
+        transcribed_text, error = transcribe_audio_with_whisper(audio_bytes)
+
+        if transcribed_text:
+            emit('transcription', {'text': transcribed_text, 'error': None})
+        else:
+            emit('transcription', {'text': '', 'error': error or 'Could not transcribe'})
+
+    except Exception as e:
+        logging.error(f"Audio handling error: {str(e)}")
+        emit('transcription', {'text': '', 'error': str(e)})
+
+
+@socketio.on('audio_end')
+def handle_audio_end():
+    """Signal que l'enregistrement audio est terminé"""
+    emit('audio_processed', {'status': 'done'})
+
+
+# =========================
 # 🌐 ROUTES
 # =========================
 @app.route("/")
@@ -553,7 +571,7 @@ def login():
             session.permanent = True
             session["user"] = email
             return redirect("/")
-        return render_template("login.html", error="Invalid email or password ❌")
+        return render_template("login.html", error="Invalid email or password")
     return render_template("login.html")
 
 
@@ -614,4 +632,4 @@ def reload_courses():
 
 
 if __name__ == "__main__":
-    app.run(debug=False, host="0.0.0.0", port=5000)
+    socketio.run(app, debug=False, host="0.0.0.0", port=5000)
