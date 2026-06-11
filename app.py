@@ -66,10 +66,7 @@ ALLOWED_USERS = {
 }
 
 STUDENT_LEVELS = {
-    # 🛠️ ADMIN
     "admin@wec-bec.com": "C1",
-
-    # 👨‍🎓 APPRENANTS (A1)
     "apprenant1@gmail.com": "A1",
     "apprenant2@gmail.com": "A1",
     "apprenant3@gmail.com": "A1",
@@ -100,19 +97,17 @@ STUDENT_LEVELS = {
     "apprenant28@gmail.com": "A1",
     "apprenant29@gmail.com": "A1",
     "apprenant30@gmail.com": "A1",
-
-    # 🧑 UTILISATEURS SPÉCIAUX (niveau plus avancé)
     "tycoon@wec-bec.com": "B2",
     "shooter@wec-bec.com": "B1",
     "mefia@wec-bec.com": "B1"
 }
 
 # =========================
-# 🎤 FASTER-WHISPER - ULTRA RAPIDE ⚡
+# 🎤 FASTER-WHISPER
 # =========================
-WHISPER_MODEL_SIZE = "base"  # base = vitesse max, small = plus précis
+WHISPER_MODEL_SIZE = "base"
 WHISPER_DEVICE = "cpu"
-WHISPER_COMPUTE_TYPE = "int8"  # Accélération CPU
+WHISPER_COMPUTE_TYPE = "int8"
 
 print("🚀 Loading Whisper model...")
 try:
@@ -123,7 +118,7 @@ try:
         cpu_threads=4,
         num_workers=2
     )
-    print(f"✅ Whisper '{WHISPER_MODEL_SIZE}' ready (fast mode)")
+    print(f"✅ Whisper '{WHISPER_MODEL_SIZE}' ready")
 except Exception as e:
     print(f"⚠️ Whisper error: {e}")
     whisper_model = None
@@ -155,11 +150,10 @@ COURSES_DATA = load_courses()
 
 
 # =========================
-# 🎤 TRANSCRIPTION ENDPOINT (ULTRA RAPIDE)
+# 🎤 TRANSCRIPTION ENDPOINT
 # =========================
 @app.route("/transcribe", methods=["POST"])
 def transcribe():
-    """Transcription whisper ultra rapide - sans base64, sans socket"""
     if whisper_model is None:
         return jsonify({"text": "", "error": "Model not ready"})
 
@@ -171,31 +165,23 @@ def transcribe():
         return jsonify({"text": "", "error": "Empty file"})
 
     try:
-        # Sauvegarde temporaire
         with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
             audio.save(tmp.name)
             tmp_path = tmp.name
 
-        # Transcription optimisée
         segments, info = whisper_model.transcribe(
             tmp_path,
-            beam_size=1,  # Plus rapide
+            beam_size=1,
             language="en",
             vad_filter=True,
             vad_parameters=dict(min_silence_duration_ms=300)
         )
 
         text = " ".join([segment.text for segment in segments]).strip()
-
-        # Nettoyage
         os.unlink(tmp_path)
 
-        # Vérification qualité
         if not text:
             return jsonify({"text": "", "error": "No speech detected"})
-
-        if len(text.split()) < 2:
-            return jsonify({"text": text, "partial": True})
 
         return jsonify({"text": text})
 
@@ -205,7 +191,7 @@ def transcribe():
 
 
 # =========================
-# 🗣️ GESTIONNAIRE A1 SIMPLIFIÉ
+# 🗣️ GESTIONNAIRE A1
 # =========================
 class A1ConversationManager:
     def __init__(self):
@@ -243,7 +229,6 @@ class A1ConversationManager:
         if email not in self.user_sessions:
             self.user_sessions[email] = self.create_session()
 
-        # Première question: le nom
         q_data = self.all_questions[0] if self.all_questions else None
 
         if q_data:
@@ -289,7 +274,6 @@ class A1ConversationManager:
         if is_correct:
             session["correct"] += 1
 
-            # Choisir une nouvelle question aléatoire
             import random
             new_q = random.choice(self.all_questions)
 
@@ -319,11 +303,17 @@ class A1ConversationManager:
         score = round(s["correct"] / max(1, s["total"]) * 100, 1)
         return {"total": s["total"], "correct": s["correct"], "score": score}
 
+    # ⚡ AJOUT DE LA MÉTHODE MANQUANTE ⚡
+    def is_greeting(self, text):
+        greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "bonjour"]
+        text = text.lower().strip()
+        return any(g in text for g in greetings)
+
 
 a1_manager = A1ConversationManager()
 
 # =========================
-# 🤖 AI ENDPOINT (RAPIDE)
+# 🤖 AI ENDPOINT
 # =========================
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 MODEL = "meta-llama/llama-3-8b-instruct"
@@ -365,11 +355,16 @@ def login():
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         pwd = request.form.get("password", "").strip()
+
+        # Vérification des identifiants
         if email in ALLOWED_USERS and ALLOWED_USERS[email] == pwd:
             session.permanent = True
             session["user"] = email
             return redirect("/")
-        return render_template("login.html", error="Invalid credentials")
+
+        # Message d'erreur plus clair
+        error = "Invalid email or password. Please check your credentials."
+        return render_template("login.html", error=error)
     return render_template("login.html")
 
 
