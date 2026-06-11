@@ -172,7 +172,39 @@
             font-size: 14px;
         }
 
-        /* Mini galerie d'images dans la carte */
+        /* Info compte aide */
+        .account-help {
+            background: rgba(0, 128, 0, 0.15);
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+        .account-help p {
+            color: #94a3b8;
+            font-size: 0.7rem;
+            margin-bottom: 6px;
+        }
+        .account-help .demo-accounts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            font-size: 0.65rem;
+        }
+        .demo-accounts span {
+            background: rgba(255, 215, 0, 0.15);
+            padding: 3px 8px;
+            border-radius: 12px;
+            color: #ffd700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .demo-accounts span:hover {
+            background: rgba(255, 215, 0, 0.3);
+        }
+
+        /* Mini galerie d'images */
         .mini-gallery {
             display: flex;
             gap: 10px;
@@ -362,6 +394,9 @@
                 width: 50px;
                 height: 50px;
             }
+            .account-help {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -388,6 +423,19 @@
             <i class="fas fa-microphone-alt"></i>
             <i class="fas fa-robot"></i>
         </p>
+
+        <!-- Aide pour les comptes -->
+        <div class="account-help">
+            <p><i class="fas fa-info-circle"></i> Comptes de démonstration :</p>
+            <div class="demo-accounts">
+                <span onclick="fillCredentials('admin@wec-bec.com', 'WBcAdmin#Ultra2026')">👑 Admin</span>
+                <span onclick="fillCredentials('tycoon@wec-bec.com', 'Tycoon#Speak2026!')">👤 Tycoon (B2)</span>
+                <span onclick="fillCredentials('apprenant1@gmail.com', 'WBcA1!Start01')">📚 A1-01</span>
+                <span onclick="fillCredentials('apprenant2@gmail.com', 'WBcA1!Start02')">📚 A1-02</span>
+                <span onclick="fillCredentials('shooter@wec-bec.com', 'Shooter#Learn2026!')">🎯 Shooter (B1)</span>
+                <span onclick="fillCredentials('mefia@wec-bec.com', 'Mefia#English2026!')">⭐ Mefia (B1)</span>
+            </div>
+        </div>
 
         <!-- Mini galerie des photos -->
         <div class="mini-gallery">
@@ -417,12 +465,12 @@
         <form method="POST">
             <div class="input-group">
                 <label><i class="fas fa-envelope"></i> Email</label>
-                <input type="email" name="email" placeholder="student1@gmail.com" required autocomplete="email">
+                <input type="email" name="email" id="emailInput" placeholder="ex: apprenant1@gmail.com" required autocomplete="email">
                 <i class="fas fa-user"></i>
             </div>
             <div class="input-group">
                 <label><i class="fas fa-lock"></i> Mot de passe</label>
-                <input type="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+                <input type="password" name="password" id="passwordInput" placeholder="••••••••" required autocomplete="current-password">
                 <i class="fas fa-key"></i>
             </div>
             <button type="submit" class="btn-login">
@@ -460,6 +508,16 @@
                 particle.style.background = `rgba(255, 215, 0, ${0.15 + Math.random() * 0.3})`;
                 container.appendChild(particle);
             }
+        }
+
+        // ========== REMPLIR AUTO LES IDENTIFIANTS ==========
+        function fillCredentials(email, password) {
+            document.getElementById('emailInput').value = email;
+            document.getElementById('passwordInput').value = password;
+            // Optionnel : mettre en évidence
+            const emailField = document.getElementById('emailInput');
+            emailField.style.borderColor = '#ffd700';
+            setTimeout(() => { emailField.style.borderColor = ''; }, 1000);
         }
 
         // ========== MODAL IMAGE ==========
