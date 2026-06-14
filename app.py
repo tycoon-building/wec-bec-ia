@@ -8,11 +8,13 @@ import tempfile
 from datetime import timedelta
 from dotenv import load_dotenv
 from faster_whisper import WhisperModel
+from flask_cors import CORS
 
 load_dotenv()
 
 app = Flask(__name__)
-
+# Permettre les requêtes depuis l'application mobile
+CORS(app, origins=['http://localhost:19006', 'exp://', 'http://192.168.100.236'])
 # =========================
 # 🔐 SECURITY CONFIG
 # =========================
