@@ -2,3 +2,5 @@ Flask
 gunicorn
 requests
 python-dotenv
+flask-cors
+faster-whisper
