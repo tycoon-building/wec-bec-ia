@@ -92,7 +92,7 @@
             <img src="/static/images/logo.jpg" alt="Logo" onerror="this.src='https://placehold.co/44x44/008000/white?text=W'">
         </div>
         <div class="header-text">
-            <h1>WEC-BEC <span class="web-speech-badge"><i class="fas fa-microphone-alt"></i> Web Speech</span></h1>
+            <h1>WEC-BEC <span class="web-speech-badge"><i class="fas fa-microphone-alt"></i> Voice</span></h1>
             <p>{{ user }} · Level {{ level }}</p>
         </div>
         <div class="streak-badge"><i class="fas fa-crown"></i> Born to lead</div>
@@ -117,7 +117,7 @@
             <div class="chat-input-area">
                 <input id="msg" placeholder="Type or speak..." autocomplete="off" enterkeyhint="send">
                 <button class="btn-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
-                <button class="btn-mic" id="micBtn" onclick="startWebSpeech()"><i class="fas fa-microphone"></i></button>
+                <button class="btn-mic" id="micBtn" onclick="startVoiceRecognition()"><i class="fas fa-microphone"></i></button>
                 <button class="btn-stop" onclick="stopAllAudio()"><i class="fas fa-stop"></i></button>
             </div>
         </div>
@@ -135,9 +135,9 @@
 </div>
 
 <script>
-// ========== WEB SPEECH API (Fonctionne sans backend) ==========
+// ========== WEB SPEECH API (RECONNAISSANCE VOCALE) ==========
 let isListening = false;
-let webSpeechRecognition = null;
+let recognition = null;
 
 const statusDiv = document.getElementById('status');
 const micBtn = document.getElementById('micBtn');
@@ -146,54 +146,50 @@ const chatBox = document.getElementById('chat-box');
 
 function setStatus(text) { if(statusDiv) statusDiv.innerText = text; }
 
-function startWebSpeech() {
-    // Vérifier le support
+function startVoiceRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
     if (!SpeechRecognition) {
-        setStatus('❌ Speech recognition not supported in this browser');
+        setStatus('❌ Speech recognition not supported');
         alert('Votre navigateur ne supporte pas la reconnaissance vocale. Utilisez Chrome, Edge ou Safari.');
         return;
     }
 
     if (isListening) {
-        if (webSpeechRecognition) {
-            webSpeechRecognition.stop();
+        if (recognition) {
+            recognition.stop();
         }
         return;
     }
 
     try {
-        webSpeechRecognition = new SpeechRecognition();
-        webSpeechRecognition.lang = 'en-US';
-        webSpeechRecognition.continuous = false;
-        webSpeechRecognition.interimResults = false;
-        webSpeechRecognition.maxAlternatives = 1;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.continuous = false;
+        recognition.interimResults = false;
 
-        webSpeechRecognition.onstart = () => {
+        recognition.onstart = () => {
             isListening = true;
             micBtn.classList.add('recording');
             setStatus('🎤 Listening... Speak now');
-            console.log('Speech recognition started');
         };
 
-        webSpeechRecognition.onresult = (event) => {
+        recognition.onresult = (event) => {
             const text = event.results[0][0].transcript;
-            console.log('Recognized:', text);
             msgInput.value = text;
             setStatus('✅ Recognized! Sending...');
             sendMessage(text);
         };
 
-        webSpeechRecognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
+        recognition.onerror = (event) => {
+            console.error('Recognition error:', event.error);
             setStatus(`❌ Error: ${event.error}`);
             if (event.error === 'not-allowed') {
-                setStatus('❌ Microphone permission denied. Please allow access.');
+                setStatus('❌ Microphone permission denied');
             }
         };
 
-        webSpeechRecognition.onend = () => {
-            console.log('Speech recognition ended');
+        recognition.onend = () => {
             isListening = false;
             micBtn.classList.remove('recording');
             if (!msgInput.value) {
@@ -201,11 +197,11 @@ function startWebSpeech() {
             }
         };
 
-        webSpeechRecognition.start();
+        recognition.start();
 
     } catch (err) {
-        console.error('Failed to start recognition:', err);
-        setStatus('❌ Failed to start microphone');
+        console.error('Start error:', err);
+        setStatus('❌ Failed to start');
         isListening = false;
         micBtn.classList.remove('recording');
     }
@@ -224,8 +220,8 @@ function speak(text) {
 
 function stopAllAudio() {
     window.speechSynthesis.cancel();
-    if (webSpeechRecognition && isListening) {
-        webSpeechRecognition.stop();
+    if (recognition && isListening) {
+        recognition.stop();
     }
     setStatus('Stopped');
 }
@@ -350,27 +346,13 @@ function renderPronunciation() {
     container.innerHTML = '';
 
     const lesson7Phrases = [
-        "Hi everybody!",
-        "Let me introduce myself",
-        "My Surname is Mbongo and my Firstname is Tycoon",
-        "I live at number 20, Mapémé Street Nkombo quarter, Djiri area",
-        "I study at Marien Ngouabi University",
-        "I attend Marien Ngouabi University",
-        "I am in the first level",
-        "I am a fresher",
-        "I am a Christian",
-        "I pray at Catholic Church",
-        "We are 7 in our family",
-        "I am 20 years old",
-        "I am Congolese",
-        "I was born in 2002 in Oyo",
-        "I learn English at WEC-BEC",
-        "I am one of the students of O.I",
-        "I am a newcomer",
-        "I am still a beginner",
-        "I have been learning English for one week",
-        "I learn English because it is one of the most spoken languages in the world",
-        "That's all!"
+        "Hi everybody!", "Let me introduce myself", "My Surname is Mbongo and my Firstname is Tycoon",
+        "I live at number 20, Mapémé Street Nkombo quarter, Djiri area", "I study at Marien Ngouabi University",
+        "I attend Marien Ngouabi University", "I am in the first level", "I am a fresher", "I am a Christian",
+        "I pray at Catholic Church", "We are 7 in our family", "I am 20 years old", "I am Congolese",
+        "I was born in 2002 in Oyo", "I learn English at WEC-BEC", "I am one of the students of O.I",
+        "I am a newcomer", "I am still a beginner", "I have been learning English for one week",
+        "I learn English because it is one of the most spoken languages in the world", "That's all!"
     ];
 
     lesson7Phrases.forEach((phrase, idx) => {
@@ -380,7 +362,7 @@ function renderPronunciation() {
             <div class="phrase">"${escapeHtml(phrase)}"</div>
             <div class="actions">
                 <button class="btn-listen" onclick="speak('${escapeHtml(phrase).replace(/'/g, "\\'")}')">🎧 Listen</button>
-                <button class="btn-record" onclick="recordPhrase('${escapeHtml(phrase).replace(/'/g, "\\'")}', ${idx})">🎤 Record & Compare</button>
+                <button class="btn-record" onclick="recordPhrase('${escapeHtml(phrase).replace(/'/g, "\\'")}', ${idx})">🎤 Record</button>
             </div>
             <div class="pron-feedback" id="pron-feedback-${idx}">Click record, speak clearly</div>
         `;
@@ -415,7 +397,7 @@ async function recordPhrase(targetPhrase, idx) {
         targetWords.forEach((w, i) => { if (userWords[i] === w) correct++; });
         let acc = Math.round((correct / targetWords.length) * 100);
         let stars = acc >= 90 ? '⭐⭐⭐' : (acc >= 70 ? '⭐⭐' : '⭐');
-        let comment = acc >= 90 ? 'Excellent pronunciation!' : (acc >= 70 ? 'Good job! Keep practicing.' : 'Try again. Listen to the example.');
+        let comment = acc >= 90 ? 'Excellent!' : (acc >= 70 ? 'Good job!' : 'Try again.');
 
         feedback.innerHTML = `📝 You said: "${escapeHtml(user)}"<br>📊 Accuracy: ${stars} (${acc}%)<br>💡 ${comment}<br>🎯 Target: "${escapeHtml(targetPhrase)}"`;
     };
