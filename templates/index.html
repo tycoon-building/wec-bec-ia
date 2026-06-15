@@ -63,7 +63,7 @@
         .btn-mic.recording { background: #10b981; animation: pulse 1s infinite; }
         .btn-stop { background: #0f172a; color: white; }
         .status { font-size: 10px; color: #ffd700; padding: 8px 0; text-align: center; }
-        .whisper-badge { background: rgba(16,185,129,0.2); border: 1px solid #10b981; border-radius: 20px; padding: 2px 8px; font-size: 8px; color: #10b981; margin-left: 6px; white-space: nowrap; }
+        .web-speech-badge { background: rgba(16,185,129,0.2); border: 1px solid #10b981; border-radius: 20px; padding: 2px 8px; font-size: 8px; color: #10b981; margin-left: 6px; white-space: nowrap; }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
         .menu-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
         .menu-bar button { background: rgba(0,128,0,0.3); border: 1px solid rgba(255,215,0,0.5); padding: 6px 12px; border-radius: 40px; color: #ffd700; cursor: pointer; font-size: 11px; }
@@ -92,7 +92,7 @@
             <img src="/static/images/logo.jpg" alt="Logo" onerror="this.src='https://placehold.co/44x44/008000/white?text=W'">
         </div>
         <div class="header-text">
-            <h1>WEC-BEC <span class="whisper-badge"><i class="fas fa-microphone-alt"></i> Whisper</span></h1>
+            <h1>WEC-BEC <span class="web-speech-badge"><i class="fas fa-microphone-alt"></i> Web Speech</span></h1>
             <p>{{ user }} · Level {{ level }}</p>
         </div>
         <div class="streak-badge"><i class="fas fa-crown"></i> Born to lead</div>
@@ -117,7 +117,7 @@
             <div class="chat-input-area">
                 <input id="msg" placeholder="Type or speak..." autocomplete="off" enterkeyhint="send">
                 <button class="btn-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
-                <button class="btn-mic" id="micBtn" onclick="startRecording()"><i class="fas fa-microphone"></i></button>
+                <button class="btn-mic" id="micBtn" onclick="startWebSpeech()"><i class="fas fa-microphone"></i></button>
                 <button class="btn-stop" onclick="stopAllAudio()"><i class="fas fa-stop"></i></button>
             </div>
         </div>
@@ -135,10 +135,9 @@
 </div>
 
 <script>
-// ========== AUDIO RECORDING - VERSION CORRIGÉE ==========
-let mediaRecorder = null;
-let audioChunks = [];
-let isRecording = false;
+// ========== WEB SPEECH API (Fonctionne sans backend) ==========
+let isListening = false;
+let webSpeechRecognition = null;
 
 const statusDiv = document.getElementById('status');
 const micBtn = document.getElementById('micBtn');
@@ -147,116 +146,68 @@ const chatBox = document.getElementById('chat-box');
 
 function setStatus(text) { if(statusDiv) statusDiv.innerText = text; }
 
-async function startRecording() {
-    if (isRecording) { stopRecording(); return; }
+function startWebSpeech() {
+    // Vérifier le support
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        setStatus('❌ Speech recognition not supported in this browser');
+        alert('Votre navigateur ne supporte pas la reconnaissance vocale. Utilisez Chrome, Edge ou Safari.');
+        return;
+    }
+
+    if (isListening) {
+        if (webSpeechRecognition) {
+            webSpeechRecognition.stop();
+        }
+        return;
+    }
 
     try {
-        setStatus('🎤 Listening... Speak now');
+        webSpeechRecognition = new SpeechRecognition();
+        webSpeechRecognition.lang = 'en-US';
+        webSpeechRecognition.continuous = false;
+        webSpeechRecognition.interimResults = false;
+        webSpeechRecognition.maxAlternatives = 1;
 
-        // Vérifier le microphone
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        webSpeechRecognition.onstart = () => {
+            isListening = true;
+            micBtn.classList.add('recording');
+            setStatus('🎤 Listening... Speak now');
+            console.log('Speech recognition started');
+        };
 
-        // Déterminer le MIME type supporté
-        let mimeType = '';
-        const supportedTypes = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'];
-        for (const type of supportedTypes) {
-            if (MediaRecorder.isTypeSupported(type)) {
-                mimeType = type;
-                break;
-            }
-        }
+        webSpeechRecognition.onresult = (event) => {
+            const text = event.results[0][0].transcript;
+            console.log('Recognized:', text);
+            msgInput.value = text;
+            setStatus('✅ Recognized! Sending...');
+            sendMessage(text);
+        };
 
-        console.log('Using MIME type:', mimeType);
-
-        mediaRecorder = new MediaRecorder(stream, { mimeType });
-        audioChunks = [];
-
-        mediaRecorder.ondataavailable = (e) => {
-            if (e.data.size > 0) {
-                audioChunks.push(e.data);
+        webSpeechRecognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            setStatus(`❌ Error: ${event.error}`);
+            if (event.error === 'not-allowed') {
+                setStatus('❌ Microphone permission denied. Please allow access.');
             }
         };
 
-        mediaRecorder.onstop = async () => {
-            setStatus('📤 Processing audio...');
-
-            if (audioChunks.length === 0) {
-                setStatus('No audio recorded. Try again.');
-                stream.getTracks().forEach(t => t.stop());
-                isRecording = false;
-                micBtn.classList.remove('recording');
-                return;
-            }
-
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-            const formData = new FormData();
-            formData.append("audio", audioBlob, "voice.webm");
-
-            setStatus('🎧 Transcribing with Whisper...');
-
-            try {
-                const res = await fetch("/transcribe", {
-                    method: "POST",
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-                }
-
-                const data = await res.json();
-                console.log('Transcription response:', data);
-
-                if (data.text && data.text.trim()) {
-                    msgInput.value = data.text;
-                    setStatus('✅ Recognized! Sending...');
-                    await sendMessage(data.text);
-                } else if (data.error) {
-                    setStatus(`❌ ${data.error}`);
-                } else {
-                    setStatus('❌ No speech detected. Please try again.');
-                }
-            } catch (err) {
-                console.error('Transcription fetch error:', err);
-                setStatus(`❌ Transcription error: ${err.message}`);
-            } finally {
-                stream.getTracks().forEach(t => t.stop());
-                isRecording = false;
-                micBtn.classList.remove('recording');
+        webSpeechRecognition.onend = () => {
+            console.log('Speech recognition ended');
+            isListening = false;
+            micBtn.classList.remove('recording');
+            if (!msgInput.value) {
+                setStatus('Ready');
             }
         };
 
-        mediaRecorder.start(1000);
-        isRecording = true;
-        micBtn.classList.add('recording');
-
-        // Auto-stop après 10 secondes
-        setTimeout(() => {
-            if (isRecording) {
-                setStatus('⏱️ Max recording time reached');
-                stopRecording();
-            }
-        }, 10000);
+        webSpeechRecognition.start();
 
     } catch (err) {
-        console.error('Microphone error:', err);
-        if (err.name === 'NotAllowedError') {
-            setStatus('❌ Microphone permission denied. Please allow access.');
-        } else if (err.name === 'NotFoundError') {
-            setStatus('❌ No microphone found.');
-        } else {
-            setStatus('❌ Microphone error. Check permissions.');
-        }
-    }
-}
-
-function stopRecording() {
-    if (mediaRecorder && isRecording && mediaRecorder.state === 'recording') {
-        setStatus('⏹️ Stopping...');
-        mediaRecorder.stop();
+        console.error('Failed to start recognition:', err);
+        setStatus('❌ Failed to start microphone');
+        isListening = false;
+        micBtn.classList.remove('recording');
     }
 }
 
@@ -273,7 +224,9 @@ function speak(text) {
 
 function stopAllAudio() {
     window.speechSynthesis.cancel();
-    if (mediaRecorder && isRecording) stopRecording();
+    if (webSpeechRecognition && isListening) {
+        webSpeechRecognition.stop();
+    }
     setStatus('Stopped');
 }
 
@@ -390,7 +343,7 @@ function repeatRandomPhrase(idx) {
     }
 }
 
-// ========== PRONUNCIATION - LEÇON 7 COMPLÈTE ==========
+// ========== PRONUNCIATION ==========
 function renderPronunciation() {
     const container = document.getElementById('pron-container');
     if (!container) return;
