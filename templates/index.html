@@ -63,7 +63,6 @@
         .btn-mic.recording { background: #10b981; animation: pulse 1s infinite; }
         .btn-stop { background: #0f172a; color: white; }
         .status { font-size: 10px; color: #ffd700; padding: 8px 0; text-align: center; }
-        .web-speech-badge { background: rgba(16,185,129,0.2); border: 1px solid #10b981; border-radius: 20px; padding: 2px 8px; font-size: 8px; color: #10b981; margin-left: 6px; white-space: nowrap; }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
         .menu-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
         .menu-bar button { background: rgba(0,128,0,0.3); border: 1px solid rgba(255,215,0,0.5); padding: 6px 12px; border-radius: 40px; color: #ffd700; cursor: pointer; font-size: 11px; }
@@ -92,7 +91,7 @@
             <img src="/static/images/logo.jpg" alt="Logo" onerror="this.src='https://placehold.co/44x44/008000/white?text=W'">
         </div>
         <div class="header-text">
-            <h1>WEC-BEC <span class="web-speech-badge"><i class="fas fa-microphone-alt"></i> Voice</span></h1>
+            <h1>WEC-BEC English AI</h1>
             <p>{{ user }} · Level {{ level }}</p>
         </div>
         <div class="streak-badge"><i class="fas fa-crown"></i> Born to lead</div>
@@ -135,7 +134,7 @@
 </div>
 
 <script>
-// ========== WEB SPEECH API (RECONNAISSANCE VOCALE) ==========
+// ========== RECONNAISSANCE VOCALE (WEB SPEECH API) ==========
 let isListening = false;
 let recognition = null;
 
@@ -207,7 +206,7 @@ function startVoiceRecognition() {
     }
 }
 
-// ========== TEXT TO SPEECH ==========
+// ========== TEXTE VERS AUDIO ==========
 function speak(text) {
     if (!text) return;
     window.speechSynthesis.cancel();
@@ -226,7 +225,7 @@ function stopAllAudio() {
     setStatus('Stopped');
 }
 
-// ========== CHAT FUNCTIONS ==========
+// ========== FONCTIONS DU CHAT ==========
 let coursesData = [];
 
 function escapeHtml(str) {
@@ -295,7 +294,7 @@ async function resetChat() {
     } catch (err) { console.error(err); }
 }
 
-// ========== LOAD LESSONS ==========
+// ========== CHARGEMENT DES LEÇONS ==========
 async function loadCourses() {
     try {
         const res = await fetch('/courses');
@@ -339,7 +338,7 @@ function repeatRandomPhrase(idx) {
     }
 }
 
-// ========== PRONUNCIATION ==========
+// ========== PRONONCIATION ==========
 function renderPronunciation() {
     const container = document.getElementById('pron-container');
     if (!container) return;
@@ -419,7 +418,7 @@ document.querySelectorAll('.nav button').forEach(btn => {
     });
 });
 
-// ========== INIT ==========
+// ========== INITIALISATION ==========
 msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
 document.addEventListener('DOMContentLoaded', () => {
