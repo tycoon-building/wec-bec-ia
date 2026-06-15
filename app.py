@@ -9,27 +9,16 @@ from datetime import timedelta
 from dotenv import load_dotenv
 from faster_whisper import WhisperModel
 from flask_cors import CORS
+import time
 
 load_dotenv()
 
 app = Flask(__name__)
 
 # =========================
-# 🔐 CORS CONFIGURATION - ÉTENDUE
+# 🔐 CORS CONFIGURATION
 # =========================
-# Permettre toutes les origines pour le développement
-CORS(app, origins=[
-    'http://localhost:5000',
-    'http://localhost:19006',
-    'exp://',
-    'http://192.168.1.%',
-    'http://192.168.100.%',
-    'http://127.0.0.1:5000',
-    '*'
-], supports_credentials=True, allow_headers=['Content-Type', 'Accept'])
-
-# Alternative plus simple pour développement (décommentez si besoin)
-# CORS(app)
+CORS(app, origins=['*'], supports_credentials=True)
 
 # =========================
 # 🔐 SECURITY CONFIG
@@ -116,14 +105,17 @@ STUDENT_LEVELS = {
 }
 
 # =========================
-# 🎤 FASTER-WHISPER
+# 🎤 FASTER-WHISPER - CONFIGURATION OPTIMISÉE
 # =========================
-WHISPER_MODEL_SIZE = "tiny"  # Changé de 'base' à 'tiny' pour plus de rapidité
+WHISPER_MODEL_SIZE = "tiny"  # tiny = plus rapide, moins de RAM
 WHISPER_DEVICE = "cpu"
 WHISPER_COMPUTE_TYPE = "int8"
 
 print("🚀 Loading Whisper model...")
 try:
+    # Désactiver l'avertissement des symlinks Windows
+    os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
     whisper_model = WhisperModel(
         WHISPER_MODEL_SIZE,
         device=WHISPER_DEVICE,
@@ -131,7 +123,7 @@ try:
         cpu_threads=2,
         num_workers=1
     )
-    print(f"✅ Whisper '{WHISPER_MODEL_SIZE}' ready")
+    print(f"✅ Whisper '{WHISPER_MODEL_SIZE}' ready (fast mode)")
 except Exception as e:
     print(f"⚠️ Whisper error: {e}")
     whisper_model = None
@@ -163,51 +155,50 @@ COURSES_DATA = load_courses()
 
 
 # =========================
-# 🎤 TRANSCRIPTION ENDPOINT - CORRIGÉ
+# 🎤 TRANSCRIPTION ENDPOINT - VERSION STABLE
 # =========================
-@app.route("/transcribe", methods=["POST", "OPTIONS"])
+@app.route("/transcribe", methods=["POST"])
 def transcribe():
-    # Gérer la requête OPTIONS pour CORS
-    if request.method == "OPTIONS":
-        response = jsonify({"status": "ok"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        return response
+    start_time = time.time()
 
     if whisper_model is None:
-        return jsonify({"text": "", "error": "Whisper model not ready"})
+        return jsonify({"text": "", "error": "Whisper model not ready"}), 503
 
     if "audio" not in request.files:
-        return jsonify({"text": "", "error": "No audio file"})
+        return jsonify({"text": "", "error": "No audio file"}), 400
 
     audio = request.files["audio"]
     if audio.filename == "":
-        return jsonify({"text": "", "error": "Empty file"})
+        return jsonify({"text": "", "error": "Empty file"}), 400
+
+    # Vérifier la taille
+    audio.seek(0, 2)
+    size = audio.tell()
+    audio.seek(0)
+    if size < 1000:
+        return jsonify({"text": "", "error": "Audio too short"}), 400
+
+    print(f"📁 Audio received: {size} bytes")
 
     try:
-        # Sauvegarder le fichier temporairement
         with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
             audio.save(tmp.name)
             tmp_path = tmp.name
 
-        print(f"📁 Audio saved: {tmp_path}")
-
-        # Transcription avec Whisper
+        # Transcription avec paramètres rapides
         segments, info = whisper_model.transcribe(
             tmp_path,
             beam_size=1,
             language="en",
             vad_filter=True,
-            vad_parameters=dict(min_silence_duration_ms=300)
+            vad_parameters=dict(min_silence_duration_ms=500)
         )
 
         text = " ".join([segment.text for segment in segments]).strip()
-
-        # Nettoyer le fichier temporaire
         os.unlink(tmp_path)
 
-        print(f"📝 Transcribed text: '{text}'")
+        elapsed = time.time() - start_time
+        print(f"📝 Transcribed ({elapsed:.2f}s): '{text}'")
 
         if not text:
             return jsonify({"text": "", "error": "No speech detected"})
@@ -216,7 +207,19 @@ def transcribe():
 
     except Exception as e:
         logging.error(f"Transcription error: {str(e)}")
-        return jsonify({"text": "", "error": str(e)})
+        return jsonify({"text": "", "error": str(e)}), 500
+
+
+# =========================
+# 🏓 ROUTE DE TEST
+# =========================
+@app.route("/test", methods=["GET"])
+def test():
+    return jsonify({
+        "status": "ok",
+        "whisper_ready": whisper_model is not None,
+        "whisper_model": WHISPER_MODEL_SIZE
+    })
 
 
 # =========================
@@ -257,20 +260,16 @@ class A1ConversationManager:
     def start(self, email):
         if email not in self.user_sessions:
             self.user_sessions[email] = self.create_session()
-
         q_data = self.all_questions[0] if self.all_questions else None
-
         if q_data:
             self.user_sessions[email]["current_q"] = q_data['question']
             self.user_sessions[email]["current_expected"] = q_data['expected']
             self.user_sessions[email]["current_topics"] = q_data['topics']
-
         return {"reply": "Hello! Nice to meet you. What's your name?"}
 
     def process(self, email, answer):
         if email not in self.user_sessions:
             return self.start(email)
-
         session = self.user_sessions[email]
         current_q = session.get("current_q")
         expected = session.get("current_expected", [])
@@ -283,13 +282,11 @@ class A1ConversationManager:
 
         answer_lower = answer.lower().strip()
         is_correct = False
-
         if topics:
             for t in topics:
                 if t.lower() in answer_lower:
                     is_correct = True
                     break
-
         if not is_correct:
             for e in expected:
                 if e.lower() in answer_lower:
@@ -300,19 +297,15 @@ class A1ConversationManager:
 
         if is_correct:
             session["correct"] += 1
-
             import random
             new_q = random.choice(self.all_questions)
-
             session["current_q"] = new_q['question']
             session["current_expected"] = new_q['expected']
             session["current_topics"] = new_q['topics']
-
             if session.get("name") and "name" in str(current_q).lower():
                 reply = f"Nice to meet you, {session['name']}!"
             else:
                 reply = "Great job!"
-
             return {"reply": f"{reply}\n\n{new_q['question']}"}
         else:
             return {"reply": f"Not quite. Try again! {current_q}"}
@@ -381,12 +374,10 @@ def login():
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         pwd = request.form.get("password", "").strip()
-
         if email in ALLOWED_USERS and ALLOWED_USERS[email] == pwd:
             session.permanent = True
             session["user"] = email
             return redirect("/")
-
         error = "Invalid email or password. Please check your credentials."
         return render_template("login.html", error=error)
     return render_template("login.html")
@@ -413,18 +404,14 @@ def chat():
             if p:
                 return jsonify({"reply": f"Progress: {p['score']}% - {p['correct']}/{p['total']} correct"})
             return jsonify({"reply": "Say 'hi' to start!"})
-
         if msg.lower() == "hint":
             return jsonify({"reply": a1_manager.get_hint(email)})
-
         if msg.lower() == "reset":
             a1_manager.reset_user(email)
             return jsonify({"reply": "Restarted! Say 'hi' to begin."})
-
         if a1_manager.is_greeting(msg) or email not in a1_manager.user_sessions:
             res = a1_manager.start(email)
             return jsonify({"reply": res["reply"]})
-
         res = a1_manager.process(email, msg)
         return jsonify({"reply": res["reply"]})
 
@@ -437,13 +424,6 @@ def get_courses():
     return jsonify({"conversations": COURSES_DATA})
 
 
-# =========================
-# ROUTE DE TEST POUR VÉRIFIER LE SERVEUR
-# =========================
-@app.route("/test", methods=["GET"])
-def test():
-    return jsonify({"status": "ok", "message": "Server is running", "whisper_ready": whisper_model is not None})
-
-
 if __name__ == "__main__":
-    app.run(debug=False, host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host="0.0.0.0", port=port)
