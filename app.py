@@ -4,12 +4,9 @@ import json
 import logging
 import random
 import os
-import tempfile
 from datetime import timedelta
 from dotenv import load_dotenv
-from faster_whisper import WhisperModel
 from flask_cors import CORS
-import time
 
 load_dotenv()
 
@@ -105,31 +102,6 @@ STUDENT_LEVELS = {
 }
 
 # =========================
-# 🎤 FASTER-WHISPER - CONFIGURATION OPTIMISÉE
-# =========================
-WHISPER_MODEL_SIZE = "tiny"  # tiny = plus rapide, moins de RAM
-WHISPER_DEVICE = "cpu"
-WHISPER_COMPUTE_TYPE = "int8"
-
-print("🚀 Loading Whisper model...")
-try:
-    # Désactiver l'avertissement des symlinks Windows
-    os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
-
-    whisper_model = WhisperModel(
-        WHISPER_MODEL_SIZE,
-        device=WHISPER_DEVICE,
-        compute_type=WHISPER_COMPUTE_TYPE,
-        cpu_threads=2,
-        num_workers=1
-    )
-    print(f"✅ Whisper '{WHISPER_MODEL_SIZE}' ready (fast mode)")
-except Exception as e:
-    print(f"⚠️ Whisper error: {e}")
-    whisper_model = None
-
-
-# =========================
 # 📖 CHARGEMENT DES DONNÉES
 # =========================
 def load_a1_questions():
@@ -155,70 +127,13 @@ COURSES_DATA = load_courses()
 
 
 # =========================
-# 🎤 TRANSCRIPTION ENDPOINT - VERSION STABLE
-# =========================
-@app.route("/transcribe", methods=["POST"])
-def transcribe():
-    start_time = time.time()
-
-    if whisper_model is None:
-        return jsonify({"text": "", "error": "Whisper model not ready"}), 503
-
-    if "audio" not in request.files:
-        return jsonify({"text": "", "error": "No audio file"}), 400
-
-    audio = request.files["audio"]
-    if audio.filename == "":
-        return jsonify({"text": "", "error": "Empty file"}), 400
-
-    # Vérifier la taille
-    audio.seek(0, 2)
-    size = audio.tell()
-    audio.seek(0)
-    if size < 1000:
-        return jsonify({"text": "", "error": "Audio too short"}), 400
-
-    print(f"📁 Audio received: {size} bytes")
-
-    try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
-            audio.save(tmp.name)
-            tmp_path = tmp.name
-
-        # Transcription avec paramètres rapides
-        segments, info = whisper_model.transcribe(
-            tmp_path,
-            beam_size=1,
-            language="en",
-            vad_filter=True,
-            vad_parameters=dict(min_silence_duration_ms=500)
-        )
-
-        text = " ".join([segment.text for segment in segments]).strip()
-        os.unlink(tmp_path)
-
-        elapsed = time.time() - start_time
-        print(f"📝 Transcribed ({elapsed:.2f}s): '{text}'")
-
-        if not text:
-            return jsonify({"text": "", "error": "No speech detected"})
-
-        return jsonify({"text": text})
-
-    except Exception as e:
-        logging.error(f"Transcription error: {str(e)}")
-        return jsonify({"text": "", "error": str(e)}), 500
-
-
-# =========================
 # 🏓 ROUTE DE TEST
 # =========================
 @app.route("/test", methods=["GET"])
 def test():
     return jsonify({
         "status": "ok",
-        "whisper_ready": whisper_model is not None,
-        "whisper_model": WHISPER_MODEL_SIZE
+        "message": "WEC-BEC API is running"
     })
 
 
