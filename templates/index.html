@@ -135,7 +135,7 @@
 </div>
 
 <script>
-// ========== AUDIO RECORDING ==========
+// ========== AUDIO RECORDING - VERSION CORRIGÉE ==========
 let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
@@ -151,58 +151,112 @@ async function startRecording() {
     if (isRecording) { stopRecording(); return; }
 
     try {
-        setStatus('🎤 Listening...');
+        setStatus('🎤 Listening... Speak now');
+
+        // Vérifier le microphone
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-        mediaRecorder = new MediaRecorder(stream);
+        // Déterminer le MIME type supporté
+        let mimeType = '';
+        const supportedTypes = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'];
+        for (const type of supportedTypes) {
+            if (MediaRecorder.isTypeSupported(type)) {
+                mimeType = type;
+                break;
+            }
+        }
+
+        console.log('Using MIME type:', mimeType);
+
+        mediaRecorder = new MediaRecorder(stream, { mimeType });
         audioChunks = [];
 
-        mediaRecorder.ondataavailable = (e) => { audioChunks.push(e.data); };
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) {
+                audioChunks.push(e.data);
+            }
+        };
 
         mediaRecorder.onstop = async () => {
+            setStatus('📤 Processing audio...');
+
+            if (audioChunks.length === 0) {
+                setStatus('No audio recorded. Try again.');
+                stream.getTracks().forEach(t => t.stop());
+                isRecording = false;
+                micBtn.classList.remove('recording');
+                return;
+            }
+
             const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
             const formData = new FormData();
             formData.append("audio", audioBlob, "voice.webm");
 
-            setStatus('🎧 Transcribing...');
+            setStatus('🎧 Transcribing with Whisper...');
 
             try {
-                const res = await fetch("/transcribe", { method: "POST", body: formData });
-                const data = await res.json();
+                const res = await fetch("/transcribe", {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
 
-                if (data.text) {
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+
+                const data = await res.json();
+                console.log('Transcription response:', data);
+
+                if (data.text && data.text.trim()) {
                     msgInput.value = data.text;
-                    setStatus('🎤 Sending...');
-                    sendMessage(data.text);
+                    setStatus('✅ Recognized! Sending...');
+                    await sendMessage(data.text);
+                } else if (data.error) {
+                    setStatus(`❌ ${data.error}`);
                 } else {
-                    setStatus('No speech detected. Try again.');
+                    setStatus('❌ No speech detected. Please try again.');
                 }
             } catch (err) {
-                setStatus('Transcription error');
-                console.error(err);
+                console.error('Transcription fetch error:', err);
+                setStatus(`❌ Transcription error: ${err.message}`);
+            } finally {
+                stream.getTracks().forEach(t => t.stop());
+                isRecording = false;
+                micBtn.classList.remove('recording');
             }
-
-            stream.getTracks().forEach(t => t.stop());
-            isRecording = false;
-            micBtn.classList.remove('recording');
         };
 
-        mediaRecorder.start();
+        mediaRecorder.start(1000);
         isRecording = true;
         micBtn.classList.add('recording');
 
-        setTimeout(() => { if (isRecording) stopRecording(); }, 10000);
+        // Auto-stop après 10 secondes
+        setTimeout(() => {
+            if (isRecording) {
+                setStatus('⏱️ Max recording time reached');
+                stopRecording();
+            }
+        }, 10000);
 
     } catch (err) {
-        setStatus('Microphone error. Check permissions.');
-        console.error(err);
+        console.error('Microphone error:', err);
+        if (err.name === 'NotAllowedError') {
+            setStatus('❌ Microphone permission denied. Please allow access.');
+        } else if (err.name === 'NotFoundError') {
+            setStatus('❌ No microphone found.');
+        } else {
+            setStatus('❌ Microphone error. Check permissions.');
+        }
     }
 }
 
 function stopRecording() {
-    if (mediaRecorder && isRecording) {
+    if (mediaRecorder && isRecording && mediaRecorder.state === 'recording') {
+        setStatus('⏹️ Stopping...');
         mediaRecorder.stop();
-        setStatus('Processing...');
     }
 }
 
@@ -261,6 +315,7 @@ async function sendMessage(voiceText = null) {
         const data = await res.json();
         addMessage(data.reply, false, true);
     } catch (err) {
+        console.error('Chat error:', err);
         addMessage('Connection error. Please try again.', false, true);
         setStatus('Error');
     }
@@ -341,7 +396,6 @@ function renderPronunciation() {
     if (!container) return;
     container.innerHTML = '';
 
-    // Leçon 7 complète: Self Introduction (Presentation)
     const lesson7Phrases = [
         "Hi everybody!",
         "Let me introduce myself",
@@ -383,7 +437,10 @@ function renderPronunciation() {
 
 async function recordPhrase(targetPhrase, idx) {
     const SpeechRecog = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecog) { alert('Recording not supported in this browser.'); return; }
+    if (!SpeechRecog) {
+        alert('Recording not supported in this browser.');
+        return;
+    }
 
     const feedback = document.getElementById(`pron-feedback-${idx}`);
     feedback.innerHTML = '🎤 Listening... Please speak clearly.';
@@ -410,7 +467,10 @@ async function recordPhrase(targetPhrase, idx) {
         feedback.innerHTML = `📝 You said: "${escapeHtml(user)}"<br>📊 Accuracy: ${stars} (${acc}%)<br>💡 ${comment}<br>🎯 Target: "${escapeHtml(targetPhrase)}"`;
     };
 
-    rec.onerror = () => { feedback.innerHTML = '❌ Microphone error. Please try again.'; };
+    rec.onerror = () => {
+        feedback.innerHTML = '❌ Microphone error. Please try again.';
+    };
+
     rec.start();
 }
 

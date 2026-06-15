@@ -13,8 +13,24 @@ from flask_cors import CORS
 load_dotenv()
 
 app = Flask(__name__)
-# Permettre les requêtes depuis l'application mobile
-CORS(app, origins=['http://localhost:19006', 'exp://', 'http://192.168.100.236'])
+
+# =========================
+# 🔐 CORS CONFIGURATION - ÉTENDUE
+# =========================
+# Permettre toutes les origines pour le développement
+CORS(app, origins=[
+    'http://localhost:5000',
+    'http://localhost:19006',
+    'exp://',
+    'http://192.168.1.%',
+    'http://192.168.100.%',
+    'http://127.0.0.1:5000',
+    '*'
+], supports_credentials=True, allow_headers=['Content-Type', 'Accept'])
+
+# Alternative plus simple pour développement (décommentez si besoin)
+# CORS(app)
+
 # =========================
 # 🔐 SECURITY CONFIG
 # =========================
@@ -26,10 +42,7 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 # 👤 USERS DATABASE
 # =========================
 ALLOWED_USERS = {
-    # 🛠️ ADMIN
     "admin@wec-bec.com": "admin",
-
-    # 👨‍🎓 APPRENANTS A1 (1 à 30)
     "apprenant1@gmail.com": "WBcA1Start01",
     "apprenant2@gmail.com": "WBcA1Start02",
     "apprenant3@gmail.com": "WBcA1Start03",
@@ -60,8 +73,6 @@ ALLOWED_USERS = {
     "apprenant28@gmail.com": "WBcA1Start28",
     "apprenant29@gmail.com": "WBcA1Start29",
     "apprenant30@gmail.com": "WBcA1Start30",
-
-    # 🧑 UTILISATEURS SPÉCIAUX
     "tycoon@wec-bec.com": "Tycoon#Speak2026",
     "shooter@wec-bec.com": "Shooter#Learn2026",
     "mefia@wec-bec.com": "Mefia#English2026"
@@ -107,7 +118,7 @@ STUDENT_LEVELS = {
 # =========================
 # 🎤 FASTER-WHISPER
 # =========================
-WHISPER_MODEL_SIZE = "base"
+WHISPER_MODEL_SIZE = "tiny"  # Changé de 'base' à 'tiny' pour plus de rapidité
 WHISPER_DEVICE = "cpu"
 WHISPER_COMPUTE_TYPE = "int8"
 
@@ -117,8 +128,8 @@ try:
         WHISPER_MODEL_SIZE,
         device=WHISPER_DEVICE,
         compute_type=WHISPER_COMPUTE_TYPE,
-        cpu_threads=4,
-        num_workers=2
+        cpu_threads=2,
+        num_workers=1
     )
     print(f"✅ Whisper '{WHISPER_MODEL_SIZE}' ready")
 except Exception as e:
@@ -152,25 +163,37 @@ COURSES_DATA = load_courses()
 
 
 # =========================
-# 🎤 TRANSCRIPTION ENDPOINT
+# 🎤 TRANSCRIPTION ENDPOINT - CORRIGÉ
 # =========================
-@app.route("/transcribe", methods=["POST"])
+@app.route("/transcribe", methods=["POST", "OPTIONS"])
 def transcribe():
+    # Gérer la requête OPTIONS pour CORS
+    if request.method == "OPTIONS":
+        response = jsonify({"status": "ok"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        return response
+
     if whisper_model is None:
-        return jsonify({"text": "", "error": "Model not ready"})
+        return jsonify({"text": "", "error": "Whisper model not ready"})
 
     if "audio" not in request.files:
-        return jsonify({"text": "", "error": "No audio"})
+        return jsonify({"text": "", "error": "No audio file"})
 
     audio = request.files["audio"]
     if audio.filename == "":
         return jsonify({"text": "", "error": "Empty file"})
 
     try:
+        # Sauvegarder le fichier temporairement
         with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
             audio.save(tmp.name)
             tmp_path = tmp.name
 
+        print(f"📁 Audio saved: {tmp_path}")
+
+        # Transcription avec Whisper
         segments, info = whisper_model.transcribe(
             tmp_path,
             beam_size=1,
@@ -180,7 +203,11 @@ def transcribe():
         )
 
         text = " ".join([segment.text for segment in segments]).strip()
+
+        # Nettoyer le fichier temporaire
         os.unlink(tmp_path)
+
+        print(f"📝 Transcribed text: '{text}'")
 
         if not text:
             return jsonify({"text": "", "error": "No speech detected"})
@@ -249,13 +276,11 @@ class A1ConversationManager:
         expected = session.get("current_expected", [])
         topics = session.get("current_topics", [])
 
-        # Extraire le nom
         if not session.get("name") and ("name" in str(current_q).lower() or "introduce" in str(current_q).lower()):
             name = answer.lower().replace("my name is", "").replace("i am", "").strip()
             if name and len(name) < 30 and not name.startswith(("what", "where", "how")):
                 session["name"] = name.capitalize()
 
-        # Vérifier la réponse
         answer_lower = answer.lower().strip()
         is_correct = False
 
@@ -305,7 +330,6 @@ class A1ConversationManager:
         score = round(s["correct"] / max(1, s["total"]) * 100, 1)
         return {"total": s["total"], "correct": s["correct"], "score": score}
 
-    # ⚡ AJOUT DE LA MÉTHODE MANQUANTE ⚡
     def is_greeting(self, text):
         greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "bonjour"]
         text = text.lower().strip()
@@ -358,13 +382,11 @@ def login():
         email = request.form.get("email", "").strip().lower()
         pwd = request.form.get("password", "").strip()
 
-        # Vérification des identifiants
         if email in ALLOWED_USERS and ALLOWED_USERS[email] == pwd:
             session.permanent = True
             session["user"] = email
             return redirect("/")
 
-        # Message d'erreur plus clair
         error = "Invalid email or password. Please check your credentials."
         return render_template("login.html", error=error)
     return render_template("login.html")
@@ -413,6 +435,14 @@ def chat():
 @app.route("/courses")
 def get_courses():
     return jsonify({"conversations": COURSES_DATA})
+
+
+# =========================
+# ROUTE DE TEST POUR VÉRIFIER LE SERVEUR
+# =========================
+@app.route("/test", methods=["GET"])
+def test():
+    return jsonify({"status": "ok", "message": "Server is running", "whisper_ready": whisper_model is not None})
 
 
 if __name__ == "__main__":
