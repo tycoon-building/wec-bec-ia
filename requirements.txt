@@ -1,6 +1,8 @@
 Flask
-gunicorn
 requests
 python-dotenv
+gunicorn
 flask-cors
 faster-whisper
+torch
+transformers
