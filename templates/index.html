@@ -70,11 +70,12 @@
         .lesson-card { background: rgba(30,41,59,0.8); border-radius: 20px; padding: 14px; margin-bottom: 10px; border: 1px solid rgba(255,215,0,0.2); }
         .lesson-card h3 { color: white; font-size: 16px; margin-bottom: 6px; }
         .lesson-card .content { color: #cbd5e1; font-size: 12px; line-height: 1.5; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
-        .audio-bar { display: flex; gap: 8px; margin-top: 10px; }
+        .audio-bar { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
         .audio-bar button { background: #008000; color: white; padding: 5px 14px; border-radius: 40px; border: none; cursor: pointer; font-size: 11px; }
+        .audio-bar button.secondary { background: rgba(255, 0, 0, 0.5); }
         .pron-card { background: rgba(30,41,59,0.8); border-radius: 20px; padding: 14px; margin-bottom: 10px; border: 1px solid rgba(255,215,0,0.2); }
-        .pron-card .phrase { font-size: 18px; font-weight: 700; color: #ffd700; margin: 6px 0; }
-        .pron-card .actions { display: flex; gap: 8px; }
+        .pron-card .phrase { font-size: 16px; font-weight: 700; color: #ffd700; margin: 6px 0; }
+        .pron-card .actions { display: flex; gap: 8px; flex-wrap: wrap; }
         .pron-card .actions button { padding: 6px 16px; border-radius: 40px; border: none; font-weight: 600; cursor: pointer; font-size: 12px; }
         .btn-listen { background: #0f172a; color: #ffd700; border: 1px solid rgba(255,215,0,0.3); }
         .btn-record { background: #ef4444; color: white; }
@@ -127,14 +128,14 @@
         </div>
 
         <div id="section-pronunciation" class="section">
-            <h2 class="section-title">Pronunciation</h2>
+            <h2 class="section-title">Pronunciation - Self Introduction</h2>
             <div id="pron-container"><div class="loading">Loading...</div></div>
         </div>
     </div>
 </div>
 
 <script>
-// ========== AUDIO RECORDING - ULTRA RAPIDE ==========
+// ========== AUDIO RECORDING ==========
 let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
@@ -190,8 +191,7 @@ async function startRecording() {
         isRecording = true;
         micBtn.classList.add('recording');
 
-        // Auto-stop après 8 secondes max
-        setTimeout(() => { if (isRecording) stopRecording(); }, 8000);
+        setTimeout(() => { if (isRecording) stopRecording(); }, 10000);
 
     } catch (err) {
         setStatus('Microphone error. Check permissions.');
@@ -213,6 +213,7 @@ function speak(text) {
     let utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
     utterance.rate = 0.9;
+    utterance.pitch = 1.0;
     window.speechSynthesis.speak(utterance);
 }
 
@@ -306,34 +307,73 @@ function renderLessons() {
     if (!container) return;
     container.innerHTML = '';
     if (!coursesData.length) { container.innerHTML = '<div class="lesson-card">No lessons</div>'; return; }
-    coursesData.forEach(lesson => {
+
+    coursesData.forEach((lesson, idx) => {
         const card = document.createElement('div');
         card.className = 'lesson-card';
         card.innerHTML = `
             <h3>${escapeHtml(lesson.title)}</h3>
             <div class="content">${escapeHtml(lesson.content || '').replace(/\n/g, '<br>')}</div>
-            <div class="audio-bar"><button onclick="speak('${escapeHtml(lesson.content || '').replace(/'/g, "\\'")}')">🎧 Listen</button></div>
+            <div class="audio-bar">
+                <button onclick="speak('${escapeHtml(lesson.content || '').replace(/'/g, "\\'").replace(/\n/g, ' ')}')">🎧 Listen Full Lesson</button>
+                <button class="secondary" onclick="repeatRandomPhrase(${idx})">🔄 Repeat Random Phrase</button>
+            </div>
         `;
         container.appendChild(card);
     });
 }
 
+function repeatRandomPhrase(idx) {
+    const lesson = coursesData[idx];
+    if (!lesson || !lesson.content) return;
+    const sentences = lesson.content.split(/[.!?]+/).filter(s => s.trim().length > 10);
+    if (sentences.length) {
+        const randomPhrase = sentences[Math.floor(Math.random() * sentences.length)].trim() + '.';
+        speak(randomPhrase);
+    } else {
+        speak(lesson.content.substring(0, 200));
+    }
+}
+
+// ========== PRONUNCIATION - LEÇON 7 COMPLÈTE ==========
 function renderPronunciation() {
     const container = document.getElementById('pron-container');
     if (!container) return;
     container.innerHTML = '';
-    const phrases = [
-        "Hi everybody!", "Let me introduce myself", "My name is Tycoon",
-        "I am 20 years old", "I am Congolese", "I learn English at WEC-BEC"
+
+    // Leçon 7 complète: Self Introduction (Presentation)
+    const lesson7Phrases = [
+        "Hi everybody!",
+        "Let me introduce myself",
+        "My Surname is Mbongo and my Firstname is Tycoon",
+        "I live at number 20, Mapémé Street Nkombo quarter, Djiri area",
+        "I study at Marien Ngouabi University",
+        "I attend Marien Ngouabi University",
+        "I am in the first level",
+        "I am a fresher",
+        "I am a Christian",
+        "I pray at Catholic Church",
+        "We are 7 in our family",
+        "I am 20 years old",
+        "I am Congolese",
+        "I was born in 2002 in Oyo",
+        "I learn English at WEC-BEC",
+        "I am one of the students of O.I",
+        "I am a newcomer",
+        "I am still a beginner",
+        "I have been learning English for one week",
+        "I learn English because it is one of the most spoken languages in the world",
+        "That's all!"
     ];
-    phrases.forEach((phrase, idx) => {
+
+    lesson7Phrases.forEach((phrase, idx) => {
         const card = document.createElement('div');
         card.className = 'pron-card';
         card.innerHTML = `
             <div class="phrase">"${escapeHtml(phrase)}"</div>
             <div class="actions">
                 <button class="btn-listen" onclick="speak('${escapeHtml(phrase).replace(/'/g, "\\'")}')">🎧 Listen</button>
-                <button class="btn-record" onclick="recordPhrase('${escapeHtml(phrase).replace(/'/g, "\\'")}', ${idx})">🎤 Record</button>
+                <button class="btn-record" onclick="recordPhrase('${escapeHtml(phrase).replace(/'/g, "\\'")}', ${idx})">🎤 Record & Compare</button>
             </div>
             <div class="pron-feedback" id="pron-feedback-${idx}">Click record, speak clearly</div>
         `;
@@ -343,24 +383,34 @@ function renderPronunciation() {
 
 async function recordPhrase(targetPhrase, idx) {
     const SpeechRecog = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecog) { alert('Not supported'); return; }
+    if (!SpeechRecog) { alert('Recording not supported in this browser.'); return; }
+
     const feedback = document.getElementById(`pron-feedback-${idx}`);
-    feedback.innerHTML = 'Listening...';
+    feedback.innerHTML = '🎤 Listening... Please speak clearly.';
+
     const rec = new SpeechRecog();
     rec.lang = 'en-US';
+    rec.continuous = false;
+    rec.interimResults = false;
+
     rec.onresult = (e) => {
         const user = e.results[0][0].transcript;
         const target = targetPhrase.toLowerCase().replace(/[^\w\s]/g, '');
         const userClean = user.toLowerCase().replace(/[^\w\s]/g, '');
+
         let correct = 0;
         const targetWords = target.split(/\s+/);
         const userWords = userClean.split(/\s+/);
+
         targetWords.forEach((w, i) => { if (userWords[i] === w) correct++; });
         let acc = Math.round((correct / targetWords.length) * 100);
         let stars = acc >= 90 ? '⭐⭐⭐' : (acc >= 70 ? '⭐⭐' : '⭐');
-        feedback.innerHTML = `You said: "${escapeHtml(user)}"<br>Accuracy: ${stars} (${acc}%)`;
+        let comment = acc >= 90 ? 'Excellent pronunciation!' : (acc >= 70 ? 'Good job! Keep practicing.' : 'Try again. Listen to the example.');
+
+        feedback.innerHTML = `📝 You said: "${escapeHtml(user)}"<br>📊 Accuracy: ${stars} (${acc}%)<br>💡 ${comment}<br>🎯 Target: "${escapeHtml(targetPhrase)}"`;
     };
-    rec.onerror = () => { feedback.innerHTML = 'Error, try again'; };
+
+    rec.onerror = () => { feedback.innerHTML = '❌ Microphone error. Please try again.'; };
     rec.start();
 }
 
