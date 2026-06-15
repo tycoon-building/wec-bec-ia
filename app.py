@@ -9,37 +9,26 @@ from datetime import timedelta
 from dotenv import load_dotenv
 from faster_whisper import WhisperModel
 from flask_cors import CORS
+import time
 
 load_dotenv()
 
 app = Flask(__name__)
 
 # =========================
-# 🔐 CORS CONFIGURATION - ÉTENDUE
+# 🔐 CORS CONFIGURATION
 # =========================
-# Permettre toutes les origines pour le développement
-CORS(app, origins=[
-    'http://localhost:5000',
-    'http://localhost:19006',
-    'exp://',
-    'http://192.168.1.%',
-    'http://192.168.100.%',
-    'http://127.0.0.1:5000',
-    '*'
-], supports_credentials=True, allow_headers=['Content-Type', 'Accept'])
-
-# Alternative plus simple pour développement (décommentez si besoin)
-# CORS(app)
+CORS(app, origins=['*'], supports_credentials=True)
 
 # =========================
 # 🔐 SECURITY CONFIG
 # =========================
 app.secret_key = os.getenv("SECRET_KEY", "wec-bec-secret-key")
 app.permanent_session_lifetime = timedelta(hours=2)
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max
 
 # =========================
-# 👤 USERS DATABASE
+# 👤 USERS DATABASE (garde tes identifiants)
 # =========================
 ALLOWED_USERS = {
     "admin@wec-bec.com": "admin",
@@ -116,9 +105,9 @@ STUDENT_LEVELS = {
 }
 
 # =========================
-# 🎤 FASTER-WHISPER
+# 🎤 FASTER-WHISPER - VERSION TINY (RAPIDE) ⚡
 # =========================
-WHISPER_MODEL_SIZE = "tiny"  # Changé de 'base' à 'tiny' pour plus de rapidité
+WHISPER_MODEL_SIZE = "tiny"  # tiny = plus rapide, moins de RAM
 WHISPER_DEVICE = "cpu"
 WHISPER_COMPUTE_TYPE = "int8"
 
@@ -131,7 +120,7 @@ try:
         cpu_threads=2,
         num_workers=1
     )
-    print(f"✅ Whisper '{WHISPER_MODEL_SIZE}' ready")
+    print(f"✅ Whisper '{WHISPER_MODEL_SIZE}' ready (fast mode)")
 except Exception as e:
     print(f"⚠️ Whisper error: {e}")
     whisper_model = None
@@ -163,209 +152,107 @@ COURSES_DATA = load_courses()
 
 
 # =========================
-# 🎤 TRANSCRIPTION ENDPOINT - CORRIGÉ
+# 🎤 TRANSCRIPTION ENDPOINT - VERSION STABLE
 # =========================
-@app.route("/transcribe", methods=["POST", "OPTIONS"])
+@app.route("/transcribe", methods=["POST"])
 def transcribe():
-    # Gérer la requête OPTIONS pour CORS
-    if request.method == "OPTIONS":
-        response = jsonify({"status": "ok"})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-        return response
+    start_time = time.time()
 
+    # Vérification 1: Whisper chargé
     if whisper_model is None:
-        return jsonify({"text": "", "error": "Whisper model not ready"})
+        return jsonify({"text": "", "error": "Whisper model not ready"}), 503
 
+    # Vérification 2: Audio présent
     if "audio" not in request.files:
-        return jsonify({"text": "", "error": "No audio file"})
+        return jsonify({"text": "", "error": "No audio file"}), 400
 
     audio = request.files["audio"]
     if audio.filename == "":
-        return jsonify({"text": "", "error": "Empty file"})
+        return jsonify({"text": "", "error": "Empty file"}), 400
+
+    # Vérification 3: Taille du fichier
+    audio.seek(0, 2)
+    size = audio.tell()
+    audio.seek(0)
+    if size < 1000:  # Moins de 1KB
+        return jsonify({"text": "", "error": "Audio too short"}), 400
+
+    print(f"📁 Audio received: {size} bytes")
 
     try:
-        # Sauvegarder le fichier temporairement
+        # Sauvegarder temporairement
         with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
             audio.save(tmp.name)
             tmp_path = tmp.name
 
-        print(f"📁 Audio saved: {tmp_path}")
+        print(f"📁 Saved to: {tmp_path}")
 
-        # Transcription avec Whisper
+        # Transcription avec paramètres rapides
         segments, info = whisper_model.transcribe(
             tmp_path,
-            beam_size=1,
+            beam_size=1,  # Plus rapide
             language="en",
             vad_filter=True,
-            vad_parameters=dict(min_silence_duration_ms=300)
+            vad_parameters=dict(
+                min_silence_duration_ms=500,
+                threshold=0.5
+            )
         )
 
         text = " ".join([segment.text for segment in segments]).strip()
 
-        # Nettoyer le fichier temporaire
+        # Nettoyer
         os.unlink(tmp_path)
 
-        print(f"📝 Transcribed text: '{text}'")
+        elapsed = time.time() - start_time
+        print(f"📝 Transcribed ({elapsed:.2f}s): '{text}'")
 
         if not text:
-            return jsonify({"text": "", "error": "No speech detected"})
+            return jsonify({"text": "", "error": "No speech detected"}), 200
 
         return jsonify({"text": text})
 
     except Exception as e:
         logging.error(f"Transcription error: {str(e)}")
-        return jsonify({"text": "", "error": str(e)})
+        return jsonify({"text": "", "error": str(e)}), 500
 
 
 # =========================
-# 🗣️ GESTIONNAIRE A1
+# 🏓 ROUTE DE TEST
+# =========================
+@app.route("/test", methods=["GET"])
+def test():
+    return jsonify({
+        "status": "ok",
+        "whisper_ready": whisper_model is not None,
+        "whisper_model": WHISPER_MODEL_SIZE
+    })
+
+
+# =========================
+# 🗣️ GESTIONNAIRE A1 (garde ton code existant)
 # =========================
 class A1ConversationManager:
-    def __init__(self):
-        self.user_sessions = {}
-        self.all_questions = self.extract_questions()
-
-    def extract_questions(self):
-        questions = []
-        for conv in A1_CONVERSATIONS:
-            for ex in conv.get('exchanges', []):
-                questions.append({
-                    'question': ex.get('question', ''),
-                    'expected': [a.lower() for a in ex.get('expected_answers', [])],
-                    'topics': ex.get('accepted_topics', []),
-                    'good_reply': ex.get('good_reply', 'Good job!'),
-                    'wrong_reply': ex.get('wrong_reply', 'Try again.')
-                })
-        return questions
-
-    def create_session(self):
-        return {
-            "current_q": None,
-            "current_expected": [],
-            "current_topics": [],
-            "correct": 0,
-            "total": 0,
-            "name": None
-        }
-
-    def reset_user(self, email):
-        self.user_sessions[email] = self.create_session()
-        return True
-
-    def start(self, email):
-        if email not in self.user_sessions:
-            self.user_sessions[email] = self.create_session()
-
-        q_data = self.all_questions[0] if self.all_questions else None
-
-        if q_data:
-            self.user_sessions[email]["current_q"] = q_data['question']
-            self.user_sessions[email]["current_expected"] = q_data['expected']
-            self.user_sessions[email]["current_topics"] = q_data['topics']
-
-        return {"reply": "Hello! Nice to meet you. What's your name?"}
-
-    def process(self, email, answer):
-        if email not in self.user_sessions:
-            return self.start(email)
-
-        session = self.user_sessions[email]
-        current_q = session.get("current_q")
-        expected = session.get("current_expected", [])
-        topics = session.get("current_topics", [])
-
-        if not session.get("name") and ("name" in str(current_q).lower() or "introduce" in str(current_q).lower()):
-            name = answer.lower().replace("my name is", "").replace("i am", "").strip()
-            if name and len(name) < 30 and not name.startswith(("what", "where", "how")):
-                session["name"] = name.capitalize()
-
-        answer_lower = answer.lower().strip()
-        is_correct = False
-
-        if topics:
-            for t in topics:
-                if t.lower() in answer_lower:
-                    is_correct = True
-                    break
-
-        if not is_correct:
-            for e in expected:
-                if e.lower() in answer_lower:
-                    is_correct = True
-                    break
-
-        session["total"] += 1
-
-        if is_correct:
-            session["correct"] += 1
-
-            import random
-            new_q = random.choice(self.all_questions)
-
-            session["current_q"] = new_q['question']
-            session["current_expected"] = new_q['expected']
-            session["current_topics"] = new_q['topics']
-
-            if session.get("name") and "name" in str(current_q).lower():
-                reply = f"Nice to meet you, {session['name']}!"
-            else:
-                reply = "Great job!"
-
-            return {"reply": f"{reply}\n\n{new_q['question']}"}
-        else:
-            return {"reply": f"Not quite. Try again! {current_q}"}
-
-    def get_hint(self, email):
-        if email not in self.user_sessions:
-            return "Say 'hi' to start!"
-        expected = self.user_sessions[email].get("current_expected", [])
-        return f"Hint: {expected[0]}" if expected else "Answer naturally."
-
-    def get_progress(self, email):
-        if email not in self.user_sessions:
-            return None
-        s = self.user_sessions[email]
-        score = round(s["correct"] / max(1, s["total"]) * 100, 1)
-        return {"total": s["total"], "correct": s["correct"], "score": score}
-
-    def is_greeting(self, text):
-        greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "bonjour"]
-        text = text.lower().strip()
-        return any(g in text for g in greetings)
+    # ... garde toute ta classe intacte
+    pass
 
 
 a1_manager = A1ConversationManager()
 
 # =========================
-# 🤖 AI ENDPOINT
+# 🤖 AI ENDPOINT (garde ton code)
 # =========================
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 MODEL = "meta-llama/llama-3-8b-instruct"
 
 
 def ask_ai(message, level="B1"):
-    try:
-        prompt = f"You are WEC-BEC English teacher. Level {level}. Be friendly. Ask ONE question. Reply:"
-        response = requests.post(
-            url="https://openrouter.ai/api/v1/chat/completions",
-            headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
-            json={
-                "model": MODEL,
-                "messages": [{"role": "system", "content": prompt}, {"role": "user", "content": message}]
-            },
-            timeout=15
-        )
-        if response.status_code == 200:
-            return response.json()["choices"][0]["message"]["content"]
-        return "AI service error."
-    except:
-        return "Connection error."
+    # ... garde ton code
+    pass
 
 
 # =========================
-# 🌐 ROUTES
+# 🌐 ROUTES (garde tes routes)
 # =========================
 @app.route("/")
 def home():
@@ -376,20 +263,8 @@ def home():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if session.get("user"):
-        return redirect("/")
-    if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
-        pwd = request.form.get("password", "").strip()
-
-        if email in ALLOWED_USERS and ALLOWED_USERS[email] == pwd:
-            session.permanent = True
-            session["user"] = email
-            return redirect("/")
-
-        error = "Invalid email or password. Please check your credentials."
-        return render_template("login.html", error=error)
-    return render_template("login.html")
+    # ... garde ton code
+    pass
 
 
 @app.route("/logout")
@@ -400,36 +275,8 @@ def logout():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    if not session.get("user"):
-        return jsonify({"reply": "Not authorized"}), 403
-
-    msg = request.json.get("message", "").strip()
-    email = session["user"]
-    level = STUDENT_LEVELS.get(email, "B1")
-
-    if level == "A1":
-        if msg.lower() == "menu":
-            p = a1_manager.get_progress(email)
-            if p:
-                return jsonify({"reply": f"Progress: {p['score']}% - {p['correct']}/{p['total']} correct"})
-            return jsonify({"reply": "Say 'hi' to start!"})
-
-        if msg.lower() == "hint":
-            return jsonify({"reply": a1_manager.get_hint(email)})
-
-        if msg.lower() == "reset":
-            a1_manager.reset_user(email)
-            return jsonify({"reply": "Restarted! Say 'hi' to begin."})
-
-        if a1_manager.is_greeting(msg) or email not in a1_manager.user_sessions:
-            res = a1_manager.start(email)
-            return jsonify({"reply": res["reply"]})
-
-        res = a1_manager.process(email, msg)
-        return jsonify({"reply": res["reply"]})
-
-    reply = ask_ai(msg, level)
-    return jsonify({"reply": reply})
+    # ... garde ton code
+    pass
 
 
 @app.route("/courses")
@@ -437,13 +284,6 @@ def get_courses():
     return jsonify({"conversations": COURSES_DATA})
 
 
-# =========================
-# ROUTE DE TEST POUR VÉRIFIER LE SERVEUR
-# =========================
-@app.route("/test", methods=["GET"])
-def test():
-    return jsonify({"status": "ok", "message": "Server is running", "whisper_ready": whisper_model is not None})
-
-
 if __name__ == "__main__":
-    app.run(debug=False, host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host="0.0.0.0", port=port)
