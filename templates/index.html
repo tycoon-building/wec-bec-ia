@@ -1,593 +1,1032 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>WEC-BEC English AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            background: linear-gradient(145deg, #0a0f1c 0%, #0f172a 30%, #1a1a2e 100%);
-            overflow: hidden;
-            touch-action: pan-x pan-y;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .app {
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
             width: 100%;
-            max-width: 1000px;
-            height: 100vh;
-            margin: 0 auto;
+            max-width: 1200px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 0 1px rgba(255,215,0,0.2);
+            height: 90vh;
         }
-        @media (min-width: 1000px) { .app { height: 95vh; margin: 2vh auto; border-radius: 42px; } }
+
+        /* Header */
         .header {
-            background: linear-gradient(135deg, #008000, #ffd700, #ff0000);
-            padding: 10px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .nav button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav button:hover {
+            background: #e0e0e0;
+        }
+
+        .nav button.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .section.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Chat Box */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        .msg {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .msg.user {
+            justify-content: flex-end;
+        }
+
+        .msg .fa-user, .msg .fa-robot {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 12px;
-            flex-shrink: 0;
+            justify-content: center;
+            background: #667eea;
+            color: white;
         }
-        .header-logo { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; border: 2px solid #ffd700; background: white; flex-shrink: 0; }
-        .header-logo img { width: 100%; height: 100%; object-fit: cover; }
-        .header-text { flex: 1; }
-        .header-text h1 { font-size: 18px; color: white; }
-        .header-text p { font-size: 10px; color: rgba(255,255,255,0.8); }
-        .streak-badge { background: linear-gradient(135deg, #f59e0b, #ef4444); padding: 4px 12px; border-radius: 40px; font-weight: 700; font-size: 11px; color: white; white-space: nowrap; }
-        .logout-btn { background: rgba(0,0,0,0.3); color: white; padding: 6px 14px; border-radius: 40px; text-decoration: none; font-size: 11px; font-weight: 600; }
-        .nav { display: flex; background: rgba(0,0,0,0.4); padding: 0 8px; gap: 4px; flex-shrink: 0; }
-        .nav button { flex: 1; padding: 10px 8px; border: none; background: transparent; color: rgba(255,255,255,0.7); font-weight: 600; font-size: 13px; cursor: pointer; }
-        .nav button.active { color: #ffd700; border-bottom: 2px solid #ffd700; }
-        .main { flex: 1; overflow-y: auto; padding: 16px; -webkit-overflow-scrolling: touch; }
-        .section { display: none; }
-        .section.active { display: block; }
-        #chat-box { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; max-height: 60vh; overflow-y: auto; }
-        .msg { padding: 10px 14px; border-radius: 18px; max-width: 85%; font-size: 14px; animation: fadeIn 0.2s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .msg.user { margin-left: auto; background: linear-gradient(135deg, #008000, #ffd700); color: #1a1a2e; }
-        .msg.bot { background: rgba(30,41,59,0.9); border: 1px solid rgba(255,215,0,0.3); color: #f1f5f9; }
-        .msg-actions { margin-top: 6px; }
-        .listen-btn { background: rgba(255,215,0,0.2); border: none; padding: 3px 10px; border-radius: 16px; color: #ffd700; font-size: 10px; cursor: pointer; }
-        .chat-input-area { display: flex; gap: 8px; margin-top: 8px; }
-        .chat-input-area input { flex: 1; padding: 12px 16px; border-radius: 40px; background: rgba(30,41,59,0.9); color: white; border: 1px solid rgba(255,215,0,0.3); outline: none; font-size: 14px; }
-        .chat-input-area button { padding: 12px 16px; border-radius: 40px; border: none; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.1s ease; }
-        .btn-send { background: #008000; color: white; }
-        .btn-mic { background: #ef4444; color: white; }
-        .btn-mic.recording { background: #10b981; animation: pulse 1s infinite; }
-        .btn-stop { background: #0f172a; color: white; }
-        .status { font-size: 10px; color: #ffd700; padding: 8px 0; text-align: center; }
-        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
-        .menu-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-        .menu-bar button { background: rgba(0,128,0,0.3); border: 1px solid rgba(255,215,0,0.5); padding: 6px 12px; border-radius: 40px; color: #ffd700; cursor: pointer; font-size: 11px; }
-        .lesson-card { background: rgba(30,41,59,0.8); border-radius: 20px; padding: 14px; margin-bottom: 10px; border: 1px solid rgba(255,215,0,0.2); }
-        .lesson-card h3 { color: white; font-size: 16px; margin-bottom: 6px; }
-        .lesson-card .content { color: #cbd5e1; font-size: 12px; line-height: 1.5; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
-        .audio-bar { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-        .audio-bar button { background: #008000; color: white; padding: 5px 14px; border-radius: 40px; border: none; cursor: pointer; font-size: 11px; }
-        .audio-bar button.secondary { background: rgba(255, 0, 0, 0.5); }
-        .pron-card { background: rgba(30,41,59,0.8); border-radius: 20px; padding: 14px; margin-bottom: 10px; border: 1px solid rgba(255,215,0,0.2); }
-        .pron-card .phrase { font-size: 16px; font-weight: 700; color: #ffd700; margin: 6px 0; }
-        .pron-card .actions { display: flex; gap: 8px; flex-wrap: wrap; }
-        .pron-card .actions button { padding: 6px 16px; border-radius: 40px; border: none; font-weight: 600; cursor: pointer; font-size: 12px; }
-        .btn-listen { background: #0f172a; color: #ffd700; border: 1px solid rgba(255,215,0,0.3); }
-        .btn-record { background: #ef4444; color: white; }
-        .pron-feedback { margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 12px; border-left: 3px solid #ffd700; font-size: 11px; color: #cbd5e1; }
-        .loading { text-align: center; padding: 30px; color: #ffd700; font-size: 13px; }
-        @media (max-width: 480px) { .main { padding: 12px; } .msg { max-width: 90%; } .chat-input-area button { padding: 12px 12px; } }
+
+        .msg.user .fa-user {
+            background: #4CAF50;
+        }
+
+        .msg-content {
+            max-width: 70%;
+            padding: 12px 15px;
+            border-radius: 18px;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .msg.user .msg-content {
+            background: #667eea;
+            color: white;
+        }
+
+        .msg-actions {
+            margin-top: 5px;
+        }
+
+        .listen-btn {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 0.8em;
+            padding: 5px;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-size: 1em;
+        }
+
+        .input-area input:focus {
+            border-color: #667eea;
+        }
+
+        .input-area button {
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .input-area button:hover {
+            transform: scale(1.05);
+        }
+
+        .input-area button.recording {
+            background: #ff4444;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .status-bar {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            font-size: 0.85em;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Lessons Section */
+        .lessons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .lesson-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        .lesson-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .lesson-card .content {
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .audio-bar {
+            display: flex;
+            gap: 10px;
+        }
+
+        .audio-bar button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+        }
+
+        .audio-bar button.secondary {
+            background: #4CAF50;
+        }
+
+        /* Pronunciation Section */
+        .pron-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .pron-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .pron-card .phrase {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-style: italic;
+            color: #333;
+        }
+
+        .pron-card .actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .pron-card .actions button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-listen {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-record {
+            background: #ff9800;
+            color: white;
+        }
+
+        .pron-feedback {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 10px;
+            padding: 8px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                height: 95vh;
+            }
+
+            .msg-content {
+                max-width: 85%;
+            }
+
+            .lessons-grid, .pron-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-
-<div class="app">
-    <div class="header">
-        <div class="header-logo">
-            <img src="/static/images/logo.jpg" alt="Logo" onerror="this.src='https://placehold.co/44x44/008000/white?text=W'">
+    <div class="app-container">
+        <div class="header">
+            <h1>🎓 WEC-BEC English AI Teacher</h1>
+            <p>Your personal AI English tutor</p>
+            <div class="user-info" id="userInfo">
+                <i class="fas fa-user"></i> {{ user }}
+            </div>
         </div>
-        <div class="header-text">
-            <h1>WEC-BEC English AI</h1>
-            <p>{{ user }} · Level {{ level }}</p>
+
+        <div class="nav">
+            <button data-section="chat" class="active">💬 Chat</button>
+            <button data-section="lessons">📚 Lessons</button>
+            <button data-section="pronunciation">🎤 Pronunciation</button>
         </div>
-        <div class="streak-badge"><i class="fas fa-crown"></i> Born to lead</div>
-        <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i></a>
-    </div>
 
-    <div class="nav">
-        <button class="active" data-section="chat"><i class="fas fa-comment-dots"></i> Chat</button>
-        <button data-section="lessons"><i class="fas fa-book-open"></i> Lessons</button>
-        <button data-section="pronunciation"><i class="fas fa-microphone-alt"></i> Pronunciation</button>
-    </div>
-
-    <div class="main">
+        <!-- Chat Section -->
         <div id="section-chat" class="section active">
-            <div class="menu-bar">
-                <button onclick="showMenu()"><i class="fas fa-chart-line"></i> Menu</button>
-                <button onclick="getHint()"><i class="fas fa-lightbulb"></i> Hint</button>
-                <button onclick="resetChat()"><i class="fas fa-redo"></i> Reset</button>
-            </div>
-            <div id="chat-box"></div>
-            <div class="status" id="status">Ready</div>
-            <div class="chat-input-area">
-                <input id="msg" placeholder="Type or speak..." autocomplete="off" enterkeyhint="send">
-                <button class="btn-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
-                <button class="btn-mic" id="micBtn" onclick="toggleVoiceMode()"><i class="fas fa-microphone"></i> Voice</button>
-                <button class="btn-stop" onclick="stopAllAudio()"><i class="fas fa-stop"></i></button>
+            <div class="chat-container">
+                <div class="chat-box" id="chat-box">
+                    <div class="msg bot">
+                        <i class="fas fa-robot"></i>
+                        <div class="msg-content">
+                            Hello! Voice mode is ON. Just speak to start! 🚀<br>
+                            <small>Commands: 'menu', 'hint', 'reset'</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="status-bar">
+                    <span id="status">🎧 Ready</span>
+                    <div>
+                        <button onclick="toggleVoiceMode()" style="background:none;border:none;cursor:pointer;" title="Toggle Voice Mode">
+                            <i class="fas fa-microphone-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="input-area">
+                    <input type="text" id="msg" placeholder="Type your message or speak..." autocomplete="off">
+                    <button onclick="sendMessage()" title="Send">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                    <button id="micBtn" onclick="toggleVoiceMode()" title="Voice Mode">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
+        <!-- Lessons Section -->
         <div id="section-lessons" class="section">
-            <h2 class="section-title">Audio Lessons</h2>
-            <div id="lessons-container"><div class="loading">Loading...</div></div>
+            <h2>📖 Your English Lessons</h2>
+            <div id="lessons-container" class="lessons-grid">
+                Loading lessons...
+            </div>
         </div>
 
+        <!-- Pronunciation Section -->
         <div id="section-pronunciation" class="section">
-            <h2 class="section-title">Pronunciation - Self Introduction</h2>
-            <div id="pron-container"><div class="loading">Loading...</div></div>
+            <h2>🎯 Pronunciation Practice</h2>
+            <p>Listen to the phrase, then record yourself speaking!</p>
+            <div id="pron-container" class="pron-grid">
+                Loading pronunciation exercises...
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-// ========== VOICE MODE - MICRO EN CONTINU ==========
-let voiceMode = true;  // Démarrer automatiquement en mode vocal
-let currentRecognition = null;
-let isSpeaking = false;
-let isListening = false;
-let currentUtterance = null;
-let coursesData = [];
+    <script>
+        // ========== VOICE MODE - MICRO EN CONTINU ==========
+        let voiceMode = true;  // Démarrer automatiquement en mode vocal
+        let currentRecognition = null;
+        let isSpeaking = false;
+        let isListening = false;
+        let currentUtterance = null;
+        let coursesData = [];
 
-const statusEl = document.getElementById('status');
-const micBtn = document.getElementById('micBtn');
-const msgInput = document.getElementById('msg');
-const chatBox = document.getElementById('chat-box');
+        const statusEl = document.getElementById('status');
+        const micBtn = document.getElementById('micBtn');
+        const msgInput = document.getElementById('msg');
+        const chatBox = document.getElementById('chat-box');
 
-function setStatus(message, isError = false) {
-    if (statusEl) {
-        const icon = isError ? '❌' : (isSpeaking ? '🔊' : (isListening ? '🎤' : '🎧'));
-        statusEl.innerHTML = `<i class="fas fa-circle"></i> ${message} ${icon}`;
-    }
-}
-
-function stopSpeaking() {
-    if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-    }
-    isSpeaking = false;
-    currentUtterance = null;
-    setStatus('Ready');
-}
-
-function speakText(text) {
-    return new Promise((resolve, reject) => {
-        if (!window.speechSynthesis) {
-            reject('Speech synthesis not supported');
-            return;
+        function setStatus(message, isError = false) {
+            if (statusEl) {
+                const icon = isError ? '❌' : (isSpeaking ? '🔊' : (isListening ? '🎤' : '🎧'));
+                statusEl.innerHTML = `${message} ${icon}`;
+            }
         }
 
-        stopSpeaking();
-
-        let cleanText = text
-            .replace(/[^\w\s\.,!?;:()\-'\u00C0-\u00FF]/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
-
-        if (!cleanText) {
-            reject('No text to speak');
-            return;
-        }
-
-        currentUtterance = new SpeechSynthesisUtterance(cleanText);
-        currentUtterance.lang = 'en-US';
-        currentUtterance.rate = 0.85;
-        currentUtterance.pitch = 1.0;
-        currentUtterance.volume = 1.0;
-
-        const voice = getBestVoice();
-        if (voice) currentUtterance.voice = voice;
-
-        currentUtterance.onstart = () => {
-            isSpeaking = true;
-            setStatus('Speaking...');
-        };
-
-        currentUtterance.onend = () => {
+        function stopSpeaking() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
             isSpeaking = false;
             currentUtterance = null;
-            setStatus('Ready');
-            resolve();
+            if (!isListening) setStatus('Ready');
+        }
 
-            // Après la réponse, réécouter automatiquement
-            if (voiceMode && !isListening && !isSpeaking) {
+        function speakText(text) {
+            return new Promise((resolve, reject) => {
+                if (!window.speechSynthesis) {
+                    reject('Speech synthesis not supported');
+                    return;
+                }
+
+                // Ne pas parler si trop long
+                if (text.length > 500) {
+                    text = text.substring(0, 500) + '...';
+                }
+
+                stopSpeaking();
+
+                let cleanText = text
+                    .replace(/[^\w\s\.,!?;:()\-'\u00C0-\u00FF]/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+
+                if (!cleanText) {
+                    reject('No text to speak');
+                    return;
+                }
+
+                currentUtterance = new SpeechSynthesisUtterance(cleanText);
+                currentUtterance.lang = 'en-US';
+                currentUtterance.rate = 0.85;
+                currentUtterance.pitch = 1.0;
+                currentUtterance.volume = 1.0;
+
+                // Attendre que les voix soient chargées
+                if (speechSynthesis.getVoices().length === 0) {
+                    speechSynthesis.addEventListener('voiceschanged', () => {
+                        const voice = getBestVoice();
+                        if (voice) currentUtterance.voice = voice;
+                        startSpeaking();
+                    });
+                } else {
+                    const voice = getBestVoice();
+                    if (voice) currentUtterance.voice = voice;
+                    startSpeaking();
+                }
+
+                function startSpeaking() {
+                    currentUtterance.onstart = () => {
+                        isSpeaking = true;
+                        setStatus('Speaking...');
+                    };
+
+                    currentUtterance.onend = () => {
+                        isSpeaking = false;
+                        currentUtterance = null;
+                        setStatus('Ready');
+                        resolve();
+
+                        // Après la réponse, réécouter automatiquement
+                        if (voiceMode && !isListening && !isSpeaking) {
+                            setTimeout(() => startListening(), 500);
+                        }
+                    };
+
+                    currentUtterance.onerror = (event) => {
+                        console.error('Speech error:', event);
+                        isSpeaking = false;
+                        currentUtterance = null;
+                        setStatus('Speech error', true);
+                        reject(event);
+                    };
+
+                    window.speechSynthesis.speak(currentUtterance);
+                }
+            });
+        }
+
+        function getBestVoice() {
+            const voices = speechSynthesis.getVoices();
+            let voice = voices.find(v => v.name.includes('Samantha'));
+            if (!voice) voice = voices.find(v => v.name.includes('Google UK English Female'));
+            if (!voice) voice = voices.find(v => v.name.includes('Microsoft Jenny'));
+            if (!voice) voice = voices.find(v => v.lang === 'en-US');
+            if (!voice) voice = voices.find(v => v.lang.startsWith('en'));
+            return voice;
+        }
+
+        // ========== SPEECH RECOGNITION - ECOUTE CONTINUE ==========
+        function startListening() {
+            if (isSpeaking) {
+                setStatus('Waiting for speech to finish...');
+                return;
+            }
+
+            if (isListening) {
+                return; // Déjà en écoute
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                setStatus('Speech recognition not supported', true);
+                if (micBtn) micBtn.style.opacity = '0.5';
+                return;
+            }
+
+            // Arrêter toute reconnaissance existante
+            if (currentRecognition) {
+                try {
+                    currentRecognition.stop();
+                } catch(e) {}
+                currentRecognition = null;
+            }
+
+            currentRecognition = new SpeechRecognition();
+            currentRecognition.lang = 'en-US';
+            currentRecognition.continuous = true;
+            currentRecognition.interimResults = true;
+            currentRecognition.maxAlternatives = 1;
+
+            let finalTranscript = '';
+            let speechTimeout = null;
+
+            currentRecognition.onstart = () => {
+                isListening = true;
+                setStatus('🎤 Listening... Speak now');
+                if (micBtn) micBtn.classList.add('recording');
+                micBtn.style.background = '#ff4444';
+            };
+
+            currentRecognition.onresult = (event) => {
+                // Reset timeout
+                if (speechTimeout) clearTimeout(speechTimeout);
+
+                let interimTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript = transcript;
+                        // Envoyer immédiatement la phrase finale
+                        if (finalTranscript && finalTranscript.trim()) {
+                            const message = finalTranscript.trim();
+                            finalTranscript = '';
+                            if (msgInput) msgInput.value = message;
+                            sendMessage(message);
+                        }
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                // Afficher le texte en temps réel
+                if (msgInput) {
+                    if (finalTranscript) {
+                        msgInput.value = finalTranscript;
+                    } else if (interimTranscript) {
+                        msgInput.value = interimTranscript + '...';
+                    }
+                }
+            };
+
+            currentRecognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
+                let errorMsg = 'Microphone error';
+                if (event.error === 'no-speech') errorMsg = 'No speech detected - speak louder';
+                else if (event.error === 'audio-capture') errorMsg = 'No microphone found';
+                else if (event.error === 'not-allowed') errorMsg = 'Microphone permission denied';
+                setStatus(errorMsg, true);
+
+                isListening = false;
+                if (micBtn) micBtn.classList.remove('recording');
+                micBtn.style.background = '';
+
+                // Réessayer après une erreur
+                if (voiceMode && !isSpeaking) {
+                    setTimeout(() => {
+                        if (voiceMode && !isListening) startListening();
+                    }, 3000);
+                }
+            };
+
+            currentRecognition.onend = () => {
+                isListening = false;
+                if (micBtn) {
+                    micBtn.classList.remove('recording');
+                    micBtn.style.background = '';
+                }
+
+                // Relancer l'écoute si le mode vocal est activé
+                if (voiceMode && !isSpeaking && !isListening) {
+                    setTimeout(() => {
+                        if (voiceMode && !isSpeaking && !isListening) {
+                            startListening();
+                        }
+                    }, 500);
+                }
+                if (!isSpeaking) setStatus('Ready');
+            };
+
+            currentRecognition.start();
+        }
+
+        function stopListening() {
+            if (currentRecognition) {
+                try {
+                    currentRecognition.stop();
+                } catch(e) {}
+                currentRecognition = null;
+            }
+            isListening = false;
+            if (micBtn) {
+                micBtn.classList.remove('recording');
+                micBtn.style.background = '';
+            }
+            if (!isSpeaking) setStatus('Ready');
+        }
+
+        function toggleVoiceMode() {
+            voiceMode = !voiceMode;
+            if (voiceMode) {
+                setStatus('Voice mode ON');
+                if (micBtn) micBtn.style.background = '#4CAF50';
+                startListening();
+            } else {
+                stopListening();
+                setStatus('Voice mode OFF (type only)');
+                if (micBtn) micBtn.style.background = '';
+            }
+        }
+
+        // ========== CHAT FUNCTIONS ==========
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        function addMessage(text, isUser = false) {
+            const div = document.createElement('div');
+            div.className = `msg ${isUser ? 'user' : 'bot'}`;
+
+            const icon = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+            const safeText = escapeHtml(text);
+
+            div.innerHTML = `
+                ${icon}
+                <div class="msg-content">
+                    ${safeText}
+                    ${!isUser ? `
+                    <div class="msg-actions">
+                        <button class="listen-btn" onclick="speakText('${safeText.replace(/'/g, "\\'")}')">
+                            <i class="fas fa-headphones"></i> Listen
+                        </button>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return div;
+        }
+
+        async function sendMessage(voiceText = null) {
+            const message = voiceText !== null ? voiceText : msgInput.value.trim();
+            if (!message) return;
+
+            // Désactiver temporairement l'écoute pendant l'envoi
+            const wasListening = isListening;
+            if (wasListening) {
+                stopListening();
+            }
+
+            addMessage(message, true);
+
+            if (voiceText === null) {
+                msgInput.value = '';
+            }
+
+            setStatus('Thinking...');
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.reply) {
+                    addMessage(data.reply, false);
+                    await speakText(data.reply);
+                } else {
+                    addMessage('Sorry, I could not process your request.', false);
+                    setStatus('Error', true);
+                }
+            } catch (error) {
+                console.error('Chat error:', error);
+                addMessage('Connection error. Please try again.', false);
+                setStatus('Connection error', true);
+            }
+
+            // Réactiver l'écoute si nécessaire
+            if (voiceMode && wasListening && !isSpeaking) {
                 setTimeout(() => startListening(), 500);
             }
-        };
+        }
 
-        currentUtterance.onerror = (event) => {
-            console.error('Speech error:', event);
-            isSpeaking = false;
-            currentUtterance = null;
-            setStatus('Speech error', true);
-            reject(event);
-        };
+        async function showMenu() {
+            const wasListening = isListening;
+            if (wasListening) stopListening();
 
-        window.speechSynthesis.speak(currentUtterance);
-    });
-}
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'menu' })
+                });
+                const data = await response.json();
+                addMessage(data.reply, false);
+                if (voiceMode && !isSpeaking) await speakText(data.reply);
+            } catch (err) {
+                addMessage('Error loading menu.', false);
+            }
 
-function getBestVoice() {
-    const voices = speechSynthesis.getVoices();
-    let voice = voices.find(v => v.name.includes('Samantha'));
-    if (!voice) voice = voices.find(v => v.name.includes('Google UK English Female'));
-    if (!voice) voice = voices.find(v => v.name.includes('Microsoft Jenny'));
-    if (!voice) voice = voices.find(v => v.lang === 'en-US');
-    if (!voice) voice = voices.find(v => v.lang.startsWith('en'));
-    return voice;
-}
+            if (voiceMode && wasListening && !isSpeaking) {
+                setTimeout(() => startListening(), 500);
+            }
+        }
 
-// ========== SPEECH RECOGNITION - ECOUTE CONTINUE ==========
-function startListening() {
-    if (isSpeaking) {
-        setStatus('Waiting for speech to finish...');
-        return;
-    }
+        async function getHint() {
+            const wasListening = isListening;
+            if (wasListening) stopListening();
 
-    if (isListening) {
-        return; // Déjà en écoute
-    }
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'hint' })
+                });
+                const data = await response.json();
+                addMessage(data.reply, false);
+                if (voiceMode && !isSpeaking) await speakText(data.reply);
+            } catch (err) {
+                addMessage('Error getting hint.', false);
+            }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        setStatus('Speech recognition not supported', true);
-        alert('Your browser does not support speech recognition. Please use Chrome, Edge, or Safari.');
-        return;
-    }
+            if (voiceMode && wasListening && !isSpeaking) {
+                setTimeout(() => startListening(), 500);
+            }
+        }
 
-    currentRecognition = new SpeechRecognition();
-    currentRecognition.lang = 'en-US';
-    currentRecognition.continuous = true;  // IMPORTANT: reste à l'écoute
-    currentRecognition.interimResults = true;
-    currentRecognition.maxAlternatives = 1;
+        async function resetChat() {
+            const wasListening = isListening;
+            if (wasListening) stopListening();
 
-    let finalTranscript = '';
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'reset' })
+                });
+                const data = await response.json();
+                chatBox.innerHTML = '';
+                addMessage(data.reply, false);
+                if (voiceMode && !isSpeaking) await speakText(data.reply);
+            } catch (err) {
+                console.error(err);
+            }
 
-    currentRecognition.onstart = () => {
-        isListening = true;
-        setStatus('🎤 Listening... Speak now');
-        if (micBtn) micBtn.classList.add('recording');
-    };
+            if (voiceMode && wasListening && !isSpeaking) {
+                setTimeout(() => startListening(), 500);
+            }
+        }
 
-    currentRecognition.onresult = (event) => {
-        let interimTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-                finalTranscript = transcript;
+        // ========== LOAD LESSONS ==========
+        async function loadCourses() {
+            try {
+                const res = await fetch('/courses');
+                const data = await res.json();
+                coursesData = data.conversations || [];
+                renderLessons();
+                renderPronunciation();
+            } catch (err) {
+                console.error(err);
+                const container = document.getElementById('lessons-container');
+                if (container) container.innerHTML = '<div class="lesson-card">Error loading lessons</div>';
+            }
+        }
+
+        function renderLessons() {
+            const container = document.getElementById('lessons-container');
+            if (!container) return;
+            container.innerHTML = '';
+            if (!coursesData.length) {
+                container.innerHTML = '<div class="lesson-card">No lessons available</div>';
+                return;
+            }
+
+            coursesData.forEach((lesson, idx) => {
+                const card = document.createElement('div');
+                card.className = 'lesson-card';
+                const safeTitle = escapeHtml(lesson.title);
+                const safeContent = escapeHtml(lesson.content || 'No content available').replace(/\n/g, '<br>');
+                card.innerHTML = `
+                    <h3>${safeTitle}</h3>
+                    <div class="content">${safeContent}</div>
+                    <div class="audio-bar">
+                        <button onclick="speakText('${escapeHtml(lesson.content || '').replace(/'/g, "\\'").replace(/\n/g, ' ')}')">🎧 Listen Full Lesson</button>
+                        <button class="secondary" onclick="repeatRandomPhrase(${idx})">🔄 Repeat Random Phrase</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function repeatRandomPhrase(idx) {
+            const lesson = coursesData[idx];
+            if (!lesson || !lesson.content) return;
+            const sentences = lesson.content.split(/[.!?]+/).filter(s => s.trim().length > 10);
+            if (sentences.length) {
+                const randomPhrase = sentences[Math.floor(Math.random() * sentences.length)].trim() + '.';
+                speakText(randomPhrase);
             } else {
-                interimTranscript += transcript;
+                speakText(lesson.content.substring(0, 200));
             }
         }
 
-        // Afficher le texte en temps réel
-        if (msgInput) {
-            if (finalTranscript) {
-                msgInput.value = finalTranscript;
-                // Envoi automatique quand une phrase est complète
-                if (finalTranscript && finalTranscript.trim()) {
-                    const message = finalTranscript;
-                    msgInput.value = '';
-                    finalTranscript = '';
-                    sendMessage(message);
+        // ========== PRONUNCIATION ==========
+        function renderPronunciation() {
+            const container = document.getElementById('pron-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const lesson7Phrases = [
+                "Hi everybody!", "Let me introduce myself", "My Surname is Mbongo and my Firstname is Tycoon",
+                "I live at number 20, Mapémé Street Nkombo quarter, Djiri area", "I study at Marien Ngouabi University",
+                "I attend Marien Ngouabi University", "I am in the first level", "I am a fresher", "I am a Christian",
+                "I pray at Catholic Church", "We are 7 in our family", "I am 20 years old", "I am Congolese",
+                "I was born in 2002 in Oyo", "I learn English at WEC-BEC", "I am one of the students of O.I",
+                "I am a newcomer", "I am still a beginner", "I have been learning English for one week",
+                "I learn English because it is one of the most spoken languages in the world", "That's all!"
+            ];
+
+            lesson7Phrases.forEach((phrase, idx) => {
+                const card = document.createElement('div');
+                card.className = 'pron-card';
+                const safePhrase = escapeHtml(phrase);
+                card.innerHTML = `
+                    <div class="phrase">"${safePhrase}"</div>
+                    <div class="actions">
+                        <button class="btn-listen" onclick="speakText('${safePhrase.replace(/'/g, "\\'")}')">🎧 Listen</button>
+                        <button class="btn-record" onclick="recordPhrase('${safePhrase.replace(/'/g, "\\'")}', ${idx})">🎤 Record</button>
+                    </div>
+                    <div class="pron-feedback" id="pron-feedback-${idx}">Click record, speak clearly</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function recordPhrase(targetPhrase, idx) {
+            const SpeechRecog = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecog) {
+                alert('Recording not supported in this browser.');
+                return;
+            }
+
+            const feedback = document.getElementById(`pron-feedback-${idx}`);
+            if (!feedback) return;
+
+            feedback.innerHTML = '🎤 Listening... Please speak clearly.';
+            feedback.style.color = '#ff9800';
+
+            const rec = new SpeechRecog();
+            rec.lang = 'en-US';
+            rec.continuous = false;
+            rec.interimResults = false;
+
+            rec.onresult = (e) => {
+                const user = e.results[0][0].transcript;
+                const target = targetPhrase.toLowerCase().replace(/[^\w\s]/g, '');
+                const userClean = user.toLowerCase().replace(/[^\w\s]/g, '');
+
+                let correct = 0;
+                const targetWords = target.split(/\s+/);
+                const userWords = userClean.split(/\s+/);
+
+                targetWords.forEach((w, i) => {
+                    if (userWords[i] && userWords[i] === w) correct++;
+                });
+
+                let acc = Math.round((correct / targetWords.length) * 100);
+                if (isNaN(acc)) acc = 0;
+
+                let stars = acc >= 90 ? '⭐⭐⭐' : (acc >= 70 ? '⭐⭐' : '⭐');
+                let comment = acc >= 90 ? 'Excellent!' : (acc >= 70 ? 'Good job!' : 'Try again.');
+                let color = acc >= 90 ? '#4CAF50' : (acc >= 70 ? '#ff9800' : '#f44336');
+
+                feedback.innerHTML = `📝 You said: "${escapeHtml(user)}"<br>📊 Accuracy: ${stars} (${acc}%)<br>💡 ${comment}<br>🎯 Target: "${escapeHtml(targetPhrase)}"`;
+                feedback.style.color = color;
+            };
+
+            rec.onerror = (event) => {
+                console.error('Record error:', event.error);
+                let errorMsg = '❌ Recording error';
+                if (event.error === 'no-speech') errorMsg = '❌ No speech detected. Please speak clearly.';
+                else if (event.error === 'not-allowed') errorMsg = '❌ Microphone permission denied.';
+                feedback.innerHTML = errorMsg;
+                feedback.style.color = '#f44336';
+            };
+
+            rec.onend = () => {
+                if (feedback.innerHTML === '🎤 Listening... Please speak clearly.') {
+                    feedback.innerHTML = '❌ No speech detected. Please try again.';
+                    feedback.style.color = '#f44336';
                 }
-            } else if (interimTranscript) {
-                msgInput.value = interimTranscript + '...';
-            }
+            };
+
+            rec.start();
         }
-    };
 
-    currentRecognition.onerror = (event) => {
-        console.error('Recognition error:', event.error);
-        let errorMsg = 'Microphone error';
-        if (event.error === 'no-speech') errorMsg = 'No speech detected';
-        else if (event.error === 'audio-capture') errorMsg = 'No microphone found';
-        else if (event.error === 'not-allowed') errorMsg = 'Microphone permission denied';
-        setStatus(errorMsg, true);
-
-        // Réessayer de réécouter après une erreur
-        if (voiceMode && !isSpeaking) {
-            setTimeout(() => startListening(), 2000);
-        }
-    };
-
-    currentRecognition.onend = () => {
-        isListening = false;
-        if (micBtn) micBtn.classList.remove('recording');
-
-        // Si le mode vocal est activé, relancer l'écoute
-        if (voiceMode && !isSpeaking) {
-            setTimeout(() => startListening(), 500);
-        }
-        if (!isSpeaking) setStatus('Ready');
-    };
-
-    currentRecognition.start();
-}
-
-function stopListening() {
-    if (currentRecognition) {
-        try {
-            currentRecognition.stop();
-        } catch(e) {}
-        currentRecognition = null;
-    }
-    isListening = false;
-    if (micBtn) micBtn.classList.remove('recording');
-    if (!isSpeaking) setStatus('Ready');
-}
-
-function stopAllAudio() {
-    stopSpeaking();
-    stopListening();
-    voiceMode = false;
-    if (micBtn) micBtn.classList.remove('recording');
-    setStatus('Stopped');
-}
-
-function toggleVoiceMode() {
-    if (voiceMode) {
-        // Désactiver le mode vocal
-        voiceMode = false;
-        stopListening();
-        setStatus('Voice mode off');
-        if (micBtn) micBtn.classList.remove('recording');
-    } else {
-        // Activer le mode vocal
-        voiceMode = true;
-        setStatus('Voice mode on');
-        startListening();
-    }
-}
-
-// ========== CHAT FUNCTIONS ==========
-function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
-}
-
-function addMessage(text, isUser = false) {
-    const div = document.createElement('div');
-    div.className = `msg ${isUser ? 'user' : 'bot'}`;
-
-    const icon = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
-
-    div.innerHTML = `
-        ${icon} ${escapeHtml(text)}
-        ${!isUser ? `
-        <div class="msg-actions">
-            <button class="listen-btn" onclick="speakText('${escapeHtml(text).replace(/'/g, "\\'")}')">
-                <i class="fas fa-headphones"></i> Listen
-            </button>
-        </div>
-        ` : ''}
-    `;
-
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-    return div;
-}
-
-async function sendMessage(voiceText = null) {
-    const message = voiceText !== null ? voiceText : msgInput.value.trim();
-    if (!message) return;
-
-    addMessage(message, true);
-
-    if (voiceText === null) {
-        msgInput.value = '';
-    }
-
-    setStatus('Thinking...');
-
-    try {
-        const response = await fetch('/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: message })
+        // ========== NAVIGATION ==========
+        document.querySelectorAll('.nav button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById('section-' + this.dataset.section).classList.add('active');
+            });
         });
 
-        const data = await response.json();
-
-        if (data.reply) {
-            addMessage(data.reply, false);
-            await speakText(data.reply);
-        } else {
-            addMessage('Sorry, I could not process your request.', false);
-            setStatus('Error', true);
+        // ========== INITIALISATION ==========
+        if (msgInput) {
+            msgInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
         }
-    } catch (error) {
-        console.error('Chat error:', error);
-        addMessage('Connection error. Please try again.', false);
-        setStatus('Connection error', true);
-    }
-}
 
-async function showMenu() {
-    try {
-        const res = await fetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'menu' }) });
-        const data = await res.json();
-        addMessage(data.reply, false);
-    } catch (err) { addMessage('Error loading menu.', false); }
-}
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCourses();
 
-async function getHint() {
-    try {
-        const res = await fetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'hint' }) });
-        const data = await res.json();
-        addMessage(data.reply, false);
-    } catch (err) { addMessage('Error getting hint.', false); }
-}
+            // Nettoyer le chat-box s'il y a un message initial
+            if (chatBox && chatBox.children.length === 0) {
+                chatBox.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i><div class="msg-content">Hello! Voice mode is ON. Just speak to start! 🚀<br><small>Commands: 'menu', 'hint', 'reset'</small></div></div>`;
+            }
 
-async function resetChat() {
-    try {
-        const res = await fetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'reset' }) });
-        const data = await res.json();
-        chatBox.innerHTML = '';
-        addMessage(data.reply, false);
-    } catch (err) { console.error(err); }
-}
+            // Démarrer le mode vocal automatiquement
+            voiceMode = true;
+            if (micBtn) micBtn.style.background = '#4CAF50';
+            setTimeout(() => startListening(), 1000);
+        });
 
-// ========== LOAD LESSONS ==========
-async function loadCourses() {
-    try {
-        const res = await fetch('/courses');
-        const data = await res.json();
-        coursesData = data.conversations || [];
-        renderLessons();
-        renderPronunciation();
-    } catch (err) { console.error(err); }
-}
-
-function renderLessons() {
-    const container = document.getElementById('lessons-container');
-    if (!container) return;
-    container.innerHTML = '';
-    if (!coursesData.length) { container.innerHTML = '<div class="lesson-card">No lessons</div>'; return; }
-
-    coursesData.forEach((lesson, idx) => {
-        const card = document.createElement('div');
-        card.className = 'lesson-card';
-        card.innerHTML = `
-            <h3>${escapeHtml(lesson.title)}</h3>
-            <div class="content">${escapeHtml(lesson.content || '').replace(/\n/g, '<br>')}</div>
-            <div class="audio-bar">
-                <button onclick="speakText('${escapeHtml(lesson.content || '').replace(/'/g, "\\'").replace(/\n/g, ' ')}')">🎧 Listen Full Lesson</button>
-                <button class="secondary" onclick="repeatRandomPhrase(${idx})">🔄 Repeat Random Phrase</button>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
-
-function repeatRandomPhrase(idx) {
-    const lesson = coursesData[idx];
-    if (!lesson || !lesson.content) return;
-    const sentences = lesson.content.split(/[.!?]+/).filter(s => s.trim().length > 10);
-    if (sentences.length) {
-        const randomPhrase = sentences[Math.floor(Math.random() * sentences.length)].trim() + '.';
-        speakText(randomPhrase);
-    } else {
-        speakText(lesson.content.substring(0, 200));
-    }
-}
-
-// ========== PRONUNCIATION ==========
-function renderPronunciation() {
-    const container = document.getElementById('pron-container');
-    if (!container) return;
-    container.innerHTML = '';
-
-    const lesson7Phrases = [
-        "Hi everybody!", "Let me introduce myself", "My Surname is Mbongo and my Firstname is Tycoon",
-        "I live at number 20, Mapémé Street Nkombo quarter, Djiri area", "I study at Marien Ngouabi University",
-        "I attend Marien Ngouabi University", "I am in the first level", "I am a fresher", "I am a Christian",
-        "I pray at Catholic Church", "We are 7 in our family", "I am 20 years old", "I am Congolese",
-        "I was born in 2002 in Oyo", "I learn English at WEC-BEC", "I am one of the students of O.I",
-        "I am a newcomer", "I am still a beginner", "I have been learning English for one week",
-        "I learn English because it is one of the most spoken languages in the world", "That's all!"
-    ];
-
-    lesson7Phrases.forEach((phrase, idx) => {
-        const card = document.createElement('div');
-        card.className = 'pron-card';
-        card.innerHTML = `
-            <div class="phrase">"${escapeHtml(phrase)}"</div>
-            <div class="actions">
-                <button class="btn-listen" onclick="speakText('${escapeHtml(phrase).replace(/'/g, "\\'")}')">🎧 Listen</button>
-                <button class="btn-record" onclick="recordPhrase('${escapeHtml(phrase).replace(/'/g, "\\'")}', ${idx})">🎤 Record</button>
-            </div>
-            <div class="pron-feedback" id="pron-feedback-${idx}">Click record, speak clearly</div>
-        `;
-        container.appendChild(card);
-    });
-}
-
-async function recordPhrase(targetPhrase, idx) {
-    const SpeechRecog = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecog) {
-        alert('Recording not supported in this browser.');
-        return;
-    }
-
-    const feedback = document.getElementById(`pron-feedback-${idx}`);
-    feedback.innerHTML = '🎤 Listening... Please speak clearly.';
-
-    const rec = new SpeechRecog();
-    rec.lang = 'en-US';
-    rec.continuous = false;
-    rec.interimResults = false;
-
-    rec.onresult = (e) => {
-        const user = e.results[0][0].transcript;
-        const target = targetPhrase.toLowerCase().replace(/[^\w\s]/g, '');
-        const userClean = user.toLowerCase().replace(/[^\w\s]/g, '');
-
-        let correct = 0;
-        const targetWords = target.split(/\s+/);
-        const userWords = userClean.split(/\s+/);
-
-        targetWords.forEach((w, i) => { if (userWords[i] === w) correct++; });
-        let acc = Math.round((correct / targetWords.length) * 100);
-        let stars = acc >= 90 ? '⭐⭐⭐' : (acc >= 70 ? '⭐⭐' : '⭐');
-        let comment = acc >= 90 ? 'Excellent!' : (acc >= 70 ? 'Good job!' : 'Try again.');
-
-        feedback.innerHTML = `📝 You said: "${escapeHtml(user)}"<br>📊 Accuracy: ${stars} (${acc}%)<br>💡 ${comment}<br>🎯 Target: "${escapeHtml(targetPhrase)}"`;
-    };
-
-    rec.onerror = () => {
-        feedback.innerHTML = '❌ Microphone error. Please try again.';
-    };
-
-    rec.start();
-}
-
-// ========== NAVIGATION ==========
-document.querySelectorAll('.nav button').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById('section-' + this.dataset.section).classList.add('active');
-    });
-});
-
-// ========== INITIALISATION ==========
-msgInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadCourses();
-    chatBox.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Hello! Voice mode is ON. Just speak to start! 🚀</div>`;
-
-    // Démarrer le mode vocal automatiquement
-    voiceMode = true;
-    setTimeout(() => startListening(), 500);
-});
-
-window.addEventListener('beforeunload', () => {
-    if (currentRecognition) {
-        try { currentRecognition.stop(); } catch(e) {}
-    }
-    window.speechSynthesis.cancel();
-});
-</script>
+        window.addEventListener('beforeunload', () => {
+            if (currentRecognition) {
+                try { currentRecognition.stop(); } catch(e) {}
+            }
+            window.speechSynthesis.cancel();
+        });
+    </script>
 </body>
 </html>
