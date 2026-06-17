@@ -153,6 +153,7 @@ let isListening = false;
 let currentUtterance = null;
 let coursesData = [];
 let micPermissionGranted = false;
+let isProcessingVoice = false; // Empêche les doublons de messages vocaux
 
 const statusEl = document.getElementById('status');
 const micBtn = document.getElementById('micBtn');
@@ -335,6 +336,7 @@ function startListening() {
 
     currentRecognition.onstart = () => {
         isListening = true;
+        isProcessingVoice = false;
         setStatus('🎤 Listening... Speak now');
         if (micBtn) {
             micBtn.classList.add('recording');
@@ -348,18 +350,26 @@ function startListening() {
             const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
                 finalTranscript = transcript;
-                if (finalTranscript && finalTranscript.trim()) {
+                if (finalTranscript && finalTranscript.trim() && !isProcessingVoice) {
+                    isProcessingVoice = true;
                     const message = finalTranscript.trim();
                     finalTranscript = '';
-                    if (msgInput) msgInput.value = message;
-                    sendMessage(message);
+                    // Afficher dans l'input pour feedback visuel mais pas automatiquement envoyé
+                    if (msgInput) {
+                        msgInput.value = message;
+                    }
+                    // Envoyer le message
+                    sendMessage(message).finally(() => {
+                        isProcessingVoice = false;
+                    });
                 }
             } else {
                 interimTranscript += transcript;
             }
         }
 
-        if (msgInput) {
+        // Afficher le texte provisoire dans l'input
+        if (msgInput && !isProcessingVoice) {
             if (finalTranscript) {
                 msgInput.value = finalTranscript;
             } else if (interimTranscript) {
@@ -428,6 +438,7 @@ function stopListening() {
         currentRecognition = null;
     }
     isListening = false;
+    isProcessingVoice = false;
     if (micBtn) {
         micBtn.classList.remove('recording');
     }
@@ -511,16 +522,26 @@ function addMessage(text, isUser = false, autoSpeak = true) {
 }
 
 async function sendMessage(voiceText = null) {
-    const message = voiceText !== null ? voiceText : msgInput.value.trim();
+    // Récupérer le message
+    let message;
+    if (voiceText !== null) {
+        message = voiceText;
+    } else {
+        message = msgInput.value.trim();
+    }
+
     if (!message) return;
 
+    // Désactiver l'écoute pendant l'envoi
     const wasListening = isListening;
     if (wasListening) {
         stopListening();
     }
 
+    // Ajouter le message utilisateur dans le chat
     addMessage(message, true, false);
 
+    // Vider l'input (sauf si c'est une commande vocale, déjà fait)
     if (voiceText === null) {
         msgInput.value = '';
     }
@@ -541,6 +562,7 @@ async function sendMessage(voiceText = null) {
         const data = await response.json();
 
         if (data.reply) {
+            // Ajouter la réponse de l'IA dans le chat (SANS la mettre dans l'input)
             addMessage(data.reply, false, true);
         } else {
             addMessage('Sorry, I could not process your request.', false, true);
@@ -552,6 +574,7 @@ async function sendMessage(voiceText = null) {
         setStatus('Connection error', true);
     }
 
+    // Réactiver l'écoute si nécessaire
     if (voiceMode && wasListening && !isSpeaking) {
         setTimeout(() => startListening(), 500);
     }
@@ -793,7 +816,10 @@ document.querySelectorAll('.nav button').forEach(btn => {
 // ========== INITIALISATION ==========
 if (msgInput) {
     msgInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMessage();
+        }
     });
 }
 
