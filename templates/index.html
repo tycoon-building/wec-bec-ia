@@ -176,7 +176,7 @@ const VoiceState = {
 };
 
 // ============================================================
-// 📦 VARIABLES GLOBALES - ARCHITECTURE CLEAN VOICE
+// 📦 VARIABLES GLOBALES
 // ============================================================
 let voiceMode = false;
 let currentRecognition = null;
@@ -186,22 +186,20 @@ let currentUtterance = null;
 let coursesData = [];
 let micPermissionGranted = false;
 
-// 🔒 VERROUX ANTI-ECHO
+// 🔒 VERROUX
 let isProcessing = false;
 let currentState = VoiceState.IDLE;
 let silenceTimer = null;
 
-// 🚫 FILTRE ANTI-ECHO - NE JAMAIS REINJECTER LA VOIX IA
+// 🚫 FILTRE ANTI-ECHO
 let lastSentMessage = '';
 let lastAIMessage = '';
 
-// ⏱️ CONSTANTES
-const SILENCE_DELAY = 1200;
-
 // 📨 SOURCE DES MESSAGES
 const MessageSource = {
+    USER: 'user',
     VOICE: 'voice',
-    TEXT: 'text'
+    AI: 'ai'
 };
 
 const statusEl = document.getElementById('status');
@@ -211,7 +209,7 @@ const chatBox = document.getElementById('chat-box');
 const voiceIndicator = document.getElementById('voiceIndicator');
 
 // ============================================================
-// 🎯 UTILITIES - CLEAN VOICE
+// 🎯 UTILITIES
 // ============================================================
 function cleanText(text) {
     if (!text) return '';
@@ -221,34 +219,15 @@ function cleanText(text) {
         .replace(/^\W+|\W+$/g, '');
 }
 
-function getWordCount(text) {
-    return text.split(/\s+/).filter(w => w.length > 0).length;
-}
-
 // ✅ 3. FILTRE CRITIQUE (anti-IA echo réel)
 function isAIReplay(text) {
     const cleaned = cleanText(text).toLowerCase();
     if (!cleaned) return true;
 
-    // ❌ Si texte ressemble à une réponse IA récente
+    // ❌ Si texte est exactement la dernière réponse IA
     if (cleaned === lastAIMessage.toLowerCase()) {
         console.log('🚫 ÉCHO IA DÉTECTÉ (réponse exacte):', cleaned);
         return true;
-    }
-
-    // ❌ Si très court fragment (genre "don't you")
-    if (cleaned.split(' ').length <= 2) {
-        console.log('🚫 FRAGMENT TROP COURT DÉTECTÉ:', cleaned);
-        return true;
-    }
-
-    // ❌ Si le texte commence par des mots typiques de l'IA
-    const aiPatterns = ['i think', 'i believe', 'in my opinion', 'actually', 'well', 'so', 'and', 'but'];
-    for (const pattern of aiPatterns) {
-        if (cleaned.startsWith(pattern) && cleaned.split(' ').length <= 4) {
-            console.log('🚫 DÉBUT DE PHRASE IA DÉTECTÉ:', cleaned);
-            return true;
-        }
     }
 
     return false;
@@ -259,15 +238,9 @@ function isEcho(text) {
     const cleaned = cleanText(text).toLowerCase();
     if (!cleaned) return true;
 
-    // 1. Ignorer si c'est exactement le dernier message envoyé
+    // Ignorer si c'est exactement le dernier message envoyé
     if (cleaned === lastSentMessage.toLowerCase()) {
         console.log('🚫 ÉCHO DÉTECTÉ (dernier message):', cleaned);
-        return true;
-    }
-
-    // 2. Ignorer si c'est la dernière réponse de l'IA
-    if (cleaned === lastAIMessage.toLowerCase()) {
-        console.log('🚫 ÉCHO DÉTECTÉ (réponse IA):', cleaned);
         return true;
     }
 
@@ -308,7 +281,7 @@ function setStatus(message, isError = false) {
 }
 
 // ============================================================
-// 🔇 SPEECH SYNTHESIS - AVEC MICRO BLOQUÉ PENDANT LA PAROLE
+// 🔇 SPEECH SYNTHESIS
 // ============================================================
 function stopSpeaking() {
     if (window.speechSynthesis) {
@@ -333,7 +306,7 @@ function speak(text) {
             return;
         }
 
-        // 🚫 NE PAS REINJECTER LA VOIX IA DANS LE MICRO
+        // Stocker la réponse IA pour le filtre anti-echo
         lastAIMessage = cleanText(text);
 
         if (text.length > 500) {
@@ -384,7 +357,7 @@ function speak(text) {
                 setVoiceState(VoiceState.IDLE);
                 resolve();
 
-                // ✅ Réactiver le micro après avoir parlé
+                // Réactiver le micro après avoir parlé
                 if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
                     setTimeout(() => {
                         if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
@@ -453,7 +426,7 @@ async function checkMicrophonePermission() {
 }
 
 // ============================================================
-// 👂 SPEECH RECOGNITION - AVEC FILTRES ANTI-ECHO
+// 👂 SPEECH RECOGNITION
 // ============================================================
 function startListening() {
     if (isListening) return;
@@ -556,7 +529,7 @@ function startListening() {
                 }
             });
         } else if (cleanedFinal && (isEcho(cleanedFinal) || isAIReplay(cleanedFinal))) {
-            // 🚫 ÉCHO OU IA REJOUÉ - On l'ignore complètement
+            // 🚫 ÉCHO OU IA REJOUÉ - On l'ignore
             console.log('🔇 IGNORÉ (écho/IA):', cleanedFinal);
             if (msgInput) msgInput.value = '';
         } else if (cleanedInterim && !isPaused && voiceMode) {
@@ -568,7 +541,6 @@ function startListening() {
             silenceTimer = setTimeout(() => {
                 if (cleanedInterim && !isProcessing && !isPaused && voiceMode) {
                     const message = cleanText(cleanedInterim);
-                    // ✅ Vérifier que ce n'est pas un écho ou une replay IA
                     if (message && !isEcho(message) && !isAIReplay(message)) {
                         isPaused = true;
                         if (msgInput) msgInput.value = message;
@@ -581,7 +553,7 @@ function startListening() {
                     }
                 }
                 silenceTimer = null;
-            }, SILENCE_DELAY);
+            }, 1200);
         }
     };
 
@@ -679,7 +651,7 @@ async function sendVoiceMessage(text) {
         return;
     }
 
-    // 🚫 FILTRE ANTI-ECHO - Vérifier avant d'envoyer
+    // 🚫 FILTRE ANTI-ECHO
     if (isEcho(cleaned) || isAIReplay(cleaned)) {
         console.log('🚫 ÉCHO/IA BLOQUÉ - message ignoré:', cleaned);
         if (msgInput) msgInput.value = '';
@@ -722,7 +694,7 @@ async function sendVoiceMessage(text) {
         const data = await response.json();
 
         if (data.reply) {
-            // Stocker la réponse IA pour le filtre anti-echo
+            // Stocker la réponse IA
             lastAIMessage = cleanText(data.reply);
             addMessage(data.reply, false, true);
         } else {
@@ -882,7 +854,7 @@ async function sendMessage(voiceText = null) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 message: cleaned,
-                source: MessageSource.TEXT
+                source: MessageSource.USER
             })
         });
 
@@ -984,7 +956,7 @@ async function resetChat() {
 }
 
 // ============================================================
-// 📚 LESSONS & PRONUNCIATION
+// 📚 LESSONS & PRONUNCIATION (INCHANGÉ - COMME AVANT)
 // ============================================================
 async function loadCourses() {
     try {
