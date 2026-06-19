@@ -74,7 +74,6 @@
         .menu-bar button:hover { background: rgba(0,128,0,0.5); }
         .lesson-card { background: rgba(30,41,59,0.8); border-radius: 20px; padding: 14px; margin-bottom: 10px; border: 1px solid rgba(255,215,0,0.2); }
         .lesson-card h3 { color: white; font-size: 16px; margin-bottom: 6px; }
-        .lesson-card .meta { color: #ffd700; font-size: 11px; margin-bottom: 6px; }
         .lesson-card .content { color: #cbd5e1; font-size: 12px; line-height: 1.5; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
         .audio-bar { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
         .audio-bar button { background: #008000; color: white; padding: 5px 14px; border-radius: 40px; border: none; cursor: pointer; font-size: 11px; }
@@ -82,8 +81,7 @@
         .audio-bar button.secondary { background: rgba(255, 0, 0, 0.5); }
         .audio-bar button.secondary:hover { background: rgba(255, 0, 0, 0.7); }
         .pron-card { background: rgba(30,41,59,0.8); border-radius: 20px; padding: 14px; margin-bottom: 10px; border: 1px solid rgba(255,215,0,0.2); }
-        .pron-card h3 { font-size: 13px; color: #ffd700; margin-bottom: 6px; }
-        .pron-card .phrase { font-size: 16px; font-weight: 700; color: white; margin: 6px 0; }
+        .pron-card .phrase { font-size: 16px; font-weight: 700; color: #ffd700; margin: 6px 0; }
         .pron-card .actions { display: flex; gap: 8px; flex-wrap: wrap; }
         .pron-card .actions button { padding: 6px 16px; border-radius: 40px; border: none; font-weight: 600; cursor: pointer; font-size: 12px; }
         .btn-listen { background: #0f172a; color: #ffd700; border: 1px solid rgba(255,215,0,0.3); }
@@ -91,7 +89,6 @@
         .btn-record { background: #ef4444; color: white; }
         .btn-record:hover { background: #ff5555; }
         .pron-feedback { margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 12px; border-left: 3px solid #ffd700; font-size: 11px; color: #cbd5e1; line-height: 1.6; }
-        .pron-feedback i { margin-right: 4px; }
         .section-title { color: #ffd700; font-size: 18px; margin-bottom: 16px; }
         .loading { text-align: center; padding: 30px; color: #ffd700; font-size: 13px; }
         @media (max-width: 480px) { .main { padding: 12px; } .msg { max-width: 90%; } .chat-input-area button { padding: 12px 12px; } }
@@ -141,7 +138,7 @@
         </div>
 
         <div id="section-pronunciation" class="section">
-            <h2 class="section-title">🎯 Pronunciation Practice</h2>
+            <h2 class="section-title">🎯 Pronunciation - Self Introduction</h2>
             <div id="pron-container"><div class="loading">Loading...</div></div>
         </div>
     </div>
@@ -155,6 +152,9 @@ let isSpeaking = false;
 let isListening = false;
 let currentUtterance = null;
 let coursesData = [];
+let isProcessing = false;
+let lastSentMessage = '';
+let lastAIMessage = '';
 
 const statusEl = document.getElementById('status');
 const micBtn = document.getElementById('micBtn');
@@ -194,9 +194,16 @@ function speakText(text) {
             return;
         }
 
+        // 🔥 CRUCIAL: Arrêter le micro pendant que l'IA parle
+        if (isListening) {
+            stopListening();
+        }
+
         stopSpeaking();
 
-        // Nettoyer le texte mais garder la prononciation
+        // Stocker la réponse IA pour le filtre anti-echo
+        lastAIMessage = text.trim();
+
         let cleanText = text
             .replace(/[^\w\s\.,!?;:()\-'`]/g, ' ')
             .replace(/\s+/g, ' ')
@@ -228,8 +235,8 @@ function speakText(text) {
             resolve();
 
             // Mode vocal automatique : se remet à écouter après la réponse
-            if (voiceMode && !isListening) {
-                setTimeout(() => startListening(), 500);
+            if (voiceMode && !isListening && !isProcessing) {
+                setTimeout(() => startListening(), 800);
             }
         };
 
@@ -257,6 +264,11 @@ function startListening() {
         return;
     }
 
+    if (isProcessing) {
+        setStatus('Processing...');
+        return;
+    }
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         setStatus('Speech recognition not supported');
@@ -271,6 +283,7 @@ function startListening() {
     currentRecognition.maxAlternatives = 1;
 
     let finalTranscript = '';
+    let isSending = false;
 
     currentRecognition.onstart = () => {
         isListening = true;
@@ -289,18 +302,25 @@ function startListening() {
             }
         }
 
+        // Afficher dans l'input pour feedback visuel
         if (msgInput) {
             if (finalTranscript) {
                 msgInput.value = finalTranscript;
-                // Envoi automatique après une pause
-                if (finalTranscript) {
-                    setTimeout(() => {
-                        if (msgInput.value === finalTranscript && !isSpeaking) {
-                            const message = msgInput.value;
-                            msgInput.value = '';
-                            sendMessage(message);
-                        }
-                    }, 1000);
+                // Envoi automatique après une pause (si pas déjà envoyé)
+                if (finalTranscript && !isSending && !isProcessing && !isSpeaking) {
+                    const message = finalTranscript.trim();
+                    // Vérifier que ce n'est pas un echo de l'IA
+                    if (message && message.toLowerCase() !== lastAIMessage.toLowerCase()) {
+                        isSending = true;
+                        msgInput.value = '';
+                        sendMessage(message).finally(() => {
+                            isSending = false;
+                        });
+                    } else if (message && message.toLowerCase() === lastAIMessage.toLowerCase()) {
+                        // Ignorer l'echo de l'IA
+                        msgInput.value = '';
+                        console.log('🚫 Écho IA ignoré:', message);
+                    }
                 }
             } else if (interimTranscript) {
                 msgInput.value = interimTranscript;
@@ -310,7 +330,11 @@ function startListening() {
 
     currentRecognition.onerror = (event) => {
         console.error('Recognition error:', event.error);
-        if (voiceMode) {
+        if (event.error === 'not-allowed') {
+            setStatus('Microphone access denied');
+            voiceMode = false;
+            if (micBtn) micBtn.classList.remove('listening');
+        } else if (voiceMode) {
             setTimeout(() => startListening(), 2000);
         } else {
             stopListening();
@@ -318,7 +342,7 @@ function startListening() {
     };
 
     currentRecognition.onend = () => {
-        if (voiceMode && !isSpeaking) {
+        if (voiceMode && !isSpeaking && !isProcessing) {
             setTimeout(() => startListening(), 500);
         } else if (!voiceMode) {
             stopListening();
@@ -344,6 +368,7 @@ function stopAllAudio() {
     stopSpeaking();
     stopListening();
     voiceMode = false;
+    isProcessing = false;
     if (micBtn) micBtn.classList.remove('listening');
     setStatus('Stopped');
 }
@@ -402,16 +427,46 @@ function addMessage(text, isUser = false, autoSpeak = true) {
 }
 
 async function sendMessage(voiceText = null) {
+    // Bloquer les doubles envois
+    if (isProcessing) {
+        console.log('⛔ Already processing');
+        return;
+    }
+
     const message = voiceText !== null ? voiceText : msgInput.value.trim();
     if (!message) return;
 
+    // 🚫 Ignorer si c'est un echo de l'IA
+    if (message.toLowerCase() === lastAIMessage.toLowerCase()) {
+        console.log('🚫 Écho IA ignoré:', message);
+        if (msgInput) msgInput.value = '';
+        return;
+    }
+
+    // 🚫 Ignorer les répétitions immédiates
+    if (message === lastSentMessage) {
+        console.log('🚫 Répétition bloquée:', message);
+        if (msgInput) msgInput.value = '';
+        return;
+    }
+
+    lastSentMessage = message;
+
+    // Ajouter le message utilisateur
     addMessage(message, true, false);
 
     if (voiceText === null) {
         msgInput.value = '';
     }
 
+    isProcessing = true;
     setStatus('Thinking...');
+
+    // Arrêter le micro pendant le traitement
+    const wasListening = isListening;
+    if (wasListening) {
+        stopListening();
+    }
 
     try {
         const response = await fetch('/chat', {
@@ -432,6 +487,12 @@ async function sendMessage(voiceText = null) {
         console.error('Chat error:', error);
         addMessage('Connection error. Please try again.', false, true);
         setStatus('Connection error');
+    } finally {
+        isProcessing = false;
+        // Réactiver le micro si nécessaire
+        if (voiceMode && wasListening && !isSpeaking) {
+            setTimeout(() => startListening(), 500);
+        }
     }
 }
 
@@ -447,8 +508,6 @@ async function loadCourses() {
         console.error('Error loading courses:', error);
         const container = document.getElementById('lessons-container');
         if (container) container.innerHTML = '<div class="lesson-card"><p>❌ Error loading lessons.</p></div>';
-        const pronContainer = document.getElementById('pron-container');
-        if (pronContainer) pronContainer.innerHTML = '<div class="pron-card"><p>❌ Error loading exercises.</p></div>';
     }
 }
 
@@ -469,19 +528,30 @@ function renderLessons() {
         const contentPreview = contentFull.substring(0, 200);
         card.innerHTML = `
             <h3>${escapeHtml(lesson.title)}</h3>
-            <div class="meta">Lesson ${idx+1}</div>
             <div class="content">${escapeHtml(contentPreview)}${contentFull.length > 200 ? '...' : ''}</div>
             <div class="audio-bar">
-                <button onclick="event.stopPropagation(); speakText('${escapeHtml(contentFull).replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
-                    <i class="fas fa-headphones"></i> Listen to Full Lesson
+                <button onclick="speakText('${escapeHtml(contentFull).replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
+                    <i class="fas fa-headphones"></i> Listen Full Lesson
                 </button>
-                <button class="secondary" onclick="event.stopPropagation(); speakText('${escapeHtml(contentFull.substring(0, 500)).replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
-                    <i class="fas fa-redo-alt"></i> Repeat (first part)
+                <button class="secondary" onclick="repeatRandomPhrase(${idx})">
+                    <i class="fas fa-redo-alt"></i> Repeat Random Phrase
                 </button>
             </div>
         `;
         container.appendChild(card);
     });
+}
+
+function repeatRandomPhrase(idx) {
+    const lesson = coursesData[idx];
+    if (!lesson || !lesson.content) return;
+    const sentences = lesson.content.split(/[.!?]+/).filter(s => s.trim().length > 10);
+    if (sentences.length) {
+        const randomPhrase = sentences[Math.floor(Math.random() * sentences.length)].trim() + '.';
+        speakText(randomPhrase);
+    } else {
+        speakText(lesson.content.substring(0, 200));
+    }
 }
 
 // ========== PRONUNCIATION ==========
@@ -490,44 +560,27 @@ function renderPronunciation() {
     if (!container) return;
     container.innerHTML = '';
 
-    if (!coursesData || coursesData.length === 0) {
-        container.innerHTML = '<div class="pron-card"><p>🎙️ No lessons loaded yet.</p></div>';
-        return;
-    }
+    const lesson7Phrases = [
+        "Hi everybody!", "Let me introduce myself", "My Surname is Mbongo and my Firstname is Tycoon",
+        "I live at number 20, Mapémé Street Nkombo quarter, Djiri area", "I study at Marien Ngouabi University",
+        "I attend Marien Ngouabi University", "I am in the first level", "I am a fresher", "I am a Christian",
+        "I pray at Catholic Church", "We are 7 in our family", "I am 20 years old", "I am Congolese",
+        "I was born in 2002 in Oyo", "I learn English at WEC-BEC", "I am one of the students of O.I",
+        "I am a newcomer", "I am still a beginner", "I have been learning English for one week",
+        "I learn English because it is one of the most spoken languages in the world", "That's all!"
+    ];
 
-    const phrasesToPractice = [];
-
-    for (let i = 0; i < coursesData.length && phrasesToPractice.length < 30; i++) {
-        const lesson = coursesData[i];
-        let content = lesson.content || '';
-        let sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10 && s.trim().length < 100);
-
-        for (let j = 0; j < sentences.length && phrasesToPractice.length < 30; j++) {
-            phrasesToPractice.push({
-                phrase: sentences[j].trim() + '.',
-                title: lesson.title
-            });
-        }
-    }
-
-    if (phrasesToPractice.length === 0 && coursesData.length > 0) {
-        phrasesToPractice.push({
-            phrase: "Hello, how are you today?",
-            title: "Basic Greetings"
-        });
-    }
-
-    phrasesToPractice.forEach((item, idx) => {
+    lesson7Phrases.forEach((phrase, idx) => {
         const card = document.createElement('div');
         card.className = 'pron-card';
+        const safePhrase = escapeHtml(phrase);
         card.innerHTML = `
-            <h3>📖 From: ${escapeHtml(item.title)}</h3>
-            <div class="phrase">"${escapeHtml(item.phrase)}"</div>
+            <div class="phrase">"${safePhrase}"</div>
             <div class="actions">
-                <button class="btn-listen" onclick="speakText('${escapeHtml(item.phrase).replace(/'/g, "\\'")}')">
+                <button class="btn-listen" onclick="speakText('${safePhrase.replace(/'/g, "\\'")}')">
                     <i class="fas fa-play"></i> Listen
                 </button>
-                <button class="btn-record" onclick="recordPhrase('${escapeHtml(item.phrase).replace(/'/g, "\\'")}', ${idx})">
+                <button class="btn-record" onclick="recordPhrase('${safePhrase.replace(/'/g, "\\'")}', ${idx})">
                     <i class="fas fa-microphone"></i> Record
                 </button>
             </div>
@@ -590,6 +643,7 @@ async function recordPhrase(targetPhrase, idx) {
 
 // ========== COMMANDS ==========
 async function showMenu() {
+    if (isProcessing) return;
     try {
         const response = await fetch('/chat', {
             method: 'POST',
@@ -604,6 +658,7 @@ async function showMenu() {
 }
 
 async function getHint() {
+    if (isProcessing) return;
     try {
         const response = await fetch('/chat', {
             method: 'POST',
@@ -618,6 +673,7 @@ async function getHint() {
 }
 
 async function resetChat() {
+    if (isProcessing) return;
     try {
         const response = await fetch('/chat', {
             method: 'POST',
@@ -626,6 +682,8 @@ async function resetChat() {
         });
         const data = await response.json();
         chatBox.innerHTML = '';
+        lastSentMessage = '';
+        lastAIMessage = '';
         addMessage(data.reply, false, true);
     } catch (err) {
         console.error(err);
