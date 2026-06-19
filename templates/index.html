@@ -156,19 +156,35 @@ let isProcessing = false;
 let lastSentMessage = '';
 let lastAIMessage = '';
 let isMicReady = true;
+let restartTimeout = null;
 
 const statusEl = document.getElementById('status');
 const micBtn = document.getElementById('micBtn');
 const msgInput = document.getElementById('msg');
 const chatBox = document.getElementById('chat-box');
 
-// ========== LOGS DE DEBUG ==========
+// ========== UTILITIES ==========
+function normalizeText(text) {
+    if (!text) return '';
+    return text
+        .toLowerCase()
+        .replace(/[^\w\s]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 function debugLog(message, data = null) {
     const timestamp = new Date().toLocaleTimeString();
     if (data) {
         console.log(`[${timestamp}] ${message}`, data);
     } else {
         console.log(`[${timestamp}] ${message}`);
+    }
+}
+
+function setStatus(message, isError = false) {
+    if (statusEl) {
+        statusEl.innerHTML = `<i class="fas fa-circle"></i> ${message}`;
     }
 }
 
@@ -181,12 +197,6 @@ function getBestVoice() {
     if (!voice) voice = voices.find(v => v.lang === 'en-US');
     if (!voice) voice = voices.find(v => v.lang.startsWith('en'));
     return voice;
-}
-
-function setStatus(message, isError = false) {
-    if (statusEl) {
-        statusEl.innerHTML = `<i class="fas fa-circle"></i> ${message}`;
-    }
 }
 
 function stopSpeaking() {
@@ -212,6 +222,12 @@ function speakText(text) {
         if (isListening) {
             debugLog('🎤 STOPPING LISTENING (before speak)');
             stopListening();
+        }
+
+        // Annuler tout redémarrage en attente
+        if (restartTimeout) {
+            clearTimeout(restartTimeout);
+            restartTimeout = null;
         }
 
         stopSpeaking();
@@ -253,13 +269,15 @@ function speakText(text) {
             debugLog('🔇 AI FINISHED SPEAKING');
             resolve();
 
-            // Mode vocal automatique : se remet à écouter après la réponse
+            // ✅ UN SEUL REDÉMARRAGE ICI (pas dans onend du micro)
             if (voiceMode && !isListening && !isProcessing) {
-                debugLog('🎤 RESTART LISTENING (after speak)');
-                setTimeout(() => {
-                    if (voiceMode && !isSpeaking && !isProcessing) {
+                debugLog('🎤 SCHEDULED RESTART LISTENING (after speak)');
+                restartTimeout = setTimeout(() => {
+                    if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
+                        debugLog('🎤 RESTART LISTENING (after speak)');
                         startListening();
                     }
+                    restartTimeout = null;
                 }, 1500);
             }
         };
@@ -278,7 +296,7 @@ function speakText(text) {
     });
 }
 
-// ========== SPEECH RECOGNITION (VOICE INPUT) - MODE AUTO ==========
+// ========== SPEECH RECOGNITION - MODE CONTINUOUS = false ==========
 function startListening() {
     debugLog('🎤 startListening() CALLED');
 
@@ -305,6 +323,12 @@ function startListening() {
         return;
     }
 
+    // Annuler tout redémarrage en attente
+    if (restartTimeout) {
+        clearTimeout(restartTimeout);
+        restartTimeout = null;
+    }
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
         setStatus('Speech recognition not supported');
@@ -322,7 +346,8 @@ function startListening() {
 
     currentRecognition = new SpeechRecognition();
     currentRecognition.lang = 'en-US';
-    currentRecognition.continuous = true;
+    // ✅ CHANGEMENT CRUCIAL: continuous = false
+    currentRecognition.continuous = false;
     currentRecognition.interimResults = true;
     currentRecognition.maxAlternatives = 1;
 
@@ -358,21 +383,29 @@ function startListening() {
         if (msgInput) {
             if (finalTranscript) {
                 msgInput.value = finalTranscript;
-                // Envoi automatique après une pause (si pas déjà envoyé)
+                // Envoi automatique après une pause
                 if (finalTranscript && !isSending && !isProcessing && !isSpeaking) {
                     const message = finalTranscript.trim();
-                    // Vérifier que ce n'est pas un echo de l'IA
-                    if (message && message.toLowerCase() !== lastAIMessage.toLowerCase()) {
-                        debugLog('📤 VOICE DETECTED:', message);
+
+                    // ✅ FILTRE ANTI-ECHO AMÉLIORÉ
+                    const cleanMessage = normalizeText(message);
+                    const cleanAI = normalizeText(lastAIMessage);
+
+                    const isEcho =
+                        cleanMessage === cleanAI ||
+                        (cleanAI && cleanAI.includes(cleanMessage)) ||
+                        (cleanMessage && cleanMessage.includes(cleanAI));
+
+                    if (message && !isEcho) {
+                        debugLog('📤 VOICE DETECTED (valid):', message);
                         isSending = true;
                         msgInput.value = '';
                         sendMessage(message).finally(() => {
                             isSending = false;
                         });
-                    } else if (message && message.toLowerCase() === lastAIMessage.toLowerCase()) {
-                        // Ignorer l'echo de l'IA
+                    } else {
                         msgInput.value = '';
-                        debugLog('🚫 Écho IA ignoré:', message);
+                        debugLog('🚫 AI echo blocked:', message);
                     }
                 }
             } else if (interimTranscript) {
@@ -389,9 +422,12 @@ function startListening() {
             if (micBtn) micBtn.classList.remove('listening');
         } else if (voiceMode && !isSpeaking) {
             debugLog('🔄 Restarting listening after error');
-            setTimeout(() => startListening(), 2000);
-        } else {
-            stopListening();
+            restartTimeout = setTimeout(() => {
+                if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
+                    startListening();
+                }
+                restartTimeout = null;
+            }, 2000);
         }
     };
 
@@ -400,15 +436,16 @@ function startListening() {
         if (micBtn) micBtn.classList.remove('listening');
         debugLog('🎤 MIC ENDED');
 
+        // ✅ NE PAS RELANCER ICI - le redémarrage est géré par speakText
+        // Seulement si le mode vocal est activé mais qu'on n'attend pas de réponse
         if (voiceMode && !isSpeaking && !isProcessing && isMicReady) {
-            debugLog('🔄 Restarting listening (auto)');
-            setTimeout(() => {
+            debugLog('🔄 Auto-restart listening (onend fallback)');
+            restartTimeout = setTimeout(() => {
                 if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
                     startListening();
                 }
+                restartTimeout = null;
             }, 500);
-        } else if (!voiceMode) {
-            stopListening();
         }
     };
 
@@ -417,6 +454,13 @@ function startListening() {
 
 function stopListening() {
     debugLog('🎤 stopListening() CALLED');
+
+    // Annuler tout redémarrage en attente
+    if (restartTimeout) {
+        clearTimeout(restartTimeout);
+        restartTimeout = null;
+    }
+
     if (currentRecognition) {
         try {
             currentRecognition.stop();
@@ -435,6 +479,10 @@ function stopAllAudio() {
     voiceMode = false;
     isProcessing = false;
     isMicReady = true;
+    if (restartTimeout) {
+        clearTimeout(restartTimeout);
+        restartTimeout = null;
+    }
     if (micBtn) micBtn.classList.remove('listening');
     setStatus('Stopped');
 }
@@ -506,15 +554,23 @@ async function sendMessage(voiceText = null) {
     const message = voiceText !== null ? voiceText : msgInput.value.trim();
     if (!message) return;
 
-    // 🚫 Ignorer si c'est un echo de l'IA
-    if (message.toLowerCase() === lastAIMessage.toLowerCase()) {
-        debugLog('🚫 Écho IA ignoré:', message);
+    // ✅ FILTRE ANTI-ECHO AMÉLIORÉ
+    const cleanMessage = normalizeText(message);
+    const cleanAI = normalizeText(lastAIMessage);
+
+    const isEcho =
+        cleanMessage === cleanAI ||
+        (cleanAI && cleanAI.includes(cleanMessage)) ||
+        (cleanMessage && cleanMessage.includes(cleanAI));
+
+    if (isEcho) {
+        debugLog('🚫 AI echo blocked (sendMessage):', message);
         if (msgInput) msgInput.value = '';
         return;
     }
 
     // 🚫 Ignorer les répétitions immédiates
-    if (message === lastSentMessage) {
+    if (cleanMessage === normalizeText(lastSentMessage)) {
         debugLog('🚫 Répétition bloquée:', message);
         if (msgInput) msgInput.value = '';
         return;
@@ -563,13 +619,7 @@ async function sendMessage(voiceText = null) {
     } finally {
         isProcessing = false;
         debugLog('✅ Processing finished');
-        // Réactiver le micro si nécessaire
-        if (voiceMode && wasListening && !isSpeaking && isMicReady) {
-            setTimeout(() => {
-                debugLog('🎤 RESTART LISTENING (after processing)');
-                startListening();
-            }, 500);
-        }
+        // Réactiver le micro si nécessaire (géré par speakText après la réponse)
     }
 }
 
