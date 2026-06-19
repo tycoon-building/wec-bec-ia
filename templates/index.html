@@ -155,11 +155,22 @@ let coursesData = [];
 let isProcessing = false;
 let lastSentMessage = '';
 let lastAIMessage = '';
+let isMicReady = true;
 
 const statusEl = document.getElementById('status');
 const micBtn = document.getElementById('micBtn');
 const msgInput = document.getElementById('msg');
 const chatBox = document.getElementById('chat-box');
+
+// ========== LOGS DE DEBUG ==========
+function debugLog(message, data = null) {
+    const timestamp = new Date().toLocaleTimeString();
+    if (data) {
+        console.log(`[${timestamp}] ${message}`, data);
+    } else {
+        console.log(`[${timestamp}] ${message}`);
+    }
+}
 
 // ========== SPEECH SYNTHESIS (TEXT TO SPEECH) ==========
 function getBestVoice() {
@@ -185,6 +196,7 @@ function stopSpeaking() {
     isSpeaking = false;
     currentUtterance = null;
     setStatus('Ready');
+    debugLog('🔇 SPEAKING STOPPED');
 }
 
 function speakText(text) {
@@ -194,8 +206,11 @@ function speakText(text) {
             return;
         }
 
+        debugLog('🔊 AI START SPEAKING');
+
         // 🔥 CRUCIAL: Arrêter le micro pendant que l'IA parle
         if (isListening) {
+            debugLog('🎤 STOPPING LISTENING (before speak)');
             stopListening();
         }
 
@@ -225,26 +240,37 @@ function speakText(text) {
 
         currentUtterance.onstart = () => {
             isSpeaking = true;
+            isMicReady = false;
             setStatus('Speaking...');
+            debugLog('🔊 AI SPEAKING STARTED');
         };
 
         currentUtterance.onend = () => {
             isSpeaking = false;
+            isMicReady = true;
             currentUtterance = null;
             setStatus('Ready');
+            debugLog('🔇 AI FINISHED SPEAKING');
             resolve();
 
             // Mode vocal automatique : se remet à écouter après la réponse
             if (voiceMode && !isListening && !isProcessing) {
-                setTimeout(() => startListening(), 800);
+                debugLog('🎤 RESTART LISTENING (after speak)');
+                setTimeout(() => {
+                    if (voiceMode && !isSpeaking && !isProcessing) {
+                        startListening();
+                    }
+                }, 1500);
             }
         };
 
         currentUtterance.onerror = (event) => {
             console.error('Speech error:', event);
             isSpeaking = false;
+            isMicReady = true;
             currentUtterance = null;
             setStatus('Speech error');
+            debugLog('❌ SPEECH ERROR');
             reject(event);
         };
 
@@ -254,18 +280,28 @@ function speakText(text) {
 
 // ========== SPEECH RECOGNITION (VOICE INPUT) - MODE AUTO ==========
 function startListening() {
-    if (isSpeaking) {
-        setStatus('Waiting for speech to finish...');
-        setTimeout(() => startListening(), 1000);
-        return;
-    }
+    debugLog('🎤 startListening() CALLED');
 
-    if (isListening) {
+    // 🔥 Vérifier si l'IA parle
+    if (isSpeaking) {
+        debugLog('⛔ SKIP: AI is speaking');
+        setStatus('Waiting for AI to finish...');
         return;
     }
 
     if (isProcessing) {
+        debugLog('⛔ SKIP: Processing in progress');
         setStatus('Processing...');
+        return;
+    }
+
+    if (isListening) {
+        debugLog('⛔ SKIP: Already listening');
+        return;
+    }
+
+    if (!isMicReady) {
+        debugLog('⛔ SKIP: Micro not ready');
         return;
     }
 
@@ -274,6 +310,14 @@ function startListening() {
         setStatus('Speech recognition not supported');
         alert('Please use Chrome, Edge, or Safari for voice features.');
         return;
+    }
+
+    // Arrêter toute reconnaissance existante
+    if (currentRecognition) {
+        try {
+            currentRecognition.stop();
+        } catch(e) {}
+        currentRecognition = null;
     }
 
     currentRecognition = new SpeechRecognition();
@@ -287,11 +331,19 @@ function startListening() {
 
     currentRecognition.onstart = () => {
         isListening = true;
+        isMicReady = true;
         setStatus('🎤 Listening... Speak now');
         if (micBtn) micBtn.classList.add('listening');
+        debugLog('🎤 MIC STARTED (listening)');
     };
 
     currentRecognition.onresult = (event) => {
+        // 🔥 Ne pas traiter si l'IA parle
+        if (isSpeaking) {
+            debugLog('⛔ IGNORE: AI is speaking');
+            return;
+        }
+
         let interimTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
             const transcript = event.results[i][0].transcript;
@@ -311,6 +363,7 @@ function startListening() {
                     const message = finalTranscript.trim();
                     // Vérifier que ce n'est pas un echo de l'IA
                     if (message && message.toLowerCase() !== lastAIMessage.toLowerCase()) {
+                        debugLog('📤 VOICE DETECTED:', message);
                         isSending = true;
                         msgInput.value = '';
                         sendMessage(message).finally(() => {
@@ -319,7 +372,7 @@ function startListening() {
                     } else if (message && message.toLowerCase() === lastAIMessage.toLowerCase()) {
                         // Ignorer l'echo de l'IA
                         msgInput.value = '';
-                        console.log('🚫 Écho IA ignoré:', message);
+                        debugLog('🚫 Écho IA ignoré:', message);
                     }
                 }
             } else if (interimTranscript) {
@@ -329,12 +382,13 @@ function startListening() {
     };
 
     currentRecognition.onerror = (event) => {
-        console.error('Recognition error:', event.error);
+        debugLog('❌ RECOGNITION ERROR:', event.error);
         if (event.error === 'not-allowed') {
             setStatus('Microphone access denied');
             voiceMode = false;
             if (micBtn) micBtn.classList.remove('listening');
-        } else if (voiceMode) {
+        } else if (voiceMode && !isSpeaking) {
+            debugLog('🔄 Restarting listening after error');
             setTimeout(() => startListening(), 2000);
         } else {
             stopListening();
@@ -342,8 +396,17 @@ function startListening() {
     };
 
     currentRecognition.onend = () => {
-        if (voiceMode && !isSpeaking && !isProcessing) {
-            setTimeout(() => startListening(), 500);
+        isListening = false;
+        if (micBtn) micBtn.classList.remove('listening');
+        debugLog('🎤 MIC ENDED');
+
+        if (voiceMode && !isSpeaking && !isProcessing && isMicReady) {
+            debugLog('🔄 Restarting listening (auto)');
+            setTimeout(() => {
+                if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
+                    startListening();
+                }
+            }, 500);
         } else if (!voiceMode) {
             stopListening();
         }
@@ -353,6 +416,7 @@ function startListening() {
 }
 
 function stopListening() {
+    debugLog('🎤 stopListening() CALLED');
     if (currentRecognition) {
         try {
             currentRecognition.stop();
@@ -365,23 +429,29 @@ function stopListening() {
 }
 
 function stopAllAudio() {
+    debugLog('⏹ STOP ALL AUDIO');
     stopSpeaking();
     stopListening();
     voiceMode = false;
     isProcessing = false;
+    isMicReady = true;
     if (micBtn) micBtn.classList.remove('listening');
     setStatus('Stopped');
 }
 
 function toggleVoiceMode() {
+    debugLog('🔄 TOGGLE VOICE MODE');
     if (isListening || voiceMode) {
         voiceMode = false;
         stopListening();
         setStatus('Voice mode off');
         if (micBtn) micBtn.classList.remove('listening');
+        debugLog('📴 Voice mode OFF');
     } else {
         voiceMode = true;
+        isMicReady = true;
         setStatus('Voice mode ON - Auto listening');
+        debugLog('📴 Voice mode ON');
         startListening();
     }
 }
@@ -429,7 +499,7 @@ function addMessage(text, isUser = false, autoSpeak = true) {
 async function sendMessage(voiceText = null) {
     // Bloquer les doubles envois
     if (isProcessing) {
-        console.log('⛔ Already processing');
+        debugLog('⛔ Already processing, skipping');
         return;
     }
 
@@ -438,14 +508,14 @@ async function sendMessage(voiceText = null) {
 
     // 🚫 Ignorer si c'est un echo de l'IA
     if (message.toLowerCase() === lastAIMessage.toLowerCase()) {
-        console.log('🚫 Écho IA ignoré:', message);
+        debugLog('🚫 Écho IA ignoré:', message);
         if (msgInput) msgInput.value = '';
         return;
     }
 
     // 🚫 Ignorer les répétitions immédiates
     if (message === lastSentMessage) {
-        console.log('🚫 Répétition bloquée:', message);
+        debugLog('🚫 Répétition bloquée:', message);
         if (msgInput) msgInput.value = '';
         return;
     }
@@ -461,10 +531,12 @@ async function sendMessage(voiceText = null) {
 
     isProcessing = true;
     setStatus('Thinking...');
+    debugLog('💭 Processing message:', message);
 
     // Arrêter le micro pendant le traitement
     const wasListening = isListening;
     if (wasListening) {
+        debugLog('🎤 STOPPING LISTENING (during processing)');
         stopListening();
     }
 
@@ -478,6 +550,7 @@ async function sendMessage(voiceText = null) {
         const data = await response.json();
 
         if (data.reply) {
+            debugLog('📥 AI Reply received');
             addMessage(data.reply, false, true);
         } else {
             addMessage('Sorry, I could not process your request.', false, true);
@@ -489,9 +562,13 @@ async function sendMessage(voiceText = null) {
         setStatus('Connection error');
     } finally {
         isProcessing = false;
+        debugLog('✅ Processing finished');
         // Réactiver le micro si nécessaire
-        if (voiceMode && wasListening && !isSpeaking) {
-            setTimeout(() => startListening(), 500);
+        if (voiceMode && wasListening && !isSpeaking && isMicReady) {
+            setTimeout(() => {
+                debugLog('🎤 RESTART LISTENING (after processing)');
+                startListening();
+            }, 500);
         }
     }
 }
@@ -702,6 +779,7 @@ document.querySelectorAll('.nav button').forEach(btn => {
 
 // ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', () => {
+    debugLog('🚀 APP STARTED');
     if (window.speechSynthesis) {
         window.speechSynthesis.getVoices();
     }
