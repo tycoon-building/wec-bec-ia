@@ -53,8 +53,9 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .msg.user { margin-left: auto; background: linear-gradient(135deg, #008000, #ffd700); color: #1a1a2e; }
         .msg.bot { background: rgba(30,41,59,0.9); border: 1px solid rgba(255,215,0,0.3); color: #f1f5f9; }
-        .msg-actions { margin-top: 6px; }
-        .listen-btn { background: rgba(255,215,0,0.2); border: none; padding: 3px 10px; border-radius: 16px; color: #ffd700; font-size: 10px; cursor: pointer; }
+        .msg-actions { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+        .listen-btn, .repeat-btn { background: rgba(255,215,0,0.2); border: none; padding: 3px 10px; border-radius: 16px; color: #ffd700; font-size: 10px; cursor: pointer; }
+        .listen-btn:hover, .repeat-btn:hover { background: rgba(255,215,0,0.4); }
         .chat-input-area { display: flex; gap: 8px; margin-top: 8px; }
         .chat-input-area input { flex: 1; padding: 12px 16px; border-radius: 40px; background: rgba(30,41,59,0.9); color: white; border: 1px solid rgba(255,215,0,0.3); outline: none; font-size: 14px; }
         .chat-input-area input::placeholder { color: #666; }
@@ -63,12 +64,7 @@
         .btn-send:hover { background: #00a000; }
         .btn-mic { background: #ef4444; color: white; }
         .btn-mic:hover { background: #ff5555; }
-        .btn-mic.recording { background: #10b981; animation: pulse 1s infinite; }
-        .btn-mic.mic-error { background: #ff4444; opacity: 0.6; }
-        .btn-mic.idle { background: #ef4444; }
         .btn-mic.listening { background: #10b981; animation: pulse 1s infinite; }
-        .btn-mic.processing { background: #f59e0b; animation: pulse 0.5s infinite; }
-        .btn-mic.speaking { background: #3b82f6; animation: pulse 0.8s infinite; }
         .btn-stop { background: #0f172a; color: white; border: 1px solid rgba(255,215,0,0.3); }
         .btn-stop:hover { background: #1a2a4a; }
         .status { font-size: 10px; color: #ffd700; padding: 8px 0; text-align: center; }
@@ -78,6 +74,7 @@
         .menu-bar button:hover { background: rgba(0,128,0,0.5); }
         .lesson-card { background: rgba(30,41,59,0.8); border-radius: 20px; padding: 14px; margin-bottom: 10px; border: 1px solid rgba(255,215,0,0.2); }
         .lesson-card h3 { color: white; font-size: 16px; margin-bottom: 6px; }
+        .lesson-card .meta { color: #ffd700; font-size: 11px; margin-bottom: 6px; }
         .lesson-card .content { color: #cbd5e1; font-size: 12px; line-height: 1.5; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
         .audio-bar { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
         .audio-bar button { background: #008000; color: white; padding: 5px 14px; border-radius: 40px; border: none; cursor: pointer; font-size: 11px; }
@@ -85,28 +82,18 @@
         .audio-bar button.secondary { background: rgba(255, 0, 0, 0.5); }
         .audio-bar button.secondary:hover { background: rgba(255, 0, 0, 0.7); }
         .pron-card { background: rgba(30,41,59,0.8); border-radius: 20px; padding: 14px; margin-bottom: 10px; border: 1px solid rgba(255,215,0,0.2); }
-        .pron-card .phrase { font-size: 16px; font-weight: 700; color: #ffd700; margin: 6px 0; }
+        .pron-card h3 { font-size: 13px; color: #ffd700; margin-bottom: 6px; }
+        .pron-card .phrase { font-size: 16px; font-weight: 700; color: white; margin: 6px 0; }
         .pron-card .actions { display: flex; gap: 8px; flex-wrap: wrap; }
         .pron-card .actions button { padding: 6px 16px; border-radius: 40px; border: none; font-weight: 600; cursor: pointer; font-size: 12px; }
         .btn-listen { background: #0f172a; color: #ffd700; border: 1px solid rgba(255,215,0,0.3); }
         .btn-listen:hover { background: #1a2a4a; }
         .btn-record { background: #ef4444; color: white; }
         .btn-record:hover { background: #ff5555; }
-        .pron-feedback { margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 12px; border-left: 3px solid #ffd700; font-size: 11px; color: #cbd5e1; }
+        .pron-feedback { margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 12px; border-left: 3px solid #ffd700; font-size: 11px; color: #cbd5e1; line-height: 1.6; }
+        .pron-feedback i { margin-right: 4px; }
         .section-title { color: #ffd700; font-size: 18px; margin-bottom: 16px; }
         .loading { text-align: center; padding: 30px; color: #ffd700; font-size: 13px; }
-        .voice-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-        .voice-indicator.idle { background: #666; }
-        .voice-indicator.listening { background: #10b981; animation: pulse 1s infinite; }
-        .voice-indicator.processing { background: #f59e0b; animation: pulse 0.5s infinite; }
-        .voice-indicator.speaking { background: #3b82f6; animation: pulse 0.8s infinite; }
-        .voice-indicator.error { background: #ef4444; }
         @media (max-width: 480px) { .main { padding: 12px; } .msg { max-width: 90%; } .chat-input-area button { padding: 12px 12px; } }
     </style>
 </head>
@@ -139,14 +126,11 @@
                 <button onclick="resetChat()"><i class="fas fa-redo"></i> Reset</button>
             </div>
             <div id="chat-box"></div>
-            <div class="status" id="status">
-                <span class="voice-indicator idle" id="voiceIndicator"></span>
-                Click 🎤 to start voice mode
-            </div>
+            <div class="status" id="status"><i class="fas fa-circle"></i> Ready</div>
             <div class="chat-input-area">
                 <input id="msg" placeholder="Type your message..." autocomplete="off" enterkeyhint="send">
                 <button class="btn-send" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
-                <button class="btn-mic idle" id="micBtn" onclick="toggleVoiceRecognition()"><i class="fas fa-microphone"></i></button>
+                <button class="btn-mic" id="micBtn" onclick="toggleVoiceMode()"><i class="fas fa-microphone"></i></button>
                 <button class="btn-stop" onclick="stopAllAudio()"><i class="fas fa-stop"></i></button>
             </div>
         </div>
@@ -157,229 +141,27 @@
         </div>
 
         <div id="section-pronunciation" class="section">
-            <h2 class="section-title">🎯 Pronunciation - Self Introduction</h2>
+            <h2 class="section-title">🎯 Pronunciation Practice</h2>
             <div id="pron-container"><div class="loading">Loading...</div></div>
         </div>
     </div>
 </div>
 
 <script>
-// ============================================================
-// 🧠 STATE MACHINE - VOICE MODE
-// ============================================================
-const VoiceState = {
-    IDLE: 'idle',
-    LISTENING: 'listening',
-    PROCESSING: 'processing',
-    SPEAKING: 'speaking',
-    ERROR: 'error'
-};
-
-// ============================================================
-// 📦 VARIABLES GLOBALES
-// ============================================================
+// ========== GLOBAL VARIABLES ==========
 let voiceMode = false;
 let currentRecognition = null;
 let isSpeaking = false;
 let isListening = false;
 let currentUtterance = null;
 let coursesData = [];
-let micPermissionGranted = false;
-
-// 🔒 VERROUX
-let isProcessing = false;
-let currentState = VoiceState.IDLE;
-let silenceTimer = null;
-
-// 🚫 FILTRE ANTI-ECHO
-let lastSentMessage = '';
-let lastAIMessage = '';
-
-// 📨 SOURCE DES MESSAGES
-const MessageSource = {
-    USER: 'user',
-    VOICE: 'voice',
-    AI: 'ai'
-};
 
 const statusEl = document.getElementById('status');
 const micBtn = document.getElementById('micBtn');
 const msgInput = document.getElementById('msg');
 const chatBox = document.getElementById('chat-box');
-const voiceIndicator = document.getElementById('voiceIndicator');
 
-// ============================================================
-// 🎯 UTILITIES
-// ============================================================
-function cleanText(text) {
-    if (!text) return '';
-    return text
-        .trim()
-        .replace(/\s+/g, ' ')
-        .replace(/^\W+|\W+$/g, '');
-}
-
-// ✅ 3. FILTRE CRITIQUE (anti-IA echo réel)
-function isAIReplay(text) {
-    const cleaned = cleanText(text).toLowerCase();
-    if (!cleaned) return true;
-
-    // ❌ Si texte est exactement la dernière réponse IA
-    if (cleaned === lastAIMessage.toLowerCase()) {
-        console.log('🚫 ÉCHO IA DÉTECTÉ (réponse exacte):', cleaned);
-        return true;
-    }
-
-    return false;
-}
-
-// 🚫 FILTRE ANTI-ECHO
-function isEcho(text) {
-    const cleaned = cleanText(text).toLowerCase();
-    if (!cleaned) return true;
-
-    // Ignorer si c'est exactement le dernier message envoyé
-    if (cleaned === lastSentMessage.toLowerCase()) {
-        console.log('🚫 ÉCHO DÉTECTÉ (dernier message):', cleaned);
-        return true;
-    }
-
-    return false;
-}
-
-// ============================================================
-// 🎨 UI STATE MANAGEMENT
-// ============================================================
-function setVoiceState(state, message) {
-    currentState = state;
-
-    if (voiceIndicator) {
-        voiceIndicator.className = `voice-indicator ${state}`;
-    }
-
-    if (micBtn) {
-        micBtn.className = `btn-mic ${state}`;
-    }
-
-    const stateMessages = {
-        [VoiceState.IDLE]: 'Ready',
-        [VoiceState.LISTENING]: '🎤 Listening... Speak now',
-        [VoiceState.PROCESSING]: '⏳ Processing...',
-        [VoiceState.SPEAKING]: '🔊 Speaking...',
-        [VoiceState.ERROR]: '❌ Error'
-    };
-
-    const statusText = message || stateMessages[state] || state;
-    if (statusEl) {
-        statusEl.innerHTML = statusText;
-    }
-}
-
-function setStatus(message, isError = false) {
-    const state = isError ? VoiceState.ERROR : currentState;
-    setVoiceState(state, message);
-}
-
-// ============================================================
-// 🔇 SPEECH SYNTHESIS
-// ============================================================
-function stopSpeaking() {
-    if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-    }
-    isSpeaking = false;
-    currentUtterance = null;
-    if (!isListening && !isProcessing) {
-        setVoiceState(VoiceState.IDLE);
-    }
-}
-
-function speak(text) {
-    return new Promise((resolve, reject) => {
-        if (!window.speechSynthesis) {
-            reject('Speech synthesis not supported');
-            return;
-        }
-
-        if (isProcessing) {
-            reject('Already processing');
-            return;
-        }
-
-        // Stocker la réponse IA pour le filtre anti-echo
-        lastAIMessage = cleanText(text);
-
-        if (text.length > 500) {
-            text = text.substring(0, 500) + '...';
-        }
-
-        // ✅ 5. BLOQUE LE MICRO PENDANT QUE L'IA PARLE
-        isSpeaking = true;
-        const wasListening = isListening;
-        if (wasListening) {
-            stopListening();
-        }
-        setVoiceState(VoiceState.SPEAKING);
-
-        let cleanTextMsg = cleanText(text);
-        if (!cleanTextMsg) {
-            isSpeaking = false;
-            reject('No text to speak');
-            return;
-        }
-
-        currentUtterance = new SpeechSynthesisUtterance(cleanTextMsg);
-        currentUtterance.lang = 'en-US';
-        currentUtterance.rate = 0.85;
-        currentUtterance.pitch = 1.0;
-        currentUtterance.volume = 1.0;
-
-        if (speechSynthesis.getVoices().length === 0) {
-            speechSynthesis.addEventListener('voiceschanged', () => {
-                const voice = getBestVoice();
-                if (voice) currentUtterance.voice = voice;
-                startSpeaking();
-            }, { once: true });
-        } else {
-            const voice = getBestVoice();
-            if (voice) currentUtterance.voice = voice;
-            startSpeaking();
-        }
-
-        function startSpeaking() {
-            currentUtterance.onstart = () => {
-                isSpeaking = true;
-            };
-
-            currentUtterance.onend = () => {
-                isSpeaking = false;
-                currentUtterance = null;
-                setVoiceState(VoiceState.IDLE);
-                resolve();
-
-                // Réactiver le micro après avoir parlé
-                if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
-                    setTimeout(() => {
-                        if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
-                            startListening();
-                        }
-                    }, 800);
-                }
-            };
-
-            currentUtterance.onerror = (event) => {
-                console.error('Speech error:', event);
-                isSpeaking = false;
-                currentUtterance = null;
-                setVoiceState(VoiceState.ERROR, 'Speech error');
-                reject(event);
-            };
-
-            window.speechSynthesis.speak(currentUtterance);
-        }
-    });
-}
-
+// ========== SPEECH SYNTHESIS (TEXT TO SPEECH) ==========
 function getBestVoice() {
     const voices = speechSynthesis.getVoices();
     let voice = voices.find(v => v.name.includes('Samantha'));
@@ -390,72 +172,96 @@ function getBestVoice() {
     return voice;
 }
 
-// ============================================================
-// 🎤 MICROPHONE PERMISSION
-// ============================================================
-async function checkMicrophonePermission() {
-    try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            console.log('MediaDevices API not supported');
-            return false;
-        }
-
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach(track => track.stop());
-        micPermissionGranted = true;
-        return true;
-    } catch (error) {
-        console.error('Microphone permission error:', error);
-        micPermissionGranted = false;
-
-        let msg = 'Microphone error';
-        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-            msg = '❌ Microphone permission denied. Please allow access.';
-        } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-            msg = '❌ No microphone found. Connect a microphone.';
-        } else {
-            msg = '❌ Microphone error. Please try again.';
-        }
-
-        setVoiceState(VoiceState.ERROR, msg);
-        if (micBtn) {
-            micBtn.classList.add('mic-error');
-        }
-        return false;
+function setStatus(message, isError = false) {
+    if (statusEl) {
+        statusEl.innerHTML = `<i class="fas fa-circle"></i> ${message}`;
     }
 }
 
-// ============================================================
-// 👂 SPEECH RECOGNITION
-// ============================================================
-function startListening() {
-    if (isListening) return;
-    if (isProcessing) {
-        setVoiceState(VoiceState.PROCESSING);
-        return;
+function stopSpeaking() {
+    if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
     }
+    isSpeaking = false;
+    currentUtterance = null;
+    setStatus('Ready');
+}
+
+function speakText(text) {
+    return new Promise((resolve, reject) => {
+        if (!window.speechSynthesis) {
+            reject('Speech synthesis not supported');
+            return;
+        }
+
+        stopSpeaking();
+
+        // Nettoyer le texte mais garder la prononciation
+        let cleanText = text
+            .replace(/[^\w\s\.,!?;:()\-'`]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        if (!cleanText) {
+            reject('No text to speak');
+            return;
+        }
+
+        currentUtterance = new SpeechSynthesisUtterance(cleanText);
+        currentUtterance.lang = 'en-US';
+        currentUtterance.rate = 0.85;
+        currentUtterance.pitch = 1.0;
+        currentUtterance.volume = 1.0;
+
+        const voice = getBestVoice();
+        if (voice) currentUtterance.voice = voice;
+
+        currentUtterance.onstart = () => {
+            isSpeaking = true;
+            setStatus('Speaking...');
+        };
+
+        currentUtterance.onend = () => {
+            isSpeaking = false;
+            currentUtterance = null;
+            setStatus('Ready');
+            resolve();
+
+            // Mode vocal automatique : se remet à écouter après la réponse
+            if (voiceMode && !isListening) {
+                setTimeout(() => startListening(), 500);
+            }
+        };
+
+        currentUtterance.onerror = (event) => {
+            console.error('Speech error:', event);
+            isSpeaking = false;
+            currentUtterance = null;
+            setStatus('Speech error');
+            reject(event);
+        };
+
+        window.speechSynthesis.speak(currentUtterance);
+    });
+}
+
+// ========== SPEECH RECOGNITION (VOICE INPUT) - MODE AUTO ==========
+function startListening() {
     if (isSpeaking) {
-        setVoiceState(VoiceState.SPEAKING);
+        setStatus('Waiting for speech to finish...');
+        setTimeout(() => startListening(), 1000);
         return;
     }
 
-    if (!micPermissionGranted) {
-        checkMicrophonePermission().then(granted => {
-            if (granted) startListening();
-        });
+    if (isListening) {
         return;
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        setVoiceState(VoiceState.ERROR, 'Speech recognition not supported');
-        if (micBtn) micBtn.style.opacity = '0.5';
+        setStatus('Speech recognition not supported');
+        alert('Please use Chrome, Edge, or Safari for voice features.');
         return;
-    }
-
-    if (currentRecognition) {
-        try { currentRecognition.stop(); } catch(e) {}
-        currentRecognition = null;
     }
 
     currentRecognition = new SpeechRecognition();
@@ -464,147 +270,58 @@ function startListening() {
     currentRecognition.interimResults = true;
     currentRecognition.maxAlternatives = 1;
 
-    let accumulatedText = '';
-    let isPaused = false;
+    let finalTranscript = '';
 
     currentRecognition.onstart = () => {
         isListening = true;
-        isPaused = false;
-        accumulatedText = '';
-        setVoiceState(VoiceState.LISTENING);
-        if (micBtn) {
-            micBtn.classList.add('recording');
-            micBtn.classList.remove('mic-error');
-        }
+        setStatus('🎤 Listening... Speak now');
+        if (micBtn) micBtn.classList.add('listening');
     };
 
     currentRecognition.onresult = (event) => {
-        let finalText = '';
-        let interimText = '';
-
+        let interimTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
             const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
-                finalText += transcript;
+                finalTranscript = transcript;
             } else {
-                interimText += transcript;
+                interimTranscript += transcript;
             }
         }
 
-        const cleanedFinal = cleanText(finalText);
-        const cleanedInterim = cleanText(interimText);
-
-        if (cleanedFinal) {
-            accumulatedText = cleanedFinal;
-        }
-
-        const displayText = cleanedFinal || cleanedInterim || '';
         if (msgInput) {
-            msgInput.value = displayText;
-            msgInput.scrollLeft = msgInput.scrollWidth;
-        }
-
-        // ✅ 4. FILTRE CRITIQUE dans SpeechRecognition
-        if (cleanedFinal &&
-            !isEcho(cleanedFinal) &&
-            !isAIReplay(cleanedFinal) &&
-            !isProcessing &&
-            !isPaused &&
-            voiceMode) {
-
-            if (silenceTimer) {
-                clearTimeout(silenceTimer);
-                silenceTimer = null;
-            }
-
-            isPaused = true;
-            const message = cleanedFinal;
-            accumulatedText = '';
-            if (msgInput) msgInput.value = message;
-
-            sendVoiceMessage(message).finally(() => {
-                isPaused = false;
-                if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
-                    setTimeout(() => startListening(), 300);
+            if (finalTranscript) {
+                msgInput.value = finalTranscript;
+                // Envoi automatique après une pause
+                if (finalTranscript) {
+                    setTimeout(() => {
+                        if (msgInput.value === finalTranscript && !isSpeaking) {
+                            const message = msgInput.value;
+                            msgInput.value = '';
+                            sendMessage(message);
+                        }
+                    }, 1000);
                 }
-            });
-        } else if (cleanedFinal && (isEcho(cleanedFinal) || isAIReplay(cleanedFinal))) {
-            // 🚫 ÉCHO OU IA REJOUÉ - On l'ignore
-            console.log('🔇 IGNORÉ (écho/IA):', cleanedFinal);
-            if (msgInput) msgInput.value = '';
-        } else if (cleanedInterim && !isPaused && voiceMode) {
-            if (silenceTimer) {
-                clearTimeout(silenceTimer);
-                silenceTimer = null;
+            } else if (interimTranscript) {
+                msgInput.value = interimTranscript;
             }
-
-            silenceTimer = setTimeout(() => {
-                if (cleanedInterim && !isProcessing && !isPaused && voiceMode) {
-                    const message = cleanText(cleanedInterim);
-                    if (message && !isEcho(message) && !isAIReplay(message)) {
-                        isPaused = true;
-                        if (msgInput) msgInput.value = message;
-                        sendVoiceMessage(message).finally(() => {
-                            isPaused = false;
-                            if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
-                                setTimeout(() => startListening(), 300);
-                            }
-                        });
-                    }
-                }
-                silenceTimer = null;
-            }, 1200);
         }
     };
 
     currentRecognition.onerror = (event) => {
         console.error('Recognition error:', event.error);
-        let msg = 'Microphone error';
-
-        if (event.error === 'no-speech') {
-            msg = 'No speech detected - speak louder';
-        } else if (event.error === 'audio-capture') {
-            msg = 'No microphone found';
-        } else if (event.error === 'not-allowed') {
-            msg = 'Microphone permission denied';
-            micPermissionGranted = false;
-        } else if (event.error === 'network') {
-            msg = 'Network error - check connection';
-        }
-
-        setVoiceState(VoiceState.ERROR, msg);
-        isListening = false;
-        if (micBtn) micBtn.classList.remove('recording');
-
-        if (voiceMode && !isSpeaking && !isProcessing) {
-            setTimeout(() => {
-                if (voiceMode && !isListening) {
-                    checkMicrophonePermission().then(granted => {
-                        if (granted) startListening();
-                    });
-                }
-            }, 3000);
+        if (voiceMode) {
+            setTimeout(() => startListening(), 2000);
+        } else {
+            stopListening();
         }
     };
 
     currentRecognition.onend = () => {
-        isListening = false;
-        if (micBtn) micBtn.classList.remove('recording');
-
-        if (silenceTimer) {
-            clearTimeout(silenceTimer);
-            silenceTimer = null;
-        }
-
-        if (voiceMode && !isSpeaking && !isProcessing) {
-            setTimeout(() => {
-                if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
-                    startListening();
-                }
-            }, 300);
-        }
-        if (!isSpeaking && !isProcessing) {
-            setVoiceState(VoiceState.IDLE);
+        if (voiceMode && !isSpeaking) {
+            setTimeout(() => startListening(), 500);
+        } else if (!voiceMode) {
+            stopListening();
         }
     };
 
@@ -613,183 +330,38 @@ function startListening() {
 
 function stopListening() {
     if (currentRecognition) {
-        try { currentRecognition.stop(); } catch(e) {}
+        try {
+            currentRecognition.stop();
+        } catch(e) {}
         currentRecognition = null;
     }
     isListening = false;
-    if (micBtn) micBtn.classList.remove('recording');
-
-    if (silenceTimer) {
-        clearTimeout(silenceTimer);
-        silenceTimer = null;
-    }
-
-    if (!isSpeaking && !isProcessing) {
-        setVoiceState(VoiceState.IDLE);
-    }
+    if (micBtn) micBtn.classList.remove('listening');
+    if (!isSpeaking) setStatus('Ready');
 }
 
-// ============================================================
-// ✅ 2. sendVoiceMessage MODIFIÉ
-// ============================================================
-async function sendVoiceMessage(text) {
-    // 🔒 Bloquer les doubles envois
-    if (isProcessing) {
-        console.log('⛔ Already processing, skipping:', text);
-        return;
-    }
-
-    const cleaned = cleanText(text);
-    if (!cleaned) {
-        console.log('⛔ Empty message, skipping');
-        return;
-    }
-
-    // 🚫 BLOQUE SI C'EST UNE RÉPÉTITION IMMEDIATE
-    if (cleaned === lastSentMessage) {
-        console.log('🚫 RÉPÉTITION IMMÉDIATE BLOQUÉE:', cleaned);
-        return;
-    }
-
-    // 🚫 FILTRE ANTI-ECHO
-    if (isEcho(cleaned) || isAIReplay(cleaned)) {
-        console.log('🚫 ÉCHO/IA BLOQUÉ - message ignoré:', cleaned);
-        if (msgInput) msgInput.value = '';
-        return;
-    }
-
-    lastSentMessage = cleaned;
-
-    // 🔒 Verrouiller le traitement
-    isProcessing = true;
-    setVoiceState(VoiceState.PROCESSING);
-
-    // Désactiver l'écoute pendant le traitement
-    const wasListening = isListening;
-    if (wasListening) {
-        stopListening();
-    }
-
-    try {
-        // Ajouter le message utilisateur dans le chat
-        addMessage(cleaned, true, false);
-
-        // Vider l'input
-        if (msgInput) msgInput.value = '';
-
-        // ✅ Envoyer avec source VOICE
-        const response = await fetch('/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: cleaned,
-                source: MessageSource.VOICE
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data.reply) {
-            // Stocker la réponse IA
-            lastAIMessage = cleanText(data.reply);
-            addMessage(data.reply, false, true);
-        } else {
-            addMessage('Sorry, I could not process your request.', false, true);
-            setVoiceState(VoiceState.ERROR, 'No reply from AI');
-        }
-    } catch (error) {
-        console.error('Chat error:', error);
-        addMessage('Connection error. Please try again.', false, true);
-        setVoiceState(VoiceState.ERROR, 'Connection error');
-    } finally {
-        // 🔓 Déverrouiller
-        isProcessing = false;
-
-        // Réactiver l'écoute si nécessaire
-        if (voiceMode && wasListening && !isSpeaking) {
-            setTimeout(() => {
-                if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
-                    startListening();
-                }
-            }, 500);
-        }
-
-        if (!isListening && !isSpeaking) {
-            setVoiceState(VoiceState.IDLE);
-        }
-    }
-}
-
-// ============================================================
-// 🔄 TOGGLE VOICE MODE
-// ============================================================
-async function toggleVoiceRecognition() {
-    voiceMode = !voiceMode;
-
-    if (voiceMode) {
-        const granted = await checkMicrophonePermission();
-        if (!granted) {
-            voiceMode = false;
-            setVoiceState(VoiceState.ERROR, '❌ Cannot start voice mode. Please allow microphone access.');
-            if (micBtn) {
-                micBtn.classList.remove('recording');
-                micBtn.classList.add('mic-error');
-            }
-            return;
-        }
-
-        // Réinitialiser les filtres anti-echo
-        lastSentMessage = '';
-        lastAIMessage = '';
-
-        setVoiceState(VoiceState.IDLE, '🎤 Voice mode ON - Start speaking...');
-        if (micBtn) {
-            micBtn.classList.remove('mic-error');
-        }
-        startListening();
-    } else {
-        stopListening();
-        setVoiceState(VoiceState.IDLE, '🎧 Voice mode OFF (type only)');
-        if (micBtn) {
-            micBtn.classList.remove('recording');
-            micBtn.classList.remove('mic-error');
-        }
-        isProcessing = false;
-    }
-}
-
-// ============================================================
-// ⏹️ STOP ALL
-// ============================================================
 function stopAllAudio() {
-    window.speechSynthesis.cancel();
-    if (currentRecognition && isListening) {
-        currentRecognition.stop();
-    }
-    if (voiceMode) {
+    stopSpeaking();
+    stopListening();
+    voiceMode = false;
+    if (micBtn) micBtn.classList.remove('listening');
+    setStatus('Stopped');
+}
+
+function toggleVoiceMode() {
+    if (isListening || voiceMode) {
         voiceMode = false;
         stopListening();
-    }
-    isProcessing = false;
-    isSpeaking = false;
-    if (silenceTimer) {
-        clearTimeout(silenceTimer);
-        silenceTimer = null;
-    }
-    setVoiceState(VoiceState.IDLE, '⏹ Stopped');
-    if (micBtn) {
-        micBtn.classList.remove('recording');
-        micBtn.classList.remove('mic-error');
+        setStatus('Voice mode off');
+        if (micBtn) micBtn.classList.remove('listening');
+    } else {
+        voiceMode = true;
+        setStatus('Voice mode ON - Auto listening');
+        startListening();
     }
 }
 
-// ============================================================
-// 💬 CHAT FUNCTIONS
-// ============================================================
+// ========== CHAT FUNCTIONS ==========
 function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>]/g, function(m) {
@@ -803,96 +375,221 @@ function escapeHtml(str) {
 function addMessage(text, isUser = false, autoSpeak = true) {
     const div = document.createElement('div');
     div.className = `msg ${isUser ? 'user' : 'bot'}`;
-    const safeText = escapeHtml(text);
+
+    const icon = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
 
     div.innerHTML = `
-        ${isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>'}
-        <span>${safeText}</span>
-        ${!isUser ? `<div class="msg-actions"><button class="listen-btn" onclick="speak('${safeText.replace(/'/g, "\\'")}')">🔊 Listen</button></div>` : ''}
+        ${icon} ${escapeHtml(text)}
+        ${!isUser ? `
+        <div class="msg-actions">
+            <button class="listen-btn" onclick="speakText('${escapeHtml(text).replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
+                <i class="fas fa-headphones"></i> Listen
+            </button>
+            <button class="repeat-btn" onclick="speakText('${escapeHtml(text).replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
+                <i class="fas fa-redo"></i> Repeat
+            </button>
+        </div>
+        ` : ''}
     `;
 
     chatBox.appendChild(div);
-    div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    chatBox.scrollTop = chatBox.scrollHeight;
 
     if (!isUser && autoSpeak) {
-        speak(text);
+        speakText(text);
     }
+    return div;
 }
 
 async function sendMessage(voiceText = null) {
     const message = voiceText !== null ? voiceText : msgInput.value.trim();
     if (!message) return;
 
-    const cleaned = cleanText(message);
-    if (!cleaned) return;
-
-    // 🚫 FILTRE ANTI-ECHO pour le texte tapé aussi
-    if (isEcho(cleaned) || isAIReplay(cleaned)) {
-        console.log('🚫 ÉCHO BLOQUÉ (texte):', cleaned);
-        if (msgInput) msgInput.value = '';
-        return;
-    }
-
-    const wasListening = isListening;
-    if (wasListening) {
-        stopListening();
-    }
-
-    lastSentMessage = cleaned;
-
-    addMessage(cleaned, true, false);
+    addMessage(message, true, false);
 
     if (voiceText === null) {
         msgInput.value = '';
     }
 
-    setVoiceState(VoiceState.PROCESSING);
+    setStatus('Thinking...');
 
     try {
         const response = await fetch('/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: cleaned,
-                source: MessageSource.USER
-            })
+            body: JSON.stringify({ message: message })
         });
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
 
         const data = await response.json();
 
         if (data.reply) {
-            lastAIMessage = cleanText(data.reply);
             addMessage(data.reply, false, true);
         } else {
             addMessage('Sorry, I could not process your request.', false, true);
-            setVoiceState(VoiceState.ERROR, 'No reply');
+            setStatus('Error');
         }
     } catch (error) {
         console.error('Chat error:', error);
         addMessage('Connection error. Please try again.', false, true);
-        setVoiceState(VoiceState.ERROR, 'Connection error');
-    }
-
-    if (voiceMode && wasListening && !isSpeaking && !isProcessing) {
-        setTimeout(() => startListening(), 500);
-    }
-
-    if (!isListening && !isSpeaking) {
-        setVoiceState(VoiceState.IDLE);
+        setStatus('Connection error');
     }
 }
 
-// ============================================================
-// 📋 COMMANDES
-// ============================================================
-async function showMenu() {
-    const wasListening = isListening;
-    if (wasListening) stopListening();
+// ========== LESSONS ==========
+async function loadCourses() {
+    try {
+        const response = await fetch('/courses');
+        const data = await response.json();
+        coursesData = data.conversations || [];
+        renderLessons();
+        renderPronunciation();
+    } catch (error) {
+        console.error('Error loading courses:', error);
+        const container = document.getElementById('lessons-container');
+        if (container) container.innerHTML = '<div class="lesson-card"><p>❌ Error loading lessons.</p></div>';
+        const pronContainer = document.getElementById('pron-container');
+        if (pronContainer) pronContainer.innerHTML = '<div class="pron-card"><p>❌ Error loading exercises.</p></div>';
+    }
+}
 
+function renderLessons() {
+    const container = document.getElementById('lessons-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!coursesData || coursesData.length === 0) {
+        container.innerHTML = '<div class="lesson-card"><p>📚 No lessons available.</p></div>';
+        return;
+    }
+
+    coursesData.forEach((lesson, idx) => {
+        const card = document.createElement('div');
+        card.className = 'lesson-card';
+        const contentFull = lesson.content || 'No content available.';
+        const contentPreview = contentFull.substring(0, 200);
+        card.innerHTML = `
+            <h3>${escapeHtml(lesson.title)}</h3>
+            <div class="meta">Lesson ${idx+1}</div>
+            <div class="content">${escapeHtml(contentPreview)}${contentFull.length > 200 ? '...' : ''}</div>
+            <div class="audio-bar">
+                <button onclick="event.stopPropagation(); speakText('${escapeHtml(contentFull).replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
+                    <i class="fas fa-headphones"></i> Listen to Full Lesson
+                </button>
+                <button class="secondary" onclick="event.stopPropagation(); speakText('${escapeHtml(contentFull.substring(0, 500)).replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
+                    <i class="fas fa-redo-alt"></i> Repeat (first part)
+                </button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// ========== PRONUNCIATION ==========
+function renderPronunciation() {
+    const container = document.getElementById('pron-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!coursesData || coursesData.length === 0) {
+        container.innerHTML = '<div class="pron-card"><p>🎙️ No lessons loaded yet.</p></div>';
+        return;
+    }
+
+    const phrasesToPractice = [];
+
+    for (let i = 0; i < coursesData.length && phrasesToPractice.length < 30; i++) {
+        const lesson = coursesData[i];
+        let content = lesson.content || '';
+        let sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10 && s.trim().length < 100);
+
+        for (let j = 0; j < sentences.length && phrasesToPractice.length < 30; j++) {
+            phrasesToPractice.push({
+                phrase: sentences[j].trim() + '.',
+                title: lesson.title
+            });
+        }
+    }
+
+    if (phrasesToPractice.length === 0 && coursesData.length > 0) {
+        phrasesToPractice.push({
+            phrase: "Hello, how are you today?",
+            title: "Basic Greetings"
+        });
+    }
+
+    phrasesToPractice.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'pron-card';
+        card.innerHTML = `
+            <h3>📖 From: ${escapeHtml(item.title)}</h3>
+            <div class="phrase">"${escapeHtml(item.phrase)}"</div>
+            <div class="actions">
+                <button class="btn-listen" onclick="speakText('${escapeHtml(item.phrase).replace(/'/g, "\\'")}')">
+                    <i class="fas fa-play"></i> Listen
+                </button>
+                <button class="btn-record" onclick="recordPhrase('${escapeHtml(item.phrase).replace(/'/g, "\\'")}', ${idx})">
+                    <i class="fas fa-microphone"></i> Record
+                </button>
+            </div>
+            <div class="pron-feedback" id="pron-feedback-${idx}">
+                <i class="fas fa-lightbulb"></i> Click record, speak clearly, get instant feedback.
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+async function recordPhrase(targetPhrase, idx) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert('Recording not supported in this browser.');
+        return;
+    }
+
+    const feedbackDiv = document.getElementById(`pron-feedback-${idx}`);
+    if (!feedbackDiv) return;
+
+    feedbackDiv.innerHTML = `<i class="fas fa-spinner fa-pulse"></i> Listening... Please speak clearly.`;
+
+    const rec = new SpeechRecognition();
+    rec.lang = 'en-US';
+    rec.continuous = false;
+    rec.interimResults = false;
+
+    rec.onresult = (e) => {
+        const userText = e.results[0][0].transcript;
+
+        const target = targetPhrase.toLowerCase().replace(/[^\w\s]/g, '');
+        const user = userText.toLowerCase().replace(/[^\w\s]/g, '');
+        const targetWords = target.split(/\s+/).filter(w => w.length > 1);
+        const userWords = user.split(/\s+/);
+
+        let correct = 0;
+        targetWords.forEach((w, i) => {
+            if (userWords[i] === w) correct++;
+        });
+
+        let accuracy = targetWords.length > 0 ? Math.round((correct / targetWords.length) * 100) : 0;
+        let stars = accuracy >= 90 ? '⭐⭐⭐' : (accuracy >= 70 ? '⭐⭐' : '⭐');
+        let comment = accuracy >= 90 ? 'Excellent pronunciation!' : (accuracy >= 70 ? 'Good job! Keep practicing.' : 'Try again. Listen to the example.');
+
+        feedbackDiv.innerHTML = `
+            <i class="fas fa-comment-dots"></i> <strong>You said:</strong> "${escapeHtml(userText)}"<br>
+            <i class="fas fa-chart-simple"></i> <strong>Accuracy:</strong> ${stars} (${accuracy}%)<br>
+            <i class="fas fa-smile-wink"></i> ${comment}<br>
+            <i class="fas fa-lightbulb"></i> <strong>Target:</strong> "${escapeHtml(targetPhrase)}"
+        `;
+    };
+
+    rec.onerror = (event) => {
+        feedbackDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Microphone error. Please try again.`;
+    };
+
+    rec.start();
+}
+
+// ========== COMMANDS ==========
+async function showMenu() {
     try {
         const response = await fetch('/chat', {
             method: 'POST',
@@ -904,16 +601,9 @@ async function showMenu() {
     } catch (err) {
         addMessage('Error loading menu.', false, true);
     }
-
-    if (voiceMode && wasListening && !isSpeaking && !isProcessing) {
-        setTimeout(() => startListening(), 500);
-    }
 }
 
 async function getHint() {
-    const wasListening = isListening;
-    if (wasListening) stopListening();
-
     try {
         const response = await fetch('/chat', {
             method: 'POST',
@@ -925,16 +615,9 @@ async function getHint() {
     } catch (err) {
         addMessage('Error getting hint.', false, true);
     }
-
-    if (voiceMode && wasListening && !isSpeaking && !isProcessing) {
-        setTimeout(() => startListening(), 500);
-    }
 }
 
 async function resetChat() {
-    const wasListening = isListening;
-    if (wasListening) stopListening();
-
     try {
         const response = await fetch('/chat', {
             method: 'POST',
@@ -943,181 +626,13 @@ async function resetChat() {
         });
         const data = await response.json();
         chatBox.innerHTML = '';
-        lastSentMessage = '';
-        lastAIMessage = '';
         addMessage(data.reply, false, true);
     } catch (err) {
         console.error(err);
     }
-
-    if (voiceMode && wasListening && !isSpeaking && !isProcessing) {
-        setTimeout(() => startListening(), 500);
-    }
 }
 
-// ============================================================
-// 📚 LESSONS & PRONUNCIATION (INCHANGÉ - COMME AVANT)
-// ============================================================
-async function loadCourses() {
-    try {
-        const res = await fetch('/courses');
-        const data = await res.json();
-        coursesData = data.conversations || [];
-        renderLessons();
-        renderPronunciation();
-    } catch (err) {
-        console.error(err);
-        const container = document.getElementById('lessons-container');
-        if (container) container.innerHTML = '<div class="lesson-card">Error loading lessons</div>';
-    }
-}
-
-function renderLessons() {
-    const container = document.getElementById('lessons-container');
-    if (!container) return;
-    container.innerHTML = '';
-    if (!coursesData.length) {
-        container.innerHTML = '<div class="lesson-card">No lessons available</div>';
-        return;
-    }
-
-    coursesData.forEach((lesson, idx) => {
-        const card = document.createElement('div');
-        card.className = 'lesson-card';
-        const safeTitle = escapeHtml(lesson.title);
-        const safeContent = escapeHtml(lesson.content || 'No content available').replace(/\n/g, '<br>');
-        card.innerHTML = `
-            <h3>${safeTitle}</h3>
-            <div class="content">${safeContent}</div>
-            <div class="audio-bar">
-                <button onclick="speak('${escapeHtml(lesson.content || '').replace(/'/g, "\\'").replace(/\n/g, ' ')}')">🎧 Listen Full Lesson</button>
-                <button class="secondary" onclick="repeatRandomPhrase(${idx})">🔄 Repeat Random Phrase</button>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
-
-function repeatRandomPhrase(idx) {
-    const lesson = coursesData[idx];
-    if (!lesson || !lesson.content) return;
-    const sentences = lesson.content.split(/[.!?]+/).filter(s => s.trim().length > 10);
-    if (sentences.length) {
-        const randomPhrase = sentences[Math.floor(Math.random() * sentences.length)].trim() + '.';
-        speak(randomPhrase);
-    } else {
-        speak(lesson.content.substring(0, 200));
-    }
-}
-
-function renderPronunciation() {
-    const container = document.getElementById('pron-container');
-    if (!container) return;
-    container.innerHTML = '';
-
-    const lesson7Phrases = [
-        "Hi everybody!", "Let me introduce myself", "My Surname is Mbongo and my Firstname is Tycoon",
-        "I live at number 20, Mapémé Street Nkombo quarter, Djiri area", "I study at Marien Ngouabi University",
-        "I attend Marien Ngouabi University", "I am in the first level", "I am a fresher", "I am a Christian",
-        "I pray at Catholic Church", "We are 7 in our family", "I am 20 years old", "I am Congolese",
-        "I was born in 2002 in Oyo", "I learn English at WEC-BEC", "I am one of the students of O.I",
-        "I am a newcomer", "I am still a beginner", "I have been learning English for one week",
-        "I learn English because it is one of the most spoken languages in the world", "That's all!"
-    ];
-
-    lesson7Phrases.forEach((phrase, idx) => {
-        const card = document.createElement('div');
-        card.className = 'pron-card';
-        const safePhrase = escapeHtml(phrase);
-        card.innerHTML = `
-            <div class="phrase">"${safePhrase}"</div>
-            <div class="actions">
-                <button class="btn-listen" onclick="speak('${safePhrase.replace(/'/g, "\\'")}')">🎧 Listen</button>
-                <button class="btn-record" onclick="recordPhrase('${safePhrase.replace(/'/g, "\\'")}', ${idx})">🎤 Record</button>
-            </div>
-            <div class="pron-feedback" id="pron-feedback-${idx}">Click record, speak clearly</div>
-        `;
-        container.appendChild(card);
-    });
-}
-
-async function recordPhrase(targetPhrase, idx) {
-    const SpeechRecog = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecog) {
-        alert('Recording not supported in this browser.');
-        return;
-    }
-
-    const granted = await checkMicrophonePermission();
-    if (!granted) {
-        const feedback = document.getElementById(`pron-feedback-${idx}`);
-        if (feedback) {
-            feedback.innerHTML = '❌ Microphone permission denied. Please allow access.';
-            feedback.style.color = '#ef4444';
-        }
-        return;
-    }
-
-    const feedback = document.getElementById(`pron-feedback-${idx}`);
-    if (!feedback) return;
-
-    feedback.innerHTML = '🎤 Listening... Please speak clearly.';
-    feedback.style.color = '#ffd700';
-
-    const rec = new SpeechRecog();
-    rec.lang = 'en-US';
-    rec.continuous = false;
-    rec.interimResults = false;
-
-    rec.onresult = (e) => {
-        const user = e.results[0][0].transcript;
-        const target = targetPhrase.toLowerCase().replace(/[^\w\s]/g, '');
-        const userClean = user.toLowerCase().replace(/[^\w\s]/g, '');
-
-        let correct = 0;
-        const targetWords = target.split(/\s+/);
-        const userWords = userClean.split(/\s+/);
-
-        targetWords.forEach((w, i) => {
-            if (userWords[i] && userWords[i] === w) correct++;
-        });
-
-        let acc = Math.round((correct / targetWords.length) * 100);
-        if (isNaN(acc)) acc = 0;
-
-        let stars = acc >= 90 ? '⭐⭐⭐' : (acc >= 70 ? '⭐⭐' : '⭐');
-        let comment = acc >= 90 ? 'Excellent!' : (acc >= 70 ? 'Good job!' : 'Try again.');
-        let color = acc >= 90 ? '#10b981' : (acc >= 70 ? '#ffd700' : '#ef4444');
-
-        feedback.innerHTML = `📝 You said: "${escapeHtml(user)}"<br>📊 Accuracy: ${stars} (${acc}%)<br>💡 ${comment}<br>🎯 Target: "${escapeHtml(targetPhrase)}"`;
-        feedback.style.color = color;
-    };
-
-    rec.onerror = (event) => {
-        console.error('Record error:', event.error);
-        let errorMsg = '❌ Recording error';
-        if (event.error === 'no-speech') errorMsg = '❌ No speech detected. Please speak clearly.';
-        else if (event.error === 'not-allowed') {
-            errorMsg = '❌ Microphone permission denied.';
-            micPermissionGranted = false;
-        }
-        feedback.innerHTML = errorMsg;
-        feedback.style.color = '#ef4444';
-    };
-
-    rec.onend = () => {
-        if (feedback.innerHTML === '🎤 Listening... Please speak clearly.') {
-            feedback.innerHTML = '❌ No speech detected. Please try again.';
-            feedback.style.color = '#ef4444';
-        }
-    };
-
-    rec.start();
-}
-
-// ============================================================
-// 🧭 NAVIGATION
-// ============================================================
+// ========== NAVIGATION ==========
 document.querySelectorAll('.nav button').forEach(btn => {
     btn.addEventListener('click', function() {
         document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
@@ -1127,31 +642,27 @@ document.querySelectorAll('.nav button').forEach(btn => {
     });
 });
 
-// ============================================================
-// 🚀 INITIALISATION
-// ============================================================
-if (msgInput) {
-    msgInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
-}
-
+// ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', () => {
-    loadCourses();
-    if (chatBox && chatBox.children.length === 0) {
-        chatBox.innerHTML = `<div class="msg bot"><i class="fas fa-robot"></i> Hello! 👋 Click the microphone button 🎤 to start voice mode.<br><small>Commands: 'menu', 'hint', 'reset'</small></div>`;
+    if (window.speechSynthesis) {
+        window.speechSynthesis.getVoices();
     }
-    setVoiceState(VoiceState.IDLE, 'Click 🎤 to start voice mode');
+
+    loadCourses();
+
+    if (chatBox && chatBox.children.length === 0) {
+        addMessage('Hello! I\'m your WEC-BEC English teacher. Ask me anything or choose a lesson. 🚀', false, true);
+    }
+
+    if (msgInput) {
+        msgInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    }
 });
 
 window.addEventListener('beforeunload', () => {
-    if (currentRecognition) {
-        try { currentRecognition.stop(); } catch(e) {}
-    }
-    window.speechSynthesis.cancel();
+    stopAllAudio();
 });
 </script>
 </body>
