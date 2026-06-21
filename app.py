@@ -101,6 +101,7 @@ STUDENT_LEVELS = {
     "mefia@wec-bec.com": "A2"
 }
 
+
 # =========================
 # 📖 CHARGEMENT DES DONNÉES
 # =========================
@@ -143,108 +144,261 @@ def test():
 class A1ConversationManager:
     def __init__(self):
         self.user_sessions = {}
-        self.all_questions = self.extract_questions()
+        self.all_questions = self.extract_all_questions()
 
-    def extract_questions(self):
-        questions = []
+    def extract_all_questions(self):
+        all_questions = []
         for conv in A1_CONVERSATIONS:
-            for ex in conv.get('exchanges', []):
-                questions.append({
-                    'question': ex.get('question', ''),
-                    'expected': [a.lower() for a in ex.get('expected_answers', [])],
-                    'topics': ex.get('accepted_topics', []),
-                    'good_reply': ex.get('good_reply', 'Good job!'),
-                    'wrong_reply': ex.get('wrong_reply', 'Try again.')
+            title = conv.get('title', 'Lesson')
+            for exchange in conv.get('exchanges', []):
+                all_questions.append({
+                    'question': exchange.get('question', ''),
+                    'validation_type': exchange.get('validation_type', 'free'),
+                    'expected_answers': [a.lower() for a in exchange.get('expected_answers', [])],
+                    'accepted_topics': [t.lower() for t in exchange.get('accepted_topics', [])],
+                    'allow_correction': exchange.get('allow_correction', True),
+                    'good_reply': exchange.get('good_reply', 'Good job! 👍'),
+                    'wrong_reply': exchange.get('wrong_reply', 'Try again.'),
+                    'example_answer': exchange.get('example_answer', ''),
+                    'title': title
                 })
-        return questions
+        return all_questions
 
     def create_session(self):
         return {
-            "current_q": None,
-            "current_expected": [],
-            "current_topics": [],
-            "correct": 0,
-            "total": 0,
-            "name": None
+            "current_question": None,
+            "current_expected_answers": [],
+            "current_accepted_topics": [],
+            "current_good_reply": None,
+            "current_wrong_reply": None,
+            "correct_count": 0,
+            "total_questions": 0,
+            "student_name": None,
+            "questions_asked": [],
+            "waiting_for_answer": False
         }
 
     def reset_user(self, email):
         self.user_sessions[email] = self.create_session()
         return True
 
-    def start(self, email):
-        if email not in self.user_sessions:
-            self.user_sessions[email] = self.create_session()
-        q_data = self.all_questions[0] if self.all_questions else None
-        if q_data:
-            self.user_sessions[email]["current_q"] = q_data['question']
-            self.user_sessions[email]["current_expected"] = q_data['expected']
-            self.user_sessions[email]["current_topics"] = q_data['topics']
-        return {"reply": "Hello! Nice to meet you. What's your name?"}
+    def get_next_question(self, exclude_question=None):
+        available = [q for q in self.all_questions if q['question'] != exclude_question]
+        return random.choice(available) if available else random.choice(self.all_questions)
 
-    def process(self, email, answer):
-        if email not in self.user_sessions:
-            return self.start(email)
-        session = self.user_sessions[email]
-        current_q = session.get("current_q")
-        expected = session.get("current_expected", [])
-        topics = session.get("current_topics", [])
+    def check_answer(self, user_answer, expected_answers, accepted_topics):
+        user_answer = user_answer.lower().strip()
 
-        if not session.get("name") and ("name" in str(current_q).lower() or "introduce" in str(current_q).lower()):
-            name = answer.lower().replace("my name is", "").replace("i am", "").strip()
-            if name and len(name) < 30 and not name.startswith(("what", "where", "how")):
-                session["name"] = name.capitalize()
+        if user_answer in ["yes", "no", "ok", "yeah", "yep", "nope", "sure"]:
+            return True, "short"
 
-        answer_lower = answer.lower().strip()
-        is_correct = False
-        if topics:
-            for t in topics:
-                if t.lower() in answer_lower:
-                    is_correct = True
-                    break
-        if not is_correct:
-            for e in expected:
-                if e.lower() in answer_lower:
-                    is_correct = True
-                    break
+        if accepted_topics and len(accepted_topics) > 0:
+            for topic in accepted_topics:
+                if topic.lower() in user_answer:
+                    return True, "topic_match"
 
-        session["total"] += 1
+        for expected in expected_answers:
+            expected_lower = expected.lower()
+            if user_answer == expected_lower:
+                return True, "exact"
+            if expected_lower in user_answer:
+                return True, "contains"
+            if user_answer in expected_lower and len(user_answer) > 2:
+                return True, "partial"
+            expected_words = expected_lower.split()
+            matches = sum(1 for w in expected_words if w in user_answer)
+            if len(expected_words) > 0 and matches >= len(expected_words) // 2:
+                return True, "partial_match"
 
-        if is_correct:
-            session["correct"] += 1
-            import random
-            new_q = random.choice(self.all_questions)
-            session["current_q"] = new_q['question']
-            session["current_expected"] = new_q['expected']
-            session["current_topics"] = new_q['topics']
-            if session.get("name") and "name" in str(current_q).lower():
-                reply = f"Nice to meet you, {session['name']}!"
-            else:
-                reply = "Great job!"
-            return {"reply": f"{reply}\n\n{new_q['question']}"}
-        else:
-            return {"reply": f"Not quite. Try again! {current_q}"}
-
-    def get_hint(self, email):
-        if email not in self.user_sessions:
-            return "Say 'hi' to start!"
-        expected = self.user_sessions[email].get("current_expected", [])
-        return f"Hint: {expected[0]}" if expected else "Answer naturally."
-
-    def get_progress(self, email):
-        if email not in self.user_sessions:
-            return None
-        s = self.user_sessions[email]
-        score = round(s["correct"] / max(1, s["total"]) * 100, 1)
-        return {"total": s["total"], "correct": s["correct"], "score": score}
+        return False, None
 
     def is_greeting(self, text):
         greetings = ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "bonjour"]
         text = text.lower().strip()
         return any(g in text for g in greetings)
 
+    def is_question_to_teacher(self, user_answer):
+        """Détecte si l'élève pose une question au professeur"""
+        question_words = ["what", "where", "when", "why", "how", "who", "which"]
+        return any(user_answer.lower().startswith(qw) for qw in question_words) or user_answer.strip().endswith("?")
+
+    def extract_name(self, answer):
+        answer_lower = answer.lower()
+        patterns = [
+            ("my name is", "my name is"),
+            ("i am", "i am"),
+            ("i'm", "i'm"),
+            ("my name's", "my name's"),
+            ("call me", "call me")
+        ]
+
+        for pattern, _ in patterns:
+            if pattern in answer_lower:
+                parts = answer_lower.split(pattern, 1)
+                if len(parts) > 1:
+                    name = parts[1].strip().split()[0] if parts[1].strip() else None
+                    if name and len(name) > 1 and len(name) < 30:
+                        if name not in ["fine", "good", "ok", "here", "student", "teacher"]:
+                            return name.capitalize()
+        return None
+
+    def start(self, email):
+        if email not in self.user_sessions:
+            self.user_sessions[email] = self.create_session()
+
+        session = self.user_sessions[email]
+
+        q_data = None
+        for q in self.all_questions:
+            if "your name" in q['question'].lower():
+                q_data = q
+                break
+        if not q_data:
+            q_data = self.all_questions[0] if self.all_questions else None
+
+        if q_data:
+            session["current_question"] = q_data['question']
+            session["current_expected_answers"] = q_data.get('expected_answers', [])
+            session["current_accepted_topics"] = q_data.get('accepted_topics', [])
+            session["current_good_reply"] = q_data.get('good_reply', 'Good job!')
+            session["current_wrong_reply"] = q_data.get('wrong_reply', 'Try again.')
+            session["waiting_for_answer"] = True
+
+        return {"reply": "Hello! Nice to meet you. What's your name?"}
+
+    def process(self, email, answer):
+        if email not in self.user_sessions:
+            return self.start(email)
+
+        session = self.user_sessions[email]
+        current_q = session.get("current_question")
+
+        # Si l'élève pose une question, on la transmet directement à l'IA via le chat
+        if self.is_question_to_teacher(answer):
+            # On retourne un indicateur pour que la route /chat utilise l'IA
+            return {"reply": None, "use_ai": True, "user_question": answer, "current_question": current_q}
+
+        # Extraire le nom
+        if not session.get("student_name") and (
+                "name" in str(current_q).lower() or "introduce" in str(current_q).lower()):
+            name = self.extract_name(answer)
+            if name:
+                session["student_name"] = name
+                session["correct_count"] += 1
+                session["total_questions"] += 1
+
+                new_q = self.get_next_question(current_q)
+                session["current_question"] = new_q['question']
+                session["current_expected_answers"] = new_q.get('expected_answers', [])
+                session["current_accepted_topics"] = new_q.get('accepted_topics', [])
+                session["current_good_reply"] = new_q.get('good_reply', 'Good job!')
+                session["current_wrong_reply"] = new_q.get('wrong_reply', 'Try again.')
+
+                return {"reply": f"Nice to meet you, {name}!\n\n{new_q['question']}"}
+
+        # Vérifier la réponse
+        expected = session.get("current_expected_answers", [])
+        topics = session.get("current_accepted_topics", [])
+
+        is_correct, match_type = self.check_answer(answer, expected, topics)
+
+        session["total_questions"] += 1
+
+        if is_correct:
+            session["correct_count"] += 1
+
+            new_q = self.get_next_question(current_q)
+            session["current_question"] = new_q['question']
+            session["current_expected_answers"] = new_q.get('expected_answers', [])
+            session["current_accepted_topics"] = new_q.get('accepted_topics', [])
+            session["current_good_reply"] = new_q.get('good_reply', 'Good job!')
+            session["current_wrong_reply"] = new_q.get('wrong_reply', 'Try again.')
+
+            good_reply = session.get("current_good_reply", "Great job!")
+            return {"reply": f"{good_reply}\n\n{new_q['question']}"}
+        else:
+            # Accepter les réponses pertinentes même si pas exactement attendues
+            if len(answer.strip()) > 3 and not any(
+                    q in answer.lower() for q in ["what", "where", "when", "why", "how"]):
+                new_q = self.get_next_question(current_q)
+                session["current_question"] = new_q['question']
+                session["current_expected_answers"] = new_q.get('expected_answers', [])
+                session["current_accepted_topics"] = new_q.get('accepted_topics', [])
+                session["current_good_reply"] = new_q.get('good_reply', 'Good job!')
+                session["current_wrong_reply"] = new_q.get('wrong_reply', 'Try again.')
+                return {"reply": f"Okay! Let's continue.\n\n{new_q['question']}"}
+
+            return {"reply": f"Not quite. Try again! {current_q}"}
+
+    def get_hint(self, email):
+        if email not in self.user_sessions:
+            return "Say 'hi' to start!"
+        session = self.user_sessions[email]
+        expected = session.get("current_expected_answers", [])
+        if expected:
+            return f"💡 Hint: Try saying: {expected[0]}"
+        return "💡 Hint: Answer naturally in English."
+
+    def get_progress(self, email):
+        if email not in self.user_sessions:
+            return None
+        s = self.user_sessions[email]
+        total = s["total_questions"]
+        correct = s["correct_count"]
+        score = round(correct / max(1, total) * 100, 1)
+        return {
+            "total_questions": total,
+            "correct_answers": correct,
+            "score": score
+        }
+
 
 a1_manager = A1ConversationManager()
+
+
+# =========================
+# 🤖 SYSTEM PROMPT AVEC LES 13 RÈGLES
+# =========================
+def get_system_prompt(level="B1"):
+    level_descriptions = {
+        "A1": "You are a patient A1 English teacher. Use very simple English. Keep sentences short (3-5 words).",
+        "A2": "You are an A2 English teacher. Use simple but complete sentences.",
+        "B1": "You are a B1 English teacher. Use natural, conversational English.",
+        "B2": "You are a B2 English teacher. Use fluent, natural English with some idioms.",
+        "C1": "You are a C1 English teacher. Use advanced, sophisticated English.",
+        "C2": "You are a C2 English teacher. Use expert-level, nuanced English."
+    }
+
+    level_instruction = level_descriptions.get(level, level_descriptions["B1"])
+
+    return f"""You are the WEC-BEC English Teacher AI.
+
+{level_instruction}
+
+GENERAL RULES (VERY IMPORTANT - FOLLOW THESE RULES AT ALL COSTS):
+1. Answer the user's question first before anything else.
+2. Never ignore what the user says. Always acknowledge their answer.
+3. Never repeat the same question. If the user has already answered, move on.
+4. Never answer a question with another question. If the user asks something, answer it.
+5. Ask at most one follow-up question per response.
+6. Do not force a follow-up question. If the conversation naturally ends, let it.
+7. Keep responses natural and concise. Do not be overly long or repetitive.
+8. Correct mistakes gently and positively. Encourage the student.
+9. Accept natural language variations. Users may have different ways of expressing themselves.
+10. Remember the current conversation context. Keep track of what has been discussed.
+11. If the student introduces themselves, acknowledge their name by using it.
+12. Do not restart a lesson unless the student requests it (e.g., says "reset" or "restart").
+13. Mention Mister Tycoon only when the student asks about WEC-BEC AI, its creator, or its development.
+
+KEY RULES TO REMEMBER:
+- When a user asks a question, ANSWER IT DIRECTLY first.
+- After answering, you MAY ask ONE follow-up question, but it is optional.
+- Never ask "What is your name?" if the user already introduced themselves.
+- Use the user's name when they have given it.
+- Keep the conversation flowing naturally like a real teacher.
+- Never display lesson titles, expected answers, or internal structure.
+"""
+
 
 # =========================
 # 🤖 AI ENDPOINT
@@ -255,20 +409,29 @@ MODEL = "meta-llama/llama-3-8b-instruct"
 
 def ask_ai(message, level="B1"):
     try:
-        prompt = f"You are WEC-BEC English teacher. Level {level}. Be friendly. Ask ONE question. Reply:"
+        system_prompt = get_system_prompt(level)
+
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
-            headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "HTTP-Referer": "https://wec-bec-ai.com",
+                "X-OpenRouter-Title": "WEC-BEC English AI"
+            },
             json={
                 "model": MODEL,
-                "messages": [{"role": "system", "content": prompt}, {"role": "user", "content": message}]
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": message}
+                ]
             },
-            timeout=15
+            timeout=30
         )
         if response.status_code == 200:
             return response.json()["choices"][0]["message"]["content"]
         return "AI service error."
-    except:
+    except Exception as e:
+        logging.error(f"AI error: {str(e)}")
         return "Connection error."
 
 
@@ -317,19 +480,32 @@ def chat():
         if msg.lower() == "menu":
             p = a1_manager.get_progress(email)
             if p:
-                return jsonify({"reply": f"Progress: {p['score']}% - {p['correct']}/{p['total']} correct"})
+                return jsonify(
+                    {"reply": f"Progress: {p['score']}% - {p['correct_answers']}/{p['total_questions']} correct"})
             return jsonify({"reply": "Say 'hi' to start!"})
         if msg.lower() == "hint":
             return jsonify({"reply": a1_manager.get_hint(email)})
         if msg.lower() == "reset":
             a1_manager.reset_user(email)
             return jsonify({"reply": "Restarted! Say 'hi' to begin."})
+
         if a1_manager.is_greeting(msg) or email not in a1_manager.user_sessions:
             res = a1_manager.start(email)
             return jsonify({"reply": res["reply"]})
-        res = a1_manager.process(email, msg)
-        return jsonify({"reply": res["reply"]})
 
+        result = a1_manager.process(email, msg)
+
+        # Si l'élève a posé une question, on utilise l'IA pour y répondre
+        if result.get("use_ai"):
+            ai_reply = ask_ai(result["user_question"], level)
+            # Ajouter la question en cours après la réponse de l'IA
+            if result.get("current_question"):
+                return jsonify({"reply": f"{ai_reply}\n\n{result['current_question']}"})
+            return jsonify({"reply": ai_reply})
+
+        return jsonify({"reply": result["reply"]})
+
+    # Pour A2, B1, B2, C1, C2
     reply = ask_ai(msg, level)
     return jsonify({"reply": reply})
 
@@ -341,4 +517,4 @@ def get_courses():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(debug=False, host="0.0.0.0", port=port)
+    app.run(debug=False, host="0.0.0.0", port=5000)
