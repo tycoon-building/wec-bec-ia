@@ -48,7 +48,21 @@
         .main { flex: 1; overflow-y: auto; padding: 16px; -webkit-overflow-scrolling: touch; }
         .section { display: none; }
         .section.active { display: block; }
-        #chat-box { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; max-height: 60vh; overflow-y: auto; }
+
+        /* ===== CHAT BOX ===== */
+        #chat-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 12px;
+            max-height: 55vh;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        #chat-box::-webkit-scrollbar { width: 4px; }
+        #chat-box::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        #chat-box::-webkit-scrollbar-thumb { background: #ffd700; border-radius: 10px; }
+
         .msg { padding: 10px 14px; border-radius: 18px; max-width: 85%; font-size: 14px; animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .msg.user { margin-left: auto; background: linear-gradient(135deg, #008000, #ffd700); color: #1a1a2e; }
@@ -56,10 +70,39 @@
         .msg-actions { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
         .listen-btn, .repeat-btn { background: rgba(255,215,0,0.2); border: none; padding: 3px 10px; border-radius: 16px; color: #ffd700; font-size: 10px; cursor: pointer; }
         .listen-btn:hover, .repeat-btn:hover { background: rgba(255,215,0,0.4); }
-        .chat-input-area { display: flex; gap: 8px; margin-top: 8px; }
-        .chat-input-area input { flex: 1; padding: 12px 16px; border-radius: 40px; background: rgba(30,41,59,0.9); color: white; border: 1px solid rgba(255,215,0,0.3); outline: none; font-size: 14px; }
+
+        /* ===== CHAT INPUT AREA ===== */
+        .chat-input-area {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        .chat-input-area input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 40px;
+            background: rgba(30,41,59,0.9);
+            color: white;
+            border: 1px solid rgba(255,215,0,0.3);
+            outline: none;
+            font-size: 14px;
+            min-width: 100px;
+        }
         .chat-input-area input::placeholder { color: #666; }
-        .chat-input-area button { padding: 12px 16px; border-radius: 40px; border: none; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.1s ease; }
+        .chat-input-area input:focus { border-color: #ffd700; }
+
+        .chat-input-area button {
+            padding: 12px 16px;
+            border-radius: 40px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.1s ease;
+            flex-shrink: 0;
+        }
         .btn-send { background: #008000; color: white; }
         .btn-send:hover { background: #00a000; }
         .btn-mic { background: #ef4444; color: white; }
@@ -67,19 +110,50 @@
         .btn-mic.listening { background: #10b981; animation: pulse 1s infinite; }
         .btn-stop { background: #0f172a; color: white; border: 1px solid rgba(255,215,0,0.3); }
         .btn-stop:hover { background: #1a2a4a; }
-        .status { font-size: 10px; color: #ffd700; padding: 8px 0; text-align: center; }
+
+        .status { font-size: 10px; color: #ffd700; padding: 8px 0; text-align: center; flex-shrink: 0; }
+
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+
         .menu-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
         .menu-bar button { background: rgba(0,128,0,0.3); border: 1px solid rgba(255,215,0,0.5); padding: 6px 12px; border-radius: 40px; color: #ffd700; cursor: pointer; font-size: 11px; }
         .menu-bar button:hover { background: rgba(0,128,0,0.5); }
-        .lesson-card { background: rgba(30,41,59,0.8); border-radius: 20px; padding: 14px; margin-bottom: 10px; border: 1px solid rgba(255,215,0,0.2); }
+
+        /* ===== LESSONS ===== */
+        .lesson-card {
+            background: rgba(30,41,59,0.8);
+            border-radius: 20px;
+            padding: 14px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,215,0,0.2);
+        }
         .lesson-card h3 { color: white; font-size: 16px; margin-bottom: 6px; }
-        .lesson-card .content { color: #cbd5e1; font-size: 12px; line-height: 1.5; white-space: pre-wrap; max-height: 200px; overflow-y: auto; }
+
+        /* ✅ BARRE DE DÉFILEMENT POUR LES LEÇONS */
+        .lesson-content-wrapper {
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 8px;
+            margin-bottom: 8px;
+        }
+        .lesson-content-wrapper::-webkit-scrollbar { width: 4px; }
+        .lesson-content-wrapper::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .lesson-content-wrapper::-webkit-scrollbar-thumb { background: #ffd700; border-radius: 10px; }
+
+        .lesson-card .content {
+            color: #cbd5e1;
+            font-size: 12px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
         .audio-bar { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
         .audio-bar button { background: #008000; color: white; padding: 5px 14px; border-radius: 40px; border: none; cursor: pointer; font-size: 11px; }
         .audio-bar button:hover { background: #00a000; }
         .audio-bar button.secondary { background: rgba(255, 0, 0, 0.5); }
         .audio-bar button.secondary:hover { background: rgba(255, 0, 0, 0.7); }
+
+        /* ===== PRONUNCIATION ===== */
         .pron-card { background: rgba(30,41,59,0.8); border-radius: 20px; padding: 14px; margin-bottom: 10px; border: 1px solid rgba(255,215,0,0.2); }
         .pron-card .phrase { font-size: 16px; font-weight: 700; color: #ffd700; margin: 6px 0; }
         .pron-card .actions { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -89,9 +163,25 @@
         .btn-record { background: #ef4444; color: white; }
         .btn-record:hover { background: #ff5555; }
         .pron-feedback { margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 12px; border-left: 3px solid #ffd700; font-size: 11px; color: #cbd5e1; line-height: 1.6; }
+
         .section-title { color: #ffd700; font-size: 18px; margin-bottom: 16px; }
         .loading { text-align: center; padding: 30px; color: #ffd700; font-size: 13px; }
-        @media (max-width: 480px) { .main { padding: 12px; } .msg { max-width: 90%; } .chat-input-area button { padding: 12px 12px; } }
+
+        /* ===== RESPONSIVE MOBILE ===== */
+        @media (max-width: 480px) {
+            .main { padding: 12px; }
+            .msg { max-width: 90%; }
+            .chat-input-area { gap: 6px; }
+            .chat-input-area input { font-size: 13px; padding: 10px 12px; }
+            .chat-input-area button { padding: 10px 12px; font-size: 12px; }
+            #chat-box { max-height: 50vh; }
+            .lesson-content-wrapper { max-height: 180px; }
+        }
+        @media (max-width: 380px) {
+            .chat-input-area button { padding: 8px 8px; font-size: 11px; }
+            .chat-input-area input { padding: 8px 10px; font-size: 12px; }
+            .lesson-content-wrapper { max-height: 150px; }
+        }
     </style>
 </head>
 <body>
@@ -218,13 +308,11 @@ function speakText(text) {
 
         debugLog('🔊 AI START SPEAKING');
 
-        // 🔥 CRUCIAL: Arrêter le micro pendant que l'IA parle
         if (isListening) {
             debugLog('🎤 STOPPING LISTENING (before speak)');
             stopListening();
         }
 
-        // Annuler tout redémarrage en attente
         if (restartTimeout) {
             clearTimeout(restartTimeout);
             restartTimeout = null;
@@ -232,7 +320,6 @@ function speakText(text) {
 
         stopSpeaking();
 
-        // Stocker la réponse IA pour le filtre anti-echo
         lastAIMessage = text.trim();
 
         let cleanText = text
@@ -269,7 +356,6 @@ function speakText(text) {
             debugLog('🔇 AI FINISHED SPEAKING');
             resolve();
 
-            // ✅ UN SEUL REDÉMARRAGE ICI (pas dans onend du micro)
             if (voiceMode && !isListening && !isProcessing) {
                 debugLog('🎤 SCHEDULED RESTART LISTENING (after speak)');
                 restartTimeout = setTimeout(() => {
@@ -296,11 +382,10 @@ function speakText(text) {
     });
 }
 
-// ========== SPEECH RECOGNITION - MODE CONTINUOUS = false ==========
+// ========== SPEECH RECOGNITION ==========
 function startListening() {
     debugLog('🎤 startListening() CALLED');
 
-    // 🔥 Vérifier si l'IA parle
     if (isSpeaking) {
         debugLog('⛔ SKIP: AI is speaking');
         setStatus('Waiting for AI to finish...');
@@ -323,7 +408,6 @@ function startListening() {
         return;
     }
 
-    // Annuler tout redémarrage en attente
     if (restartTimeout) {
         clearTimeout(restartTimeout);
         restartTimeout = null;
@@ -336,7 +420,6 @@ function startListening() {
         return;
     }
 
-    // Arrêter toute reconnaissance existante
     if (currentRecognition) {
         try {
             currentRecognition.stop();
@@ -346,7 +429,6 @@ function startListening() {
 
     currentRecognition = new SpeechRecognition();
     currentRecognition.lang = 'en-US';
-    // ✅ CHANGEMENT CRUCIAL: continuous = false
     currentRecognition.continuous = false;
     currentRecognition.interimResults = true;
     currentRecognition.maxAlternatives = 1;
@@ -363,7 +445,6 @@ function startListening() {
     };
 
     currentRecognition.onresult = (event) => {
-        // 🔥 Ne pas traiter si l'IA parle
         if (isSpeaking) {
             debugLog('⛔ IGNORE: AI is speaking');
             return;
@@ -379,15 +460,12 @@ function startListening() {
             }
         }
 
-        // Afficher dans l'input pour feedback visuel
         if (msgInput) {
             if (finalTranscript) {
                 msgInput.value = finalTranscript;
-                // Envoi automatique après une pause
                 if (finalTranscript && !isSending && !isProcessing && !isSpeaking) {
                     const message = finalTranscript.trim();
 
-                    // ✅ FILTRE ANTI-ECHO AMÉLIORÉ
                     const cleanMessage = normalizeText(message);
                     const cleanAI = normalizeText(lastAIMessage);
 
@@ -436,8 +514,6 @@ function startListening() {
         if (micBtn) micBtn.classList.remove('listening');
         debugLog('🎤 MIC ENDED');
 
-        // ✅ NE PAS RELANCER ICI - le redémarrage est géré par speakText
-        // Seulement si le mode vocal est activé mais qu'on n'attend pas de réponse
         if (voiceMode && !isSpeaking && !isProcessing && isMicReady) {
             debugLog('🔄 Auto-restart listening (onend fallback)');
             restartTimeout = setTimeout(() => {
@@ -455,7 +531,6 @@ function startListening() {
 function stopListening() {
     debugLog('🎤 stopListening() CALLED');
 
-    // Annuler tout redémarrage en attente
     if (restartTimeout) {
         clearTimeout(restartTimeout);
         restartTimeout = null;
@@ -545,7 +620,6 @@ function addMessage(text, isUser = false, autoSpeak = true) {
 }
 
 async function sendMessage(voiceText = null) {
-    // Bloquer les doubles envois
     if (isProcessing) {
         debugLog('⛔ Already processing, skipping');
         return;
@@ -554,7 +628,6 @@ async function sendMessage(voiceText = null) {
     const message = voiceText !== null ? voiceText : msgInput.value.trim();
     if (!message) return;
 
-    // ✅ FILTRE ANTI-ECHO AMÉLIORÉ
     const cleanMessage = normalizeText(message);
     const cleanAI = normalizeText(lastAIMessage);
 
@@ -569,7 +642,6 @@ async function sendMessage(voiceText = null) {
         return;
     }
 
-    // 🚫 Ignorer les répétitions immédiates
     if (cleanMessage === normalizeText(lastSentMessage)) {
         debugLog('🚫 Répétition bloquée:', message);
         if (msgInput) msgInput.value = '';
@@ -578,7 +650,6 @@ async function sendMessage(voiceText = null) {
 
     lastSentMessage = message;
 
-    // Ajouter le message utilisateur
     addMessage(message, true, false);
 
     if (voiceText === null) {
@@ -589,7 +660,6 @@ async function sendMessage(voiceText = null) {
     setStatus('Thinking...');
     debugLog('💭 Processing message:', message);
 
-    // Arrêter le micro pendant le traitement
     const wasListening = isListening;
     if (wasListening) {
         debugLog('🎤 STOPPING LISTENING (during processing)');
@@ -619,7 +689,6 @@ async function sendMessage(voiceText = null) {
     } finally {
         isProcessing = false;
         debugLog('✅ Processing finished');
-        // Réactiver le micro si nécessaire (géré par speakText après la réponse)
     }
 }
 
@@ -652,10 +721,12 @@ function renderLessons() {
         const card = document.createElement('div');
         card.className = 'lesson-card';
         const contentFull = lesson.content || 'No content available.';
-        const contentPreview = contentFull.substring(0, 200);
+
         card.innerHTML = `
             <h3>${escapeHtml(lesson.title)}</h3>
-            <div class="content">${escapeHtml(contentPreview)}${contentFull.length > 200 ? '...' : ''}</div>
+            <div class="lesson-content-wrapper">
+                <div class="content">${escapeHtml(contentFull).replace(/\n/g, '<br>')}</div>
+            </div>
             <div class="audio-bar">
                 <button onclick="speakText('${escapeHtml(contentFull).replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
                     <i class="fas fa-headphones"></i> Listen Full Lesson
