@@ -223,6 +223,20 @@
 </div>
 
 <script>
+// ========== DÉTECTION WEBVIEW MOBILE ==========
+const isWebView = (function() {
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    return (
+        /wv/i.test(ua) ||
+        /Android.*wv/.test(ua) ||
+        /iPhone|iPad|iPod/.test(ua) ||
+        window.ReactNativeWebView !== undefined ||
+        (window.webkit && window.webkit.messageHandlers !== undefined)
+    );
+})();
+
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 // ========== GLOBAL VARIABLES ==========
 let voiceMode = false;
 let currentRecognition = null;
@@ -256,7 +270,7 @@ function debugLog(message, data = null) {
     }
 }
 
-// ========== SPEECH SYNTHESIS ==========
+// ========== SPEECH SYNTHESIS (TEXT TO SPEECH) ==========
 function getBestVoice() {
     const voices = speechSynthesis.getVoices();
     let voice = voices.find(v => v.name.includes('Samantha'));
@@ -280,6 +294,7 @@ function stopSpeaking() {
 function speakText(text) {
     return new Promise((resolve) => {
         if (!window.speechSynthesis) {
+            debugLog('⚠️ Speech synthesis not available');
             resolve();
             return;
         }
@@ -300,7 +315,7 @@ function speakText(text) {
 
         lastAIMessage = text.trim();
 
-        // Supprimer les emojis pour la synthèse vocale
+        // 🔥 Pour WebView mobile, garder les caractères de base
         let cleanText = text
             .replace(/[^\w\s\.,!?;:()\-'`]/g, ' ')
             .replace(/\s+/g, ' ')
@@ -311,6 +326,58 @@ function speakText(text) {
             return;
         }
 
+        // 🔥 Sur WebView mobile, essayer de jouer l'audio différemment
+        if (isWebView && isMobile) {
+            debugLog('📱 Mobile WebView detected - using fallback TTS');
+            try {
+                // Essayer avec une approche plus simple
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+
+                const voice = getBestVoice();
+                if (voice) utterance.voice = voice;
+
+                utterance.onstart = () => {
+                    isSpeaking = true;
+                    setStatus('Speaking...');
+                    debugLog('🔊 Mobile AI SPEAKING STARTED');
+                };
+
+                utterance.onend = () => {
+                    isSpeaking = false;
+                    setStatus('Ready');
+                    debugLog('🔇 Mobile AI FINISHED SPEAKING');
+                    resolve();
+                    if (voiceMode && !isListening && !isProcessing) {
+                        restartTimeout = setTimeout(() => {
+                            if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
+                                startListening();
+                            }
+                            restartTimeout = null;
+                        }, 1500);
+                    }
+                };
+
+                utterance.onerror = (event) => {
+                    debugLog('❌ Mobile speech error:', event.error);
+                    isSpeaking = false;
+                    setStatus('Ready');
+                    resolve();
+                };
+
+                window.speechSynthesis.speak(utterance);
+                return;
+            } catch(e) {
+                debugLog('⚠️ Mobile TTS failed:', e);
+                resolve();
+                return;
+            }
+        }
+
+        // Version desktop normale
         currentUtterance = new SpeechSynthesisUtterance(cleanText);
         currentUtterance.lang = 'en-US';
         currentUtterance.rate = 0.85;
@@ -846,6 +913,9 @@ document.querySelectorAll('.nav button').forEach(btn => {
 // ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', () => {
     debugLog('🚀 APP STARTED');
+    debugLog('📱 isWebView:', isWebView);
+    debugLog('📱 isMobile:', isMobile);
+
     if (window.speechSynthesis) {
         window.speechSynthesis.getVoices();
     }
