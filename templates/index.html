@@ -223,10 +223,6 @@
 </div>
 
 <script>
-// ========== DÉTECTION WEBVIEW ==========
-// 🔥 FIABLE : détecter uniquement React Native WebView
-const isReactNativeWebView = window.ReactNativeWebView !== undefined;
-
 // ========== GLOBAL VARIABLES ==========
 let voiceMode = false;
 let currentRecognition = null;
@@ -260,29 +256,20 @@ function debugLog(message, data = null) {
     }
 }
 
-// ========== SPEECH SYNTHESIS (TEXT TO SPEECH) ==========
+// ========== SPEECH SYNTHESIS ==========
 function getBestVoice() {
-    // 🔥 Protection pour WebView
-    if (!('speechSynthesis' in window)) {
-        return null;
-    }
-    try {
-        const voices = window.speechSynthesis.getVoices?.() || [];
-        if (!voices || voices.length === 0) return null;
-        let voice = voices.find(v => v.name && v.name.includes('Samantha'));
-        if (!voice) voice = voices.find(v => v.name && v.name.includes('Google UK English Female'));
-        if (!voice) voice = voices.find(v => v.name && v.name.includes('Microsoft Jenny'));
-        if (!voice) voice = voices.find(v => v.lang && v.lang === 'en-US');
-        if (!voice) voice = voices.find(v => v.lang && v.lang.startsWith('en'));
-        return voice;
-    } catch(e) {
-        return null;
-    }
+    const voices = speechSynthesis.getVoices();
+    let voice = voices.find(v => v.name.includes('Samantha'));
+    if (!voice) voice = voices.find(v => v.name.includes('Google UK English Female'));
+    if (!voice) voice = voices.find(v => v.name.includes('Microsoft Jenny'));
+    if (!voice) voice = voices.find(v => v.lang === 'en-US');
+    if (!voice) voice = voices.find(v => v.lang.startsWith('en'));
+    return voice;
 }
 
 function stopSpeaking() {
     if (window.speechSynthesis) {
-        try { window.speechSynthesis.cancel(); } catch(e) {}
+        window.speechSynthesis.cancel();
     }
     isSpeaking = false;
     currentUtterance = null;
@@ -290,30 +277,10 @@ function stopSpeaking() {
     debugLog('🔇 SPEAKING STOPPED');
 }
 
-// 🔥 FONCTION SPEAKTEXT CORRIGÉE POUR WEBVIEW
 function speakText(text) {
     return new Promise((resolve) => {
-        // 🔥 Si on est dans React Native WebView → envoyer à Native
-        if (isReactNativeWebView) {
-            debugLog('📱 WebView - sending to Native');
-            if (window.ReactNativeWebView) {
-                window.ReactNativeWebView.postMessage(JSON.stringify({
-                    type: 'SPEAK',
-                    text: text
-                }));
-            }
-            resolve();
-            return;
-        }
-
-        // ========== Version Desktop (normale) ==========
         if (!window.speechSynthesis) {
             debugLog('⚠️ Speech synthesis not available');
-            resolve();
-            return;
-        }
-
-        if (!text || !text.trim()) {
             resolve();
             return;
         }
@@ -344,62 +311,57 @@ function speakText(text) {
             return;
         }
 
-        try {
-            currentUtterance = new SpeechSynthesisUtterance(cleanText);
-            currentUtterance.lang = 'en-US';
-            currentUtterance.rate = 0.85;
-            currentUtterance.pitch = 1.0;
-            currentUtterance.volume = 1.0;
+        currentUtterance = new SpeechSynthesisUtterance(cleanText);
+        currentUtterance.lang = 'en-US';
+        currentUtterance.rate = 0.85;
+        currentUtterance.pitch = 1.0;
+        currentUtterance.volume = 1.0;
 
-            const voice = getBestVoice();
-            if (voice) currentUtterance.voice = voice;
+        const voice = getBestVoice();
+        if (voice) currentUtterance.voice = voice;
 
-            currentUtterance.onstart = () => {
-                isSpeaking = true;
-                isMicReady = false;
-                setStatus('Speaking...');
-                debugLog('🔊 AI SPEAKING STARTED');
-            };
+        currentUtterance.onstart = () => {
+            isSpeaking = true;
+            isMicReady = false;
+            setStatus('Speaking...');
+            debugLog('🔊 AI SPEAKING STARTED');
+        };
 
-            currentUtterance.onend = () => {
-                isSpeaking = false;
-                isMicReady = true;
-                currentUtterance = null;
-                setStatus('Ready');
-                debugLog('🔇 AI FINISHED SPEAKING');
-                resolve();
-
-                if (voiceMode && !isListening && !isProcessing) {
-                    debugLog('🎤 SCHEDULED RESTART LISTENING (after speak)');
-                    restartTimeout = setTimeout(() => {
-                        if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
-                            debugLog('🎤 RESTART LISTENING (after speak)');
-                            startListening();
-                        }
-                        restartTimeout = null;
-                    }, 1500);
-                }
-            };
-
-            currentUtterance.onerror = (event) => {
-                console.error('Speech error:', event);
-                isSpeaking = false;
-                isMicReady = true;
-                currentUtterance = null;
-                setStatus('Speech error');
-                debugLog('❌ SPEECH ERROR');
-                resolve();
-            };
-
-            window.speechSynthesis.speak(currentUtterance);
-        } catch(e) {
-            console.error('speakText error:', e);
+        currentUtterance.onend = () => {
+            isSpeaking = false;
+            isMicReady = true;
+            currentUtterance = null;
+            setStatus('Ready');
+            debugLog('🔇 AI FINISHED SPEAKING');
             resolve();
-        }
+
+            if (voiceMode && !isListening && !isProcessing) {
+                debugLog('🎤 SCHEDULED RESTART LISTENING (after speak)');
+                restartTimeout = setTimeout(() => {
+                    if (voiceMode && !isListening && !isSpeaking && !isProcessing) {
+                        debugLog('🎤 RESTART LISTENING (after speak)');
+                        startListening();
+                    }
+                    restartTimeout = null;
+                }, 1500);
+            }
+        };
+
+        currentUtterance.onerror = (event) => {
+            console.error('Speech error:', event);
+            isSpeaking = false;
+            isMicReady = true;
+            currentUtterance = null;
+            setStatus('Speech error');
+            debugLog('❌ SPEECH ERROR');
+            resolve();
+        };
+
+        window.speechSynthesis.speak(currentUtterance);
     });
 }
 
-// ========== SPEECH RECOGNITION (inchangée) ==========
+// ========== SPEECH RECOGNITION ==========
 function startListening() {
     debugLog('🎤 startListening() CALLED');
 
@@ -599,16 +561,14 @@ function addMessage(text, isUser = false, autoSpeak = true) {
     div.className = `msg ${isUser ? 'user' : 'bot'}`;
     const icon = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
 
-    const safeText = text.replace(/'/g, "\\'").replace(/\n/g, ' ').replace(/"/g, '&quot;');
-
     div.innerHTML = `
         ${icon} ${escapeHtml(text)}
         ${!isUser ? `
         <div class="msg-actions">
-            <button class="listen-btn" onclick="speakText('${safeText}')">
+            <button class="listen-btn" onclick="speakText('${escapeHtml(text).replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
                 <i class="fas fa-headphones"></i> Listen
             </button>
-            <button class="repeat-btn" onclick="speakText('${safeText}')">
+            <button class="repeat-btn" onclick="speakText('${escapeHtml(text).replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
                 <i class="fas fa-redo"></i> Repeat
             </button>
         </div>
@@ -618,8 +578,7 @@ function addMessage(text, isUser = false, autoSpeak = true) {
     chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    // 🔥 Pour WebView, PAS d'auto-speak
-    if (!isUser && autoSpeak && !isReactNativeWebView) {
+    if (!isUser && autoSpeak) {
         speakText(text);
     }
     return div;
@@ -768,7 +727,7 @@ function renderPronunciation() {
                     <i class="fas fa-microphone"></i> Record
                 </button>
             </div>
-            <div class="pron-feedback" id="pron-feedback-${idx}>
+            <div class="pron-feedback" id="pron-feedback-${idx}">
                 <i class="fas fa-lightbulb"></i> Click record, speak clearly, get instant feedback.
             </div>
         `;
@@ -887,22 +846,15 @@ document.querySelectorAll('.nav button').forEach(btn => {
 // ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', () => {
     debugLog('🚀 APP STARTED');
-    debugLog('📱 isReactNativeWebView:', isReactNativeWebView);
 
-    // 🔥 Protection pour WebView
-    if (!isReactNativeWebView && 'speechSynthesis' in window) {
-        try {
-            window.speechSynthesis.getVoices();
-        } catch(e) {
-            console.warn('Speech init error:', e);
-        }
+    if (window.speechSynthesis) {
+        window.speechSynthesis.getVoices();
     }
 
     loadCourses();
 
     if (chatBox && chatBox.children.length === 0) {
-        // 🔥 WebView : autoSpeak = false
-        addMessage('Hello! I\'m your WEC-BEC English teacher. Ask me anything or choose a lesson. 🚀', false, !isReactNativeWebView);
+        addMessage('Hello! I\'m your WEC-BEC English teacher. Ask me anything or choose a lesson. 🚀', false, true);
     }
 
     if (msgInput) {
