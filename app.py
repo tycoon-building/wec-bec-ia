@@ -15,7 +15,7 @@ app = Flask(__name__)
 # =========================
 # 🔐 CORS CONFIGURATION
 # =========================
-CORS(app, origins=['*'], supports_credentials=True)
+CORS(app)
 
 # =========================
 # 🔐 SECURITY CONFIG
